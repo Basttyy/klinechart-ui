@@ -31,6 +31,7 @@ const Logo = (
 export default class KLineChartPro implements ChartPro {
   constructor (options: ChartProOptions) {
     if (utils.isString(options.container)) {
+      console.log(options.container as string)
       this._container = document.getElementById(options.container as string)
       if (!this._container) {
         throw new Error('Container is null')
@@ -38,6 +39,7 @@ export default class KLineChartPro implements ChartPro {
     } else {
       this._container = options.container as HTMLElement
     }
+    console.log(this._container, 'hello')
     this._container.classList.add('klinecharts-pro')
     this._container.setAttribute('data-theme', options.theme ?? 'light')
 

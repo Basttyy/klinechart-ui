@@ -28,6 +28,7 @@
   "license": "Apache-2.0",
   "private": false,
   "scripts": {
+    "start": "vite",
     "build-core": "tsc && vite build",
     "build-dts": "dts-bundle-generator --no-banner true --umd-module-name klinechartspro -o dist/index.d.ts src/index.ts",
     "build": "npm run build-core && npm run build-dts",
