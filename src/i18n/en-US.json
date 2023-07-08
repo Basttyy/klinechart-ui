@@ -96,6 +96,7 @@
   "period": "Period",
   "standard_deviation": "Standard Deviation",
   "candle_type": "Candle Type",
+  "candle_tooltip": "Candle Tooltip",
   "candle_solid": "Candle Solid",
   "candle_stroke": "Candle Stroke",
   "candle_up_stroke": "Candle Up Stroke",
@@ -112,5 +113,8 @@
   "log": "Log",
   "reverse_coordinate": "Reverse Coordinate",
   "grid_show": "Show Grids",
-  "restore_default": "Restore Defaults"
+  "restore_default": "Restore Defaults",
+  "none": "None",
+  "always": "Always",
+  "follow_cross": "Follow Cross"
 }
