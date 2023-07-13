@@ -442,13 +442,13 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
-      <Show when={symbolSearchModalVisible()}>
+      {/* <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal
           locale={props.locale}
           datafeed={props.datafeed}
           onSymbolSelected={symbol => { setSymbol(symbol) }}
           onClose={() => { setSymbolSearchModalVisible(false) }}/>
-      </Show>
+      </Show> */}
       <Show when={indicatorModalVisible()}>
         <IndicatorModal
           locale={props.locale}
@@ -552,8 +552,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           }
         }}
       />
-      <div
-        class="klinecharts-pro-content">
+      <div class="klinecharts-pro-content">
         <Show when={loadingVisible()}>
           <Loading/>
         </Show>
