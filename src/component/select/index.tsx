@@ -49,7 +49,7 @@ const Select: Component<SelectProps> = props => {
           class="drop-down-container">
           <ul>
             {
-              props.dataSource.map(data => {
+              props.dataSource.map((data:any) => {
                 const d = data as SelectDataSourceItem
                 // @ts-expect-error
                 const v = d[props.valueKey ?? 'text'] ?? data
