@@ -40,6 +40,7 @@ export interface Datafeed {
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
   unsubscribe (symbol: SymbolInfo, period: Period): void
+  triggerAction (name:string) : void
 }
 
 export interface ChartProOptions {

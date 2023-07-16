@@ -545,6 +545,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         onIndicatorClick={() => { setIndicatorModalVisible((visible => !visible)) }}
         onTimezoneClick={() => { setTimezoneModalVisible((visible => !visible)) }}
         onSettingClick={() => { setSettingModalVisible((visible => !visible)) }}
+        onPlaceOrderClick={() => {props.datafeed.triggerAction('order')}}
         onScreenshotClick={() => {
           if (widget) {
             const url = widget.getConvertPictureUrl(true, 'jpeg', props.theme === 'dark' ? '#151517' : '#ffffff')

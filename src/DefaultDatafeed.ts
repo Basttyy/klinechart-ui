@@ -91,5 +91,10 @@ export default class DefaultDatafeed implements Datafeed {
   }
 
   unsubscribe(symbol: SymbolInfo, period: Period): void {
+    // do something
+  }
+
+  triggerAction(name: string): void {
+    // do something
   }
 }
