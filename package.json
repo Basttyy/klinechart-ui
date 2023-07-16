@@ -28,6 +28,8 @@
   "license": "Apache-2.0",
   "private": false,
   "scripts": {
+    "start": "vite",
+    "build-link": "vite build",
     "build-core": "tsc && vite build",
     "build-dts": "dts-bundle-generator --no-banner true --umd-module-name klinechartsui -o dist/index.d.ts src/index.ts",
     "build": "yarn run build-core && yarn run build-dts",
