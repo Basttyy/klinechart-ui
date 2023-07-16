@@ -24,7 +24,7 @@ export interface SelectProps {
   style?: JSX.CSSProperties | string
   value?: JSX.Element
   valueKey?: string
-  dataSource?: SelectDataSourceItem[] | string[]
+  dataSource?: SelectDataSourceItem[] | string[] | any
   onSelected?: (data: SelectDataSourceItem | string) => void
 }
 
