@@ -56,3 +56,15 @@ export function getDistance (coordinate1: Coordinate, coordinate2: Coordinate,):
   const yDis = Math.abs(coordinate1.y - coordinate2.y)
   return Math.sqrt(xDis * xDis + yDis * yDis)
 }
+
+export function formatThousands (value: string | number, sign: string): string {
+  const vl = `${value}`
+  if (sign.length === 0) {
+    return vl
+  }
+  if (vl.includes('.')) {
+    const arr = vl.split('.')
+    return `${arr[0].replace(/(\d)(?=(\d{3})+$)/g, $1 => `${$1}${sign}`)}.${arr[1]}`
+  }
+  return vl.replace(/(\d)(?=(\d{3})+$)/g, $1 => `${$1}${sign}`)
+}

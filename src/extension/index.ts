@@ -9,6 +9,7 @@ import fibonacciSegment from './fibonacciSegment'
 import fibonacciSpiral from './fibonacciSpiral'
 import fibonacciSpeedResistanceFan from './fibonacciSpeedResistanceFan'
 import fibonacciExtension from './fibonacciExtension'
+import fibonaccDiagonal from './custom/fibonacciDiagonal'
 import gannBox from './gannBox'
 import threeWaves from './threeWaves'
 import fiveWaves from './fiveWaves'
@@ -19,7 +20,7 @@ import xabcd from './xabcd'
 
 const overlays = [
   arrow,
-  circle, rect, triangle, parallelogram,
+  circle, rect, triangle, parallelogram, fibonaccDiagonal,
   fibonacciCircle, fibonacciSegment, fibonacciSpiral,
   fibonacciSpeedResistanceFan, fibonacciExtension, gannBox,
   threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd

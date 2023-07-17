@@ -27,6 +27,7 @@ import arrow from './arrow'
 import priceLine from './priceLine'
 import priceChannelLine from './priceChannelLine'
 import parallelStraightLine from './parallelStraightLine'
+import fibonacciDiagonal from './fibonacciDiagonal'
 import fibonacciLine from './fibonacciLine'
 import fibonacciSegment from './fibonacciSegment'
 import fibonacciCircle from './fibonacciCircle'
@@ -74,6 +75,7 @@ export const mapping = {
   priceLine,
   priceChannelLine,
   parallelStraightLine,
+  fibonacciDiagonal,
   fibonacciLine,
   fibonacciSegment,
   fibonacciCircle,
@@ -134,6 +136,7 @@ export function createPolygonOptions (locale: string): SelectDataSourceItem[] {
 
 export function createFibonacciOptions (locale: string): SelectDataSourceItem[] {
   return [
+    { key: 'fibonacciDiagonal', text: i18n('fibonacci_diagonal', locale)},
     { key: 'fibonacciLine', text: i18n('fibonacci_line', locale) },
     { key: 'fibonacciSegment', text: i18n('fibonacci_segment', locale) },
     { key: 'fibonacciCircle', text: i18n('fibonacci_circle', locale) },
