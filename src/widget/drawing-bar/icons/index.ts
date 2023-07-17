@@ -27,7 +27,6 @@ import arrow from './arrow'
 import priceLine from './priceLine'
 import priceChannelLine from './priceChannelLine'
 import parallelStraightLine from './parallelStraightLine'
-import fibonacciDiagonal from './fibonacciDiagonal'
 import fibonacciLine from './fibonacciLine'
 import fibonacciSegment from './fibonacciSegment'
 import fibonacciCircle from './fibonacciCircle'
@@ -45,6 +44,10 @@ import eightWaves from './eightWaves'
 import anyWaves from './anyWaves'
 import abcd from './abcd'
 import xabcd from './xabcd'
+
+//Added by TradingIo
+import fibonacciDiagonal from './fibonacciDiagonal'
+import positionLine from './positionLine'
 
 import weakMagnet from './weakMagnet'
 import strongMagnet from './strongMagnet'
@@ -75,7 +78,8 @@ export const mapping = {
   priceLine,
   priceChannelLine,
   parallelStraightLine,
-  fibonacciDiagonal,
+  positionLine,     //by tradingio team
+  fibonacciDiagonal,  //by tradingio team
   fibonacciLine,
   fibonacciSegment,
   fibonacciCircle,
@@ -121,7 +125,8 @@ export function createSingleLineOptions (locale: string): SelectDataSourceItem[]
 export function createMoreLineOptions (locale: string): SelectDataSourceItem[] {
   return [
     { key: 'priceChannelLine', text: i18n('price_channel_line', locale) },
-    { key: 'parallelStraightLine', text: i18n('parallel_straight_line', locale) }
+    { key: 'parallelStraightLine', text: i18n('parallel_straight_line', locale) },
+    { key: 'positionLine', text: i18n('position_line', locale)}
   ]
 }
 

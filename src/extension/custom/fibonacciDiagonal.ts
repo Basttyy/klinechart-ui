@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs } from 'klinecharts'
+import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Coordinate } from 'klinecharts'
 
 import { formatThousands } from '../utils'
 
