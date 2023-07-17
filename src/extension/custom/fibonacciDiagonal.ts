@@ -60,6 +60,10 @@ const fibonacciDiagonal: OverlayTemplate = {
       ]
     }
     return []
+  },
+  onRightClick: (event): boolean => {
+    alert(`object ${event.overlay.name} was clicked`)
+    return true;
   }
 }
 
