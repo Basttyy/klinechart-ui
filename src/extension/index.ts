@@ -16,11 +16,11 @@ import eightWaves from './eightWaves'
 import anyWaves from './anyWaves'
 import abcd from './abcd'
 import xabcd from './xabcd'
-import positionBox from './custom/position'
 
 //Added by TradingIo Team
 import positionLine from './custom/positionLine'
 import fibonaccDiagonal from './custom/fibonacciDiagonal'
+import positionBox from './custom/positionBox'
 
 const overlays = [
   arrow,

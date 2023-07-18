@@ -28,7 +28,7 @@
   "license": "Apache-2.0",
   "private": false,
   "scripts": {
-    "build-link": "npm run build && npm link",
+    "build-link": "vite build && npm link",
     "start": "vite",
     "build-core": "tsc && vite build",
     "build-dts": "dts-bundle-generator --no-banner true --umd-module-name klinechartsui -o dist/index.d.ts src/index.ts",

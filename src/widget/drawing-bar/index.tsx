@@ -204,9 +204,9 @@ const DrawingBar: Component<DrawingBarProps> = props => {
         <span
           style="width:32px;height:32px"
           onClick={() => {
-            props.onDrawingItemClick({ name: 'positionLine', lock: lock(), mode: mode() as OverlayMode })
+            props.onDrawingItemClick({ name: 'positionBox', lock: lock(), mode: mode() as OverlayMode })
           }}>
-          he
+          box
         </span>
       </div>
       <span class="split-line"/>
