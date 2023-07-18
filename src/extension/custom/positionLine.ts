@@ -16,6 +16,8 @@ import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate,
 
 import { formatThousands, getLinearSlopeIntercept } from '../utils'
 
+type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[] }
+
 /**
  * 获取平行线
  * @param coordinates
@@ -23,21 +25,26 @@ import { formatThousands, getLinearSlopeIntercept } from '../utils'
  * @param extendParallelLineCount
  * @returns {Array}
  */
-function getParallelLines (coordinates: Coordinate[], bounding: Bounding, extendParallelLineCount?: number, canSlope: boolean = false): LineAttrs[] {
+function getParallelLines (coordinates: Coordinate[], bounding: Bounding, extendParallelLineCount?: number, canSlope: boolean = false): lineobj {
   const count = extendParallelLineCount ?? 0
   const lines: LineAttrs[] = []
+  const texts: TextAttrs[] = []
+  let data: lineobj = { 'lines': lines, 'texts': texts }
   if (coordinates.length > 0) {
       const startX = 0
       const endX = bounding.width
-      lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
+      data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
+      data.texts.push({ x: endX - endX*0.0027*5, y: coordinates[0].y, text: 'entry', baseline: 'bottom' })
       if (coordinates.length > 1) {
-        lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
+        data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
+        data.texts.push({ x: endX - endX*0.0027*2, y: coordinates[1].y, text: 'sl', baseline: 'bottom' })
         if (coordinates.length > 2) {
-          lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
+          data.lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
+          data.texts.push({ x: endX - endX*0.0027*11, y: coordinates[2].y, text: 'tp', baseline: 'bottom' })
         }
       }
   }
-  return lines
+  return data
 }
 
 const positionLine: OverlayTemplate = {
@@ -47,12 +54,21 @@ const positionLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ coordinates, bounding }) => {
+    const parallel = getParallelLines(coordinates, bounding, 1)
     return [
       {
         type: 'line',
-        attrs: getParallelLines(coordinates, bounding, 1),
+        attrs: parallel.lines,
         styles: {
           style: 'dashed',
+          color: 'green'
+        }
+      },
+      {
+        type: 'text',
+        attrs: parallel.texts,
+        // isCheckEvent: false,
+        styles: {
           color: 'green'
         }
       }
