@@ -17,12 +17,17 @@ import anyWaves from './anyWaves'
 import abcd from './abcd'
 import xabcd from './xabcd'
 
+//Added by TradingIo Team
+import positionLine from './custom/positionLine'
+import fibonaccDiagonal from './custom/fibonacciDiagonal'
+
 const overlays = [
   arrow,
-  circle, rect, triangle, parallelogram,
+  circle, rect, triangle, parallelogram, fibonaccDiagonal,
   fibonacciCircle, fibonacciSegment, fibonacciSpiral,
   fibonacciSpeedResistanceFan, fibonacciExtension, gannBox,
-  threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd
+  threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd,
+  positionLine
 ]
 
 export default overlays
