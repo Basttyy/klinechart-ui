@@ -13,7 +13,7 @@ export default defineConfig({
       output: {
         assetFileNames: (chunkInfo) => {
           if (chunkInfo.name === 'style.css') {
-            return 'klinecharts-pro.css'
+            return 'klinecharts-ui.css'
           }
         },
         globals: {
@@ -23,13 +23,13 @@ export default defineConfig({
     },
     lib: {
       entry: './src/index.ts',
-      name: 'klinechartspro',
+      name: 'klinechartsui',
       fileName: (format) => {
         if (format === 'es') {
-          return 'klinecharts-pro.js'
+          return 'klinecharts-ui.js'
         }
         if (format === 'umd') {
-          return 'klinecharts-pro.umd.js'
+          return 'klinecharts-ui.umd.js'
         }
       }
     }

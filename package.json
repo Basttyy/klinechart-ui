@@ -1,10 +1,10 @@
 {
-  "name": "@klinecharts/pro",
+  "name": "@klinecharts/ui",
   "version": "0.1.1",
   "description": "Financial chart built out of the box based on KLineChart.",
   "type": "module",
-  "main": "./dist/klinecharts-pro.umd.js",
-  "module": "./dist/klinecharts-pro.js",
+  "main": "./dist/klinecharts-ui.umd.js",
+  "module": "./dist/klinecharts-ui.js",
   "types": "./dist/index.d.ts",
   "files": [
     "LICENSE",
@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/klinecharts/pro"
+    "url": "https://github.com/basttyy/klinechart-ui"
   },
   "keywords": [
     "klinecharts",
@@ -29,13 +29,14 @@
   "private": false,
   "scripts": {
     "build-link": "npm run build && npm link",
+    "start": "vite",
     "build-core": "tsc && vite build",
-    "build-dts": "dts-bundle-generator --no-banner true --umd-module-name klinechartspro -o dist/index.d.ts src/index.ts",
-    "build": "npm run build-core && npm run build-dts",
+    "build-dts": "dts-bundle-generator --no-banner true --umd-module-name klinechartsui -o dist/index.d.ts src/index.ts",
+    "build": "yarn run build-core && yarn run build-dts",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:deploy": "npm run docs:build && gh-pages -d website"
+    "docs:deploy": "yarn run docs:build && gh-pages -d website"
   },
   "devDependencies": {
     "@solidjs/testing-library": "^0.6.0",
