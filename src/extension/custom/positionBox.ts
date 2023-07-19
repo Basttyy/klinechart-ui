@@ -28,7 +28,8 @@ const positionBox: OverlayTemplate = {
       color: 'rgba(22, 119, 255, 0.15)'
     }
   },
-  createPointFigures: ({ coordinates }) => {
+  createPointFigures: ({ coordinates, precision }) => {
+    const tags = ['Target: 10.06', 'Open P&L: 10.68', 'Stop: 10.06']
     const attrsData:any = []
     if (coordinates.length > 1) {
       // console.log('length', coordinates.length, coordinates)
@@ -41,7 +42,7 @@ const positionBox: OverlayTemplate = {
       })
 
       if(coordinates.length > 2) {
-        // console.log('length', coordinates.length, coordinates)
+        console.log('precision', coordinates.length, precision)
         attrsData.push({ coordinates: [
             coordinates[1],
             { x: coordinates[0].x, y: coordinates[1].y },
@@ -51,18 +52,30 @@ const positionBox: OverlayTemplate = {
         })
       }
     }
+    const texts = coordinates.map((coordinate, i) => ({
+      // ...coordinate,
+      x: coordinates[0].x, y: coordinate.y,
+      baseline: 'bottom',
+      text: `(${tags[i]})`
+    }))
     
     if(attrsData.length) {
       return [
         {
           type: 'polygon',
           attrs: attrsData[0],
-          styles: { style: 'stroke_fill', color: 'green' }
+          styles: { style: 'stroke_fill', color: '#dcc4de7b' }
         },
         {
           type: 'polygon',
           attrs: attrsData[1],
-          styles: { style: 'stroke_fill', color: 'red' }
+          styles: { style: 'stroke_fill'}
+        },
+        {
+          type: 'text',
+          // ignoreEvent: true,
+          attrs: texts,
+          styles: {style: 'stroke', color: 'black'}
         }
       ]
     }
