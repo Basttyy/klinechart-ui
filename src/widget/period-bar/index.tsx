@@ -31,6 +31,7 @@ export interface PeriodBarProps {
   onTimezoneClick: () => void
   onSettingClick: () => void
   onScreenshotClick: () => void
+  onOrderPanelClick: () => void
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {

@@ -26,7 +26,7 @@ import { SelectDataSourceItem, Loading } from './component'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
-  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal
+  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel
 } from './widget'
 
 import { translateTimezone } from './widget/timezone-modal/data'
@@ -92,6 +92,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [screenshotUrl, setScreenshotUrl] = createSignal('')
 
   const [drawingBarVisible, setDrawingBarVisible] = createSignal(props.drawingBarVisible)
+  
+  const [orderPanelVisible, setOrderPanelVisible] = createSignal(props.orderPanelVisible)
 
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
@@ -537,6 +539,12 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         onMenuClick={async () => {
           try {
             await startTransition(() => setDrawingBarVisible(!drawingBarVisible()))
+            widget?.resize()
+          } catch (e) {}    
+        }}
+        onOrderMenuClick={async () => {
+          try {
+            await startTransition(() => setOrderPanelVisible(!orderPanelVisible()))
             widget?.resize()
           } catch (e) {}    
         }}
