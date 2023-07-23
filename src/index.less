@@ -69,7 +69,11 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: @widget-height;
+    height: @content-height;
+    // height: calc(@widget-height + @order-panel-height);
+    &[data-orders-pane-visible="false"] {
+      height: @widget-height;
+    }
   }
   &-widget {
     width: @widget-width;

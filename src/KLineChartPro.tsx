@@ -52,6 +52,7 @@ export default class KLineChartPro implements ChartPro {
           theme={options.theme ?? 'light'}
           locale={options.locale ?? 'zh-CN'}
           drawingBarVisible={options.drawingBarVisible ?? true}
+          orderPanelVisible={options.orderPanelVisible ?? false}
           symbol={options.symbol}
           period={options.period}
           periods={
@@ -69,10 +70,11 @@ export default class KLineChartPro implements ChartPro {
             ]
           }
           timezone={options.timezone ?? 'Asia/Shanghai'}
-          mainIndicators={options.mainIndicators ?? ['MA']}
-          subIndicators={options.subIndicators ?? ['VOL']}
+          mainIndicators={options.mainIndicators ?? []}
+          subIndicators={options.subIndicators ?? []}
           datafeed={options.datafeed}
-          dataTimestamp={options.dataTimestamp}/>
+          dataTimestamp={options.dataTimestamp}
+          orderController={options.orderController}/>
       ),
       this._container
     )

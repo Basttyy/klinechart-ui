@@ -29,6 +29,28 @@
       }
     }
   }
+  .order-container {
+    display: flex;
+    height: 100%;
+    margin-left: auto;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: @drawing-bar-width;
+    box-sizing: border-box;
+    border-right: solid 1px var(--klinecharts-pro-border-color);
+    svg {
+      fill: var(--klinecharts-pro-text-color);
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      transition: all .2s;
+      &.rotate {
+        transform: rotate(180deg);
+        transform-origin: center;
+      }
+    }
+  }
   .symbol {
     display: flex;
     flex-direction: row;
