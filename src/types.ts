@@ -78,6 +78,7 @@ export interface ChartProOptions {
   subIndicators?: string[]
   datafeed: Datafeed
   dataTimestamp: number
+  orderController: OrderResource
 }
 
 export interface ChartPro {

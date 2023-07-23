@@ -584,6 +584,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       <Show when={orderPanelVisible()}>
         <OrdersPanel
           context='this is the order panel context'
+          orderController={props.orderController}
         />
       </Show>
     </>

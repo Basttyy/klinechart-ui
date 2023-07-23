@@ -20,8 +20,8 @@ import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
 
 export interface OrderPanelProps {
   context: string
-  ordercontroller: OrderResource
-  onOrderSelected: (order: OrderInfo) => void
+  orderController: OrderResource
+  // onOrderSelected: (order: OrderInfo) => void
   // onMouseDown: (event: MouseEvent) => void
 }
 
@@ -47,7 +47,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
         getList()
       } else {  //we will retrieve from api service instead
         const getList =async (action?: OrderType) => {
-          const orderlist = await props.ordercontroller.retrieveOrders(action)
+          const orderlist = await props.orderController.retrieveOrders(action)
           setOrderList(orderlist)
           setLoadingVisible(false)
           loading = false
@@ -59,7 +59,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   return (
     <div
       class="klinecharts-pro-order-panel">
-      <List
+      {/* <List
         class="klinecharts-pro-symbol-search-modal-list"
         loading={loadingVisible()}
         dataSource={orderList() ?? []}
@@ -69,15 +69,15 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
               props.onOrderSelected(order)
             }}>
             <div>
-              {/* <Show when={order.logo}>
+              <Show when={order.logo}>
                 <img alt="order" src={order.logo}/>
-              </Show> */}
+              </Show>
               <span title={order.name ?? ''}>{order.shortName ?? order.ticker}{`${order.name ? `(${order.name})` : ''}`}</span>
             </div>
             {order.exchange ?? ''}
           </li>
         )}>
-      </List>
+      </List> */}
       { props.context }
       <span class="split-line"/>
       { props.context }
