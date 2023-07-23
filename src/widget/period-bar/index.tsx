@@ -21,6 +21,7 @@ import i18n from '../../i18n'
 export interface PeriodBarProps {
   locale: string
   spread: boolean
+  order_spread: boolean
   symbol: SymbolInfo
   period: Period
   periods: Period[]
@@ -31,7 +32,7 @@ export interface PeriodBarProps {
   onTimezoneClick: () => void
   onSettingClick: () => void
   onScreenshotClick: () => void
-  onOrderPanelClick: () => void
+  onOrderMenuClick: () => void
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
@@ -41,6 +42,10 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
+  }
+
+  const onSymbolClickLog = () => {
+    console.log("symbol tool was clicked")
   }
 
   onMount(() => {
@@ -69,16 +74,16 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
         </svg>
       </div>
-      {/* <Show when={props.symbol}>
+      <Show when={props.symbol}>
         <div
           class="symbol"
-          onClick={props.onSymbolClick}>
+          onClick={onSymbolClickLog}>
           <Show when={props.symbol.logo}>
             <img alt="symbol" src={props.symbol.logo}/>
           </Show>
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
-      </Show> */}
+      </Show>
       {
         props.periods.map(p => (
           <span
@@ -158,6 +163,14 @@ const PeriodBar: Component<PeriodBarProps> = props => {
             </>
           )
         }
+      </div>
+      <div class='order-container'>
+        <svg
+          class={props.order_spread ? '' : 'rotate'}
+          viewBox="0 0 1024 1024"
+          onClick={props.onOrderMenuClick}>
+          <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
+        </svg>
       </div>
     </div>
   )

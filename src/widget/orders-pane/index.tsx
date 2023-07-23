@@ -12,43 +12,121 @@
  * limitations under the License.
  */
 
-import { Component, createMemo, createSignal } from 'solid-js'
-
+import { Component, createResource, createMemo, createSignal, createEffect } from 'solid-js'
 import { OverlayCreate, OverlayMode } from 'klinecharts'
-
-import { List } from '../../component'
+import i18n from '../../i18n'
+import { List, Checkbox, Input } from '../../component'
+import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
 
 export interface OrderPanelProps {
-  locale: string
-  onDrawingItemClick: (overlay: OverlayCreate) => void
-  onModeChange: (mode: string) => void,
-  onLockChange: (lock: boolean) => void
-  onVisibleChange: (visible: boolean) => void
-  onRemoveClick: (groupId: string) => void
+  context: string
+  ordercontroller: OrderResource
+  onOrderSelected: (order: OrderInfo) => void
+  // onMouseDown: (event: MouseEvent) => void
 }
 
-const GROUP_ID = 'order_tools'
+const GROUP_ID = 'order_panel'
 
 const OrdersPanel: Component<OrderPanelProps> = props => {
-  const [singleLineIcon, setSingleLineIcon] = createSignal('horizontalStraightLine')
-  const [moreLineIcon, setMoreLineIcon] = createSignal('priceChannelLine')
-  const [polygonIcon, setPolygonIcon] = createSignal('circle')
-  const [fibonacciIcon, setFibonacciIcon] = createSignal('fibonacciLine')
-  const [waveIcon, setWaveIcon] = createSignal('xabcd')
+  let loading = false
+  const [value, setValue] = createSignal('')
+  const [loadingVisible, setLoadingVisible] = createSignal(false)
+  const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
 
-  const [modeIcon, setModeIcon] = createSignal('weak_magnet')
-  const [mode, setMode] = createSignal('normal')
+  createEffect(() => {
+    if (!loading) {
+      loading = true
+      setLoadingVisible(true)
+      if (loading) { //Will check if order list is set in localstorage
+        // get the order list from local storage
+        const getList = () => {
 
-  const [lock, setLock] = createSignal(false)
-
-  const [visible, setVisible] = createSignal(true)
-
-  const [popoverKey, setPopoverKey] = createSignal('')
-
+          setLoadingVisible(false)
+          loading = false
+        }
+        getList()
+      } else {  //we will retrieve from api service instead
+        const getList =async (action?: OrderType) => {
+          const orderlist = await props.ordercontroller.retrieveOrders(action)
+          setOrderList(orderlist)
+          setLoadingVisible(false)
+          loading = false
+        }
+        getList()
+      }
+    }
+  })
   return (
     <div
       class="klinecharts-pro-order-panel">
-        Orders Panel
+      <List
+        class="klinecharts-pro-symbol-search-modal-list"
+        loading={loadingVisible()}
+        dataSource={orderList() ?? []}
+        renderItem={(order: OrderInfo) => (
+          <li
+            onClick={() => {
+              props.onOrderSelected(order)
+            }}>
+            <div>
+              {/* <Show when={order.logo}>
+                <img alt="order" src={order.logo}/>
+              </Show> */}
+              <span title={order.name ?? ''}>{order.shortName ?? order.ticker}{`${order.name ? `(${order.name})` : ''}`}</span>
+            </div>
+            {order.exchange ?? ''}
+          </li>
+        )}>
+      </List>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
+      <span class="split-line"/>
+      { props.context }
     </div>
   )
 }

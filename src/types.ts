@@ -14,6 +14,7 @@
 
 import { KLineData, Styles, DeepPartial } from 'klinecharts'
 
+export type OrderType = "buy"|"sell"|"buystop"|"buylimit"|"sellstop"|"selllimit"
 export interface SymbolInfo {
   ticker: string
   name?: string
@@ -25,6 +26,17 @@ export interface SymbolInfo {
   priceCurrency?: string
   type?: string
   logo?: string
+}
+
+export interface OrderInfo {
+  entryPoint: number
+  stopLoss?: number
+  takeProfit?: number
+  pl?: number
+  sessionId: number
+  orderId: number
+  entryTime: string
+  action: OrderType
 }
 
 export interface Period {
@@ -42,6 +54,14 @@ export interface Datafeed {
   unsubscribe (symbol: SymbolInfo, period: Period): void
 }
 
+export interface OrderResource {
+  retrieveOrder (order_id: number): Promise<OrderInfo>
+  retrieveOrders (type?: OrderType): Promise<OrderInfo[]>
+  openOrder (action: OrderType, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo>
+  closeOrder (order_id: number): Promise<boolean>
+  modifyOrder (order_id: number, action: OrderType, entry_price?: number, stop_loss?: number, take_profit?: number, pl?: number): Promise<OrderInfo>
+}
+
 export interface ChartProOptions {
   container: string | HTMLElement
   styles?: DeepPartial<Styles>
@@ -49,6 +69,7 @@ export interface ChartProOptions {
   theme?: string
   locale?: string
   drawingBarVisible?: boolean
+  orderPanelVisible?: boolean
   symbol: SymbolInfo
   period: Period
   periods?: Period[]

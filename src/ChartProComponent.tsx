@@ -534,19 +534,20 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         locale={props.locale}
         symbol={symbol()}
         spread={drawingBarVisible()}
+        order_spread={orderPanelVisible()}
         period={period()}
         periods={props.periods}
         onMenuClick={async () => {
           try {
             await startTransition(() => setDrawingBarVisible(!drawingBarVisible()))
-            widget?.resize()
+            documentResize()
           } catch (e) {}    
         }}
         onOrderMenuClick={async () => {
           try {
             await startTransition(() => setOrderPanelVisible(!orderPanelVisible()))
-            widget?.resize()
-          } catch (e) {}    
+            documentResize()
+          } catch (e) {}
         }}
         onSymbolClick={() => { setSymbolSearchModalVisible(!symbolSearchModalVisible()) }}
         onPeriodChange={setPeriod}
@@ -561,7 +562,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         }}
       />
       <div
-        class="klinecharts-pro-content">
+        class="klinecharts-pro-content"
+        data-orders-pane-visible={orderPanelVisible()}>  
         <Show when={loadingVisible()}>
           <Loading/>
         </Show>
@@ -579,6 +581,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           class='klinecharts-pro-widget'
           data-drawing-bar-visible={drawingBarVisible()}/>
       </div>
+      <Show when={orderPanelVisible()}>
+        <OrdersPanel
+          context='this is the order panel context'
+        />
+      </Show>
     </>
   )
 }
