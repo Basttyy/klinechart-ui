@@ -15,7 +15,7 @@
 import { Component, createResource, createMemo, createSignal, createEffect } from 'solid-js'
 import { OverlayCreate, OverlayMode } from 'klinecharts'
 import i18n from '../../i18n'
-import { List, Checkbox, Input } from '../../component'
+import { List, Checkbox, Input, Button } from '../../component'
 import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
 
 export interface OrderPanelProps {
@@ -32,6 +32,14 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   const [value, setValue] = createSignal('')
   const [loadingVisible, setLoadingVisible] = createSignal(false)
   const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
+
+  const onOrderSelected = (order: OrderInfo) => {
+    alert(`${order.orderId} is selected`)
+  }
+
+  const performOrderAction = (order: OrderInfo, action: 'edit'|'close') => {
+
+  }
 
   createEffect(() => {
     if (!loading) {
@@ -59,74 +67,36 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   return (
     <div
       class="klinecharts-pro-order-panel">
-      {/* <List
+      <List
         class="klinecharts-pro-symbol-search-modal-list"
         loading={loadingVisible()}
         dataSource={orderList() ?? []}
         renderItem={(order: OrderInfo) => (
           <li
             onClick={() => {
-              props.onOrderSelected(order)
+              onOrderSelected(order)
             }}>
-            <div>
-              <Show when={order.logo}>
-                <img alt="order" src={order.logo}/>
-              </Show>
-              <span title={order.name ?? ''}>{order.shortName ?? order.ticker}{`${order.name ? `(${order.name})` : ''}`}</span>
+            <div class='order-item'>
+              <span>{ order.orderId }</span>
+              <span>{ order.sessionId }</span>
+              <span>{ order.action }</span>
+              <span>{ order.entryPoint }</span>
+              <span>{ order.takeProfit }</span>
+              <span>{ order.stopLoss }</span>
+              <span>{ order.pl }</span>
+              <span>{ order.entryTime }</span>
+              <Button
+                type='confirm'
+                class='edit-button'
+                onClick={() => {performOrderAction(order, 'edit')}}>Edit</Button>
+              <Button
+                type='cancel'
+                class='close-button'
+                onClick={() => {performOrderAction(order, 'close')}}>Close</Button>
             </div>
-            {order.exchange ?? ''}
           </li>
         )}>
-      </List> */}
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
-      <span class="split-line"/>
-      { props.context }
+      </List>
     </div>
   )
 }
