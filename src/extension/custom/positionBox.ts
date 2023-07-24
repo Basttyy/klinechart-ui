@@ -14,8 +14,26 @@
 
 import { OverlayTemplate } from 'klinecharts'
 
+const calcTarget = (top:number, middle:number, dp:number) => {
+  return (top - middle).toFixed(dp)
+}
 
+const calcStop = (middle:number, bottom:number, dp:number) => {
+  return (middle - bottom).toFixed(dp)
+}
 
+const textStyle = {
+  style: 'fill',
+  color: 'white',
+  borderColor: 'white',
+  paddingTop: 5,
+  paddingBottom: 5,
+  paddingRight: 5,
+  paddingLeft: 5,
+  borderRadius: 5,
+  size: 12,
+  weight: 15
+}
 
 const positionBox: OverlayTemplate = {
   name: 'positionBox',
@@ -28,58 +46,96 @@ const positionBox: OverlayTemplate = {
       color: 'rgba(22, 119, 255, 0.15)'
     }
   },
-  createPointFigures: ({ coordinates, precision }) => {
-    const tags = ['Target: 10.06', 'Open P&L: 10.68', 'Stop: 10.06']
-    const attrsData:any = []
+  createPointFigures: ({ coordinates, precision, overlay }) => {
+    const points = overlay.points
+    let high;
+    let texts;
+    const result:any = []
+    let multiplier = 10**precision.price
     if (coordinates.length > 1) {
-      // console.log('length', coordinates.length, coordinates)
-      attrsData.push({ coordinates: [
-          coordinates[0],
-          { x: coordinates[1].x, y: coordinates[0].y },
-          coordinates[1],
-          { x: coordinates[0].x, y: coordinates[1].y },
-        ]
-      })
+      if(coordinates[0].y > coordinates[1].y) {
+        coordinates[0].y = coordinates[1].y
+      } else {
+        result.push({
+          type: 'polygon',
+          attrs: { coordinates: [
+              coordinates[0],
+              { x: coordinates[1].x, y: coordinates[0].y },
+              coordinates[1],
+              { x: coordinates[0].x, y: coordinates[1].y },
+            ]
+          },
+          styles: { style: 'stroke_fill' }
+        })
+      }
+
+      // console.log('outside', coordinates[1].y, coordinates[0].y)
+      // making sure the middle line does not cross over the top line
+      // if(coordinates[1].y < coordinates[0].y+1) {
+      //   coordinates[1].y = coordinates[0].y
+      // }
+      
 
       if(coordinates.length > 2) {
-        console.log('precision', coordinates.length, precision)
-        attrsData.push({ coordinates: [
-            coordinates[1],
-            { x: coordinates[0].x, y: coordinates[1].y },
-            { x: coordinates[0].x, y: coordinates[2].y },
-            { x: coordinates[1].x, y: coordinates[2].y },
-          ]
+        if(coordinates[2].y < coordinates[1].y) {
+          coordinates[2].y = coordinates[1].y
+        } else {
+          result.push({
+            type: 'polygon',
+            attrs: { coordinates: [
+                coordinates[1],
+                { x: coordinates[0].x, y: coordinates[1].y },
+                { x: coordinates[0].x, y: coordinates[2].y },
+                { x: coordinates[1].x, y: coordinates[2].y },
+              ]
+            },
+            styles: { style: 'stroke_fill', color: '#dcc4de7b'}
+          })
+        }
+        let target = calcTarget(points[0].value!, points[1].value!, precision.price)
+        let stop = calcStop(points[1].value!, points[2].value!, precision.price)
+        const tags = [
+          `Target: ${target} (NN%) ${(Number(target)*multiplier).toFixed(0)}, Amount:`, 
+          `Open P&L: P/L, Qty: qty, \n Risk/Reward ratio: ${(Number(target)/Number(stop)).toFixed(1)}`, 
+          `Stop: ${stop} (NN%) ${(Number(stop)*multiplier).toFixed(0)}, Amount:`
+        ]
+
+        texts = [coordinates[0],coordinates[1]].map((coordinate, i) => ({
+          x: coordinates[0].x, y: coordinate.y-10,
+          baseline: 'bottom',
+          text: `${tags[i]}`
+        }))
+
+        result.push({
+          type: 'rectText',
+          // ignoreEvent: true,
+          attrs: texts,
+          styles: {
+            backgroundColor: 'green',
+            ...textStyle
+          }
+        })
+
+        // for the third text with different background
+        result.push({
+          type: 'rectText',
+          // ignoreEvent: true,
+          attrs: {
+            x: coordinates[0].x, y: coordinates[2].y+35,
+            baseline: 'bottom',
+            text: `${tags[2]}`
+          }
+          ,
+          styles: {
+            backgroundColor: 'red',
+            ...textStyle
+          }
         })
       }
     }
-    const texts = coordinates.map((coordinate, i) => ({
-      // ...coordinate,
-      x: coordinates[0].x, y: coordinate.y,
-      baseline: 'bottom',
-      text: `(${tags[i]})`
-    }))
     
-    if(attrsData.length) {
-      return [
-        {
-          type: 'polygon',
-          attrs: attrsData[0],
-          styles: { style: 'stroke_fill', color: '#dcc4de7b' }
-        },
-        {
-          type: 'polygon',
-          attrs: attrsData[1],
-          styles: { style: 'stroke_fill'}
-        },
-        {
-          type: 'text',
-          // ignoreEvent: true,
-          attrs: texts,
-          styles: {style: 'stroke', color: 'black'}
-        }
-      ]
-    }
-    return []
+    
+    return result
   }
 }
 
