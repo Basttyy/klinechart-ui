@@ -24,23 +24,31 @@ export default class DefaultOrderController implements OrderResource {
       sessionId: resp.data.test_session_id,
       orderId: resp.data.id,
       entryTime: resp.data.entrytime,
+      exitTime: resp.data.exittime,
+      exitPoint: resp.data.exitpoint,
       action: resp.data.action
     }
   }
 
   async retrieveOrders(session_id?: number, type?: OrderType): Promise<OrderInfo[]> {
-    const response = await this.makeFetchWithAuthAndBody('GET', `${this.apiurl}/positions`)
-    const result = await response!.json()
-    return (result.data || []).map((data: any) => ({
-      entryPoint: data.entrypoint,
-      stopLoss: data.stoploss,
-      takeProfit: data.takeprofit,
-      pl: data.pl,
-      sessionId: data.test_session_id,
-      orderId: data.id,
-      entryTime: data.entrytime,
-      action: data.action
-    }))
+    try {
+      const response = await this.makeFetchWithAuthAndBody('GET', `${this.apiurl}/positions`)
+      const result = await response!.json()
+      return (result.data || []).map((data: any) => ({
+        entryPoint: data.entrypoint,
+        stopLoss: data.stoploss,
+        takeProfit: data.takeprofit,
+        pl: data.pl,
+        sessionId: data.test_session_id,
+        orderId: data.id,
+        entryTime: data.entrytime,
+        exitTime: data.exittime,
+        exitPoint: data.exitpoint,
+        action: data.action
+      }))
+    } catch (err) {
+      return []
+    }
   }
 
   async openOrder(action: OrderType, entry_price: number, stop_loss?: number | undefined, take_profit?: number | undefined): Promise<OrderInfo> {

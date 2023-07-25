@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { Component, createResource, createMemo, createSignal, createEffect, Show } from 'solid-js'
+import { Component, createResource, createMemo, createSignal, createEffect, Show, For, onMount } from 'solid-js'
 import { OverlayCreate, OverlayMode } from 'klinecharts'
 import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
@@ -28,9 +28,11 @@ export interface OrderPanelProps {
 const GROUP_ID = 'order_panel'
 
 const OrdersPanel: Component<OrderPanelProps> = props => {
-  let loading = false
+  let loading = true
+  let list_headers = ['Order Id', 'Session Id', 'Action Type', 'Entry Point', 'Take Profit', 'Stop Loss', 'Profit/Loss', 'Exit Point', 'Entry Time', 'Exit Time', 'Edit Order', 'Close Order']
+
   const [value, setValue] = createSignal('')
-  const [loadingVisible, setLoadingVisible] = createSignal(false)
+  const [loadingVisible, setLoadingVisible] = createSignal(true)
   const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
 
   const onOrderSelected = (order: OrderInfo) => {
@@ -38,72 +40,89 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   }
 
   const performOrderAction = (order: OrderInfo, action: 'edit'|'close') => {
-
+    console.log(`${action} ${order.orderId}: was clicked`)
   }
 
-  createEffect(() => {
-    if (!loading) {
-      console.log("executing")
-      loading = true
-      setLoadingVisible(true)
-      if (!loading) { //Will check if order list is set in localstorage
-        // get the order list from local storage
-        const getList = () => {
+  onMount(() => {
+    setLoadingVisible(true)
+    loading = true
+    if (!loading) { //Will check if order list is set in localstorage
+      // get the order list from local storage
+      const getList = () => {
 
-          setLoadingVisible(false)
-          loading = false
-        }
-        getList()
-      } else {  //we will retrieve from api service instead
-        const getList =async (action?: OrderType) => {
-          const orderlist = await props.orderController.retrieveOrders()
-          setOrderList(orderlist)
-          setLoadingVisible(false)
-          loading = false
-        }
-        getList()
+        setLoadingVisible(false)
+        loading = false
       }
+      getList()
+    } else {  //we will retrieve from api service instead
+      const getList =async (action?: OrderType) => {
+        const orderlist = await props.orderController.retrieveOrders()
+        setLoadingVisible(false)
+        loading = false
+        setOrderList(orderlist)
+      }
+      getList()
     }
   })
   return (
     <div
       class="klinecharts-pro-order-panel">
-      <Show when={loadingVisible()}>
-        <Loading />
-      </Show>
-      <Show when={orderList().length < 1 && !loadingVisible()}>
+      <Show when={(orderList().length < 1) && !loadingVisible()}>
         <span>No Opened Orders</span>
       </Show>
-      <Show when={orderList().length > 0}>
+      <Show when={orderList().length > 0 || loadingVisible()}>
         <List
-          class="klinecharts-pro-symbol-search-modal-list"
-          loading={false}
-          dataSource={orderList() ?? []}
-          renderItem={(order: OrderInfo) => (
-            <li
-              onClick={() => {
-                onOrderSelected(order)
-              }}>
-              <div class='order-item'>
-                <span>{ order.orderId }</span>
-                <span>{ order.sessionId }</span>
-                <span>{ order.action }</span>
-                <span>{ order.entryPoint }</span>
-                <span>{ order.takeProfit }</span>
-                <span>{ order.stopLoss }</span>
-                <span>{ order.pl }</span>
-                <span>{ order.entryTime }</span>
-                <Button
-                  type='confirm'
-                  class='edit-button'
-                  onClick={() => {performOrderAction(order, 'edit')}}>Edit</Button>
-                <Button
-                  type='cancel'
-                  class='close-button'
-                  onClick={() => {performOrderAction(order, 'close')}}>Close</Button>
-              </div>
-            </li>
-          )}>
+          class="klinecharts-pro-order-pane-list"
+          loading={loadingVisible()}>
+          {
+            !loadingVisible() ? <li>
+            <div class="order-header">
+              <span style={'width: 70px'}>Order Id</span>
+              <span style={'width: 70px'}>Session Id</span>
+              <span style={'width: 110px'}>Action Type</span>
+              <span style={'width: 110px'}>Entry Point</span>
+              <span style={'width: 110px'}>Take Profit</span>
+              <span style={'width: 110px'}>Stop Loss</span>
+              <span style={'width: 140px'}>Profit/Loss</span>
+              <span style={'width: 110px'}>Exit Point</span>
+              <span style={'width: 160px'}>Entry Time</span>
+              <span style={'width: 160px'}>Exit Time</span>
+              <span style={'width: 110px'}>Edit Order</span>
+              <span style={'width: 110px'}>Close Order</span>
+            </div>
+          </li> :
+          <li></li>
+          }
+          {
+            orderList().map(order => (
+              <li>
+                <div class='order-item'>
+                  <span style={'width: 70px'}>{ order.orderId }</span>
+                  <span style={'width: 70px'}>{ order.sessionId }</span>
+                  <span style={'width: 110px'}>{ order.action }</span>
+                  <span style={'width: 110px'}>{ order.entryPoint }</span>
+                  <span style={'width: 110px'}>{ order.takeProfit }</span>
+                  <span style={'width: 110px'}>{ order.stopLoss }</span>
+                  <span style={'width: 140px'}>{ order.pl }</span>
+                  <span style={'width: 110px'}>{ order.exitPoint }</span>
+                  <span style={'width: 160px'}>{ order.entryTime }</span>
+                  <span style={'width: 160px'}>{ order.exitTime }</span>
+                  <span style={'width: 110px'}>
+                    <Button
+                      type='confirm'
+                      class='edit-button'
+                      onClick={() => {performOrderAction(order, 'edit')}}>Edit</Button>
+                  </span>
+                  <span style={'width: 110px'}>
+                    <Button
+                      type='cancel'
+                      class='close-button'
+                      onClick={() => {performOrderAction(order, 'close')}}>Close</Button>
+                  </span>
+                </div>
+              </li>
+            ))
+          }
         </List>
       </Show>
     </div>
