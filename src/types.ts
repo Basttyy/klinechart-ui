@@ -56,7 +56,7 @@ export interface Datafeed {
   unsubscribe (symbol: SymbolInfo, period: Period): void
 }
 
-export interface OrderResource {
+export interface OtherResource {
   retrieveOrder (order_id: number): Promise<OrderInfo>
   retrieveOrders ( session_id?: number, type?: OrderType): Promise<OrderInfo[]>
   openOrder (action: OrderType, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo>
@@ -81,7 +81,7 @@ export interface ChartProOptions {
   subIndicators?: string[]
   datafeed: Datafeed
   dataTimestamp: number
-  orderController: OrderResource
+  otherController: OtherResource
 }
 
 export interface ChartPro {

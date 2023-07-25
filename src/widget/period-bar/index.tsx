@@ -14,7 +14,7 @@
 
 import { Component, Show, createSignal, onMount, onCleanup } from 'solid-js'
 
-import { SymbolInfo, Period } from '../../types'
+import { SymbolInfo, Period, OtherResource } from '../../types'
 
 import i18n from '../../i18n'
 
@@ -33,12 +33,14 @@ export interface PeriodBarProps {
   onSettingClick: () => void
   onScreenshotClick: () => void
   onOrderMenuClick: () => void
+  otherController: OtherResource
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
   let ref: Node
 
   const [fullScreen, setFullScreen] = createSignal(false)
+  const [showPeriodList, setShowPeriodList] = createSignal(false);
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
@@ -74,7 +76,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
         </svg>
       </div>
-      <Show when={props.symbol}>
+      {/* <Show when={props.symbol}>
         <div
           class="symbol"
           onClick={onSymbolClickLog}>
@@ -83,8 +85,29 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           </Show>
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
-      </Show>
-      {
+      </Show> */}
+      <button class="item tools" onClick={() => {props.otherController.launchOrderModal('h' as any,3,'h' as any)}}>Place order</button>
+      <div class=" period_home">
+        <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period selected">{props.period.text}</button>
+        {
+          showPeriodList() &&
+          <div class="period_list">
+            {
+              props.periods.map(p => (
+                <li 
+                  onClick={() => {
+                    props.onPeriodChange(p)
+                    setShowPeriodList(false)
+                  }}
+                >
+                  {p.text}
+                </li>
+              ))
+            }
+          </div>
+        }
+      </div>
+      {/* {
         props.periods.map(p => (
           <span
             class={`item period ${p.text === props.period.text ? 'selected' : ''}`}
@@ -92,7 +115,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
             {p.text}
           </span>
         ))
-      }
+      } */}
       <div
         class='item tools'
         onClick={props.onIndicatorClick}>

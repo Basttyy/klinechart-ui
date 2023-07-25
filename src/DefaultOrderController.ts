@@ -1,8 +1,8 @@
-import { OrderInfo, OrderModalType, OrderResource, OrderType } from "./types";
+import { OrderInfo, OrderModalType, OtherResource, OrderType } from "./types";
 
 type MethodType = 'POST'|'GET'|'DELETE'|'PUT'
 
-export default class DefaultOrderController implements OrderResource {
+export default class DefaultOrderController implements OtherResource {
   constructor (_testsession_id: number, _apiurl: string, _apikey: string) {
     this.apiurl = _apiurl
     this.apikey = _apikey

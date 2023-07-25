@@ -22,7 +22,7 @@ import DefaultOrderController from './DefaultOrderController'
 
 import { load } from './i18n'
 
-import { OrderType, OrderInfo, OrderResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro } from './types'
+import { OrderType, OrderInfo, OtherResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro } from './types'
 
 import './index.less'
 
@@ -36,5 +36,5 @@ export {
 }
 
 export type {
-  OrderInfo, OrderType, OrderResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro
+  OrderInfo, OrderType, OtherResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro
 }

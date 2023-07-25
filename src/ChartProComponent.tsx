@@ -560,6 +560,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             setScreenshotUrl(url)
           }
         }}
+        otherController={props.otherController}
       />
       <div
         class="klinecharts-pro-content"
@@ -584,7 +585,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       <Show when={orderPanelVisible()}>
         <OrdersPanel
           context='this is the order panel context'
-          orderController={props.orderController}
+          otherController={props.otherController}
         />
       </Show>
     </>
