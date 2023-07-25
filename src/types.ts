@@ -14,6 +14,8 @@
 
 import { KLineData, Styles, DeepPartial } from 'klinecharts'
 
+export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
+export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
 export interface SymbolInfo {
   ticker: string
   name?: string
@@ -27,6 +29,17 @@ export interface SymbolInfo {
   logo?: string
 }
 
+export interface OrderInfo {
+  entryPoint: number
+  stopLoss?: number
+  takeProfit?: number
+  pl?: number
+  sessionId: number
+  orderId: number
+  entryTime: string
+  action: OrderType
+}
+
 export interface Period {
   multiplier: number
   timespan: string
@@ -34,6 +47,7 @@ export interface Period {
 }
 
 export type DatafeedSubscribeCallback = (data: KLineData) => void
+export type OrderPlacedCallback = (data: OrderInfo|null) => void     //this should be called when a user has successfully placed an order from consumer project side
 
 export interface Datafeed {
   searchSymbols (search?: string): Promise<SymbolInfo[]>
@@ -43,6 +57,15 @@ export interface Datafeed {
   triggerAction (name:string) : void
 }
 
+export interface OrderResource {
+  retrieveOrder (order_id: number): Promise<OrderInfo>
+  retrieveOrders ( session_id?: number, type?: OrderType): Promise<OrderInfo[]>
+  openOrder (action: OrderType, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo>
+  closeOrder (order_id: number): Promise<boolean>
+  modifyOrder (order_id: number, action?: OrderType, entry_price?: number, stop_loss?: number, take_profit?: number, pl?: number): Promise<OrderInfo>
+  launchOrderModal (type: OrderModalType, currentprice: number, callback: OrderPlacedCallback): void
+}
+
 export interface ChartProOptions {
   container: string | HTMLElement
   styles?: DeepPartial<Styles>
@@ -50,6 +73,7 @@ export interface ChartProOptions {
   theme?: string
   locale?: string
   drawingBarVisible?: boolean
+  orderPanelVisible?: boolean
   symbol: SymbolInfo
   period: Period
   periods?: Period[]
@@ -58,6 +82,7 @@ export interface ChartProOptions {
   subIndicators?: string[]
   datafeed: Datafeed
   dataTimestamp: number
+  orderController: OrderResource
 }
 
 export interface ChartPro {

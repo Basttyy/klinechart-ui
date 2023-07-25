@@ -18,10 +18,11 @@ import overlays from './extension'
 
 import DefaultDatafeed from './DefaultDatafeed'
 import KLineChartPro from './KLineChartPro'
+import DefaultOrderController from './DefaultOrderController'
 
 import { load } from './i18n'
 
-import { Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, ChartProOptions, ChartPro } from './types'
+import { OrderType, OrderInfo, OrderResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro } from './types'
 
 import './index.less'
 
@@ -29,10 +30,11 @@ overlays.forEach(o => { registerOverlay(o) })
 
 export {
   DefaultDatafeed,
+  DefaultOrderController,
   KLineChartPro,
   load as loadLocales
 }
 
 export type {
-  Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, ChartProOptions, ChartPro
+  OrderInfo, OrderType, OrderResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro
 }
