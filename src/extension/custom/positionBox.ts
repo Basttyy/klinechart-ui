@@ -71,8 +71,8 @@ const positionBox: OverlayTemplate = {
 
       // console.log('outside', coordinates[1].y, coordinates[0].y)
       // making sure the middle line does not cross over the top line
-      // if(coordinates[1].y < coordinates[0].y+1) {
-      //   coordinates[1].y = coordinates[0].y
+      // if(coordinates[1].y < coordinates[0].y+10) {
+      //   coordinates[1].y = coordinates[0].y+10
       // }
       
 
