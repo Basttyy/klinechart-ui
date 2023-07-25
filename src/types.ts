@@ -37,6 +37,8 @@ export interface OrderInfo {
   sessionId: number
   orderId: number
   entryTime: string
+  exitTime?: string
+  exitPoint?: number
   action: OrderType
 }
 
