@@ -20,6 +20,7 @@ import xabcd from './xabcd'
 //Added by TradingIo Team
 import positionLine from './custom/positionLine'
 import fibonaccDiagonal from './custom/fibonacciDiagonal'
+import positionBox from './custom/positionBox'
 
 const overlays = [
   arrow,
@@ -27,7 +28,7 @@ const overlays = [
   fibonacciCircle, fibonacciSegment, fibonacciSpiral,
   fibonacciSpeedResistanceFan, fibonacciExtension, gannBox,
   threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd,
-  positionLine
+  positionBox, positionLine
 ]
 
 export default overlays
