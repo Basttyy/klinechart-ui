@@ -121,9 +121,8 @@
   .period_list{
     position: absolute;
     top: 30px;
-    left: -20px;
+    left: 0px;
     white-space: nowrap;
-    left: calc(100% + 1px);
     background-color: var(--klinecharts-pro-popover-background-color);
     z-index: 99;
     box-shadow: 0 6px 12px 0 rgba(0, 0, 0, .3);
@@ -144,5 +143,41 @@
       }
  
     }
+  }
+  
+  .period_range {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    z-index: 99;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    outline: none;
+    background-color: #76808F;
+    margin: 5px;
+  }
+  
+  .period_range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background-color: #76808F;
+    border-radius: 50%;
+  }
+  .period_range::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: #76808F;
+    border-radius: 50%;
+  }
+  
+  /* For IE and Edge */
+  .period_range::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: #76808F;
+    border-radius: 50%;
   }
 }

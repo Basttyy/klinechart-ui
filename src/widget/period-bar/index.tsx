@@ -41,9 +41,17 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const [fullScreen, setFullScreen] = createSignal(false)
   const [showPeriodList, setShowPeriodList] = createSignal(false);
+  const [showSpeed, setShowSpeed] = createSignal(false)
+  const [isPaused, setIsPaused] = createSignal(false)
+  const [range, setRange] = createSignal(1);
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
+  }
+
+  const handleRangeChange = (event:any) => {
+    setRange(event.target.value);
+    props.otherController.controlSpeed(range())
   }
 
   const onSymbolClickLog = () => {
@@ -87,8 +95,8 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         </div>
       </Show> */}
       <button class="item tools" onClick={() => {props.otherController.launchOrderModal('h' as any,3,'h' as any)}}>Place order</button>
-      <div class=" period_home">
-        <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period selected">{props.period.text}</button>
+      <div class="item tools period_home">
+        <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period">{props.period.text}</button>
         {
           showPeriodList() &&
           <div class="period_list">
@@ -105,6 +113,23 @@ const PeriodBar: Component<PeriodBarProps> = props => {
               ))
             }
           </div>
+        }
+      </div>
+      <button class="item tools" 
+        onClick={() => {
+          setIsPaused(!isPaused())
+          props.otherController.pausePlay(isPaused())
+        }}
+      >
+        {isPaused() ? 'Play' : 'Pause'}
+      </button>
+      <div class="item tools period_home">
+        <button onclick={() => setShowSpeed(!showSpeed())} class="item period">Speed {range()}</button>
+        {
+          showSpeed() &&
+          // <div class="period_list">
+            <input class="period_range" type="range" min="1" max="10" value={range()} onInput={handleRangeChange} />
+          // </div>
         }
       </div>
       {/* {
