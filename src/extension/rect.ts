@@ -47,3 +47,4 @@ const rect: OverlayTemplate = {
 }
 
 export default rect
+

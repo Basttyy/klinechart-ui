@@ -37,6 +37,8 @@ export interface OrderInfo {
   sessionId: number
   orderId: number
   entryTime: string
+  exitTime?: string
+  exitPoint?: number
   action: OrderType
 }
 
@@ -54,6 +56,7 @@ export interface Datafeed {
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
   unsubscribe (symbol: SymbolInfo, period: Period): void
+  triggerAction (name:string) : void
 }
 
 export interface OtherResource {

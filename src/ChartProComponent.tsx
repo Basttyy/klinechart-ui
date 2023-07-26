@@ -444,13 +444,13 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
-      <Show when={symbolSearchModalVisible()}>
+      {/* <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal
           locale={props.locale}
           datafeed={props.datafeed}
           onSymbolSelected={symbol => { setSymbol(symbol) }}
           onClose={() => { setSymbolSearchModalVisible(false) }}/>
-      </Show>
+      </Show> */}
       <Show when={indicatorModalVisible()}>
         <IndicatorModal
           locale={props.locale}
@@ -554,6 +554,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         onIndicatorClick={() => { setIndicatorModalVisible((visible => !visible)) }}
         onTimezoneClick={() => { setTimezoneModalVisible((visible => !visible)) }}
         onSettingClick={() => { setSettingModalVisible((visible => !visible)) }}
+        onPlaceOrderClick={() => {props.datafeed.triggerAction('order')}}
         onScreenshotClick={() => {
           if (widget) {
             const url = widget.getConvertPictureUrl(true, 'jpeg', props.theme === 'dark' ? '#151517' : '#ffffff')
