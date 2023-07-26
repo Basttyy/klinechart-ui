@@ -51,7 +51,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const handleRangeChange = (event:any) => {
     setRange(event.target.value);
-    props.otherController.controlSpeed(range())
+    props.otherController.controlSpeed!(range())
   }
 
   const onSymbolClickLog = () => {
@@ -118,7 +118,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       <button class="item tools" 
         onClick={() => {
           setIsPaused(!isPaused())
-          props.otherController.pausePlay(isPaused())
+          props.otherController.pausePlay!(isPaused())
         }}
       >
         {isPaused() ? 'Play' : 'Pause'}

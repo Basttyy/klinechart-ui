@@ -56,7 +56,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
       getList()
     } else {  //we will retrieve from api service instead
       const getList =async (action?: OrderType) => {
-        const orderlist = await props.orderController.retrieveOrders()
+        const orderlist = await props.otherController.retrieveOrders()
         setLoadingVisible(false)
         loading = false
         setOrderList(orderlist)

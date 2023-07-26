@@ -66,8 +66,8 @@ export interface OtherResource {
   closeOrder (order_id: number): Promise<boolean>
   modifyOrder (order_id: number, action?: OrderType, entry_price?: number, stop_loss?: number, take_profit?: number, pl?: number): Promise<OrderInfo>
   launchOrderModal (type: OrderModalType, currentprice: number, callback: OrderPlacedCallback): void
-  pausePlay(status:boolean):void
-  controlSpeed(speed:number):void
+  pausePlay?(status:boolean):void
+  controlSpeed?(speed:number):void
 }
 
 export interface ChartProOptions {
