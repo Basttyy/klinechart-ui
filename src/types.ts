@@ -58,15 +58,13 @@ export interface Datafeed {
   unsubscribe (symbol: SymbolInfo, period: Period): void
 }
 
-export interface OtherResource {
+export interface OrderResource {
   retrieveOrder (order_id: number): Promise<OrderInfo>
   retrieveOrders ( session_id?: number, type?: OrderType): Promise<OrderInfo[]>
   openOrder (action: OrderType, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo>
   closeOrder (order_id: number): Promise<boolean>
   modifyOrder (order_id: number, action?: OrderType, entry_price?: number, stop_loss?: number, take_profit?: number, pl?: number): Promise<OrderInfo>
   launchOrderModal (type: OrderModalType, currentprice: number, callback: OrderPlacedCallback): void
-  pausePlay?(status:boolean):void
-  controlSpeed?(speed:number):void
 }
 
 export interface ChartProOptions {
@@ -85,7 +83,7 @@ export interface ChartProOptions {
   subIndicators?: string[]
   datafeed: Datafeed
   dataTimestamp: number
-  otherController: OtherResource
+  orderController: OrderResource
 }
 
 export interface ChartPro {

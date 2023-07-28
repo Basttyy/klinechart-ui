@@ -16,11 +16,11 @@ import { Component, createResource, createMemo, createSignal, createEffect, Show
 import { OverlayCreate, OverlayMode } from 'klinecharts'
 import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
-import { Datafeed, OrderInfo, OtherResource, OrderType } from '../../types'
+import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
 
 export interface OrderPanelProps {
   context: string
-  otherController: OtherResource
+  orderController: OrderResource
   // onOrderSelected: (order: OrderInfo) => void
   // onMouseDown: (event: MouseEvent) => void
 }
@@ -56,7 +56,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
       getList()
     } else {  //we will retrieve from api service instead
       const getList =async (action?: OrderType) => {
-        const orderlist = await props.otherController.retrieveOrders()
+        const orderlist = await props.orderController.retrieveOrders()
         setLoadingVisible(false)
         loading = false
         setOrderList(orderlist)
