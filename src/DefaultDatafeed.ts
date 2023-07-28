@@ -94,7 +94,4 @@ export default class DefaultDatafeed implements Datafeed {
     // do something
   }
 
-  triggerAction(name: string): void {
-    // do something
-  }
 }

@@ -14,9 +14,10 @@
 
 import { Component, Show, createSignal, onMount, onCleanup } from 'solid-js'
 
-import { SymbolInfo, Period } from '../../types'
+import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
+import DefaultDatafeed from '../../DefaultDatafeed'
 
 export interface PeriodBarProps {
   locale: string
@@ -33,15 +34,26 @@ export interface PeriodBarProps {
   onSettingClick: () => void
   onScreenshotClick: () => void
   onOrderMenuClick: () => void
+  orderController: OrderResource
+  datafeed: Datafeed
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
   let ref: Node
 
   const [fullScreen, setFullScreen] = createSignal(false)
+  const [showPeriodList, setShowPeriodList] = createSignal(false);
+  const [showSpeed, setShowSpeed] = createSignal(false)
+  const [pausedStatus, setPausedStatus] = createSignal(false)
+  const [range, setRange] = createSignal(1);
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
+  }
+
+  const handleRangeChange = (event:any) => {
+    setRange(event.target.value);
+    (props.datafeed as any).setInterval = range() * 100
   }
 
   const onSymbolClickLog = () => {
@@ -74,7 +86,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
         </svg>
       </div>
-      <Show when={props.symbol}>
+      {/* <Show when={props.symbol}>
         <div
           class="symbol"
           onClick={onSymbolClickLog}>
@@ -83,8 +95,46 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           </Show>
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
-      </Show>
-      {
+      </Show> */}
+      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('h' as any,3,'h' as any)}}>Place order</button>
+      <div class="item tools period_home">
+        <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period">{props.period.text}</button>
+        {
+          showPeriodList() &&
+          <div class="period_list">
+            {
+              props.periods.map(p => (
+                <li 
+                  onClick={() => {
+                    props.onPeriodChange(p)
+                    setShowPeriodList(false)
+                  }}
+                >
+                  {p.text}
+                </li>
+              ))
+            }
+          </div>
+        }
+      </div>
+      <button class="item tools" 
+        onClick={() => {
+          setPausedStatus(!pausedStatus());
+          (props.datafeed as any).setIsPaused = pausedStatus()
+        }}
+      >
+        {pausedStatus() ? 'Play' : 'Pause'}
+      </button>
+      <div class="item tools period_home">
+        <button onclick={() => setShowSpeed(!showSpeed())} class="item period">Speed {range()}</button>
+        {
+          showSpeed() &&
+          // <div class="period_list">
+            <input class="period_range" type="range" min="1" max="10" value={range()} onInput={handleRangeChange} />
+          // </div>
+        }
+      </div>
+      {/* {
         props.periods.map(p => (
           <span
             class={`item period ${p.text === props.period.text ? 'selected' : ''}`}
@@ -92,7 +142,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
             {p.text}
           </span>
         ))
-      }
+      } */}
       <div
         class='item tools'
         onClick={props.onIndicatorClick}>
