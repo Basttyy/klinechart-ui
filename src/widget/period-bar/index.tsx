@@ -53,7 +53,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const handleRangeChange = (event:any) => {
     setRange(event.target.value);
-    (props.datafeed as any).setInterval(range())
+    (props.datafeed as any).setInterval = range() * 100
   }
 
   const onSymbolClickLog = () => {
@@ -120,7 +120,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       <button class="item tools" 
         onClick={() => {
           setPausedStatus(!pausedStatus());
-          (props.datafeed as any).setIsPaused(pausedStatus())
+          (props.datafeed as any).setIsPaused = pausedStatus()
         }}
       >
         {pausedStatus() ? 'Play' : 'Pause'}
