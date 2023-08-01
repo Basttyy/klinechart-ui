@@ -15,6 +15,7 @@
 import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding } from 'klinecharts'
 
 import { formatThousands, getLinearSlopeIntercept } from '../utils'
+import { currenttick } from '../../store/tickStore'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[] }
 
@@ -53,7 +54,8 @@ const positionLine: OverlayTemplate = {
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
-  createPointFigures: ({ coordinates, bounding }) => {
+  createPointFigures: ({ overlay, coordinates, bounding, }) => {
+    console.log(`hello from overlay ${overlay.id} and ${currenttick()?.close}`)
     const parallel = getParallelLines(coordinates, bounding, 1)
     return [
       {

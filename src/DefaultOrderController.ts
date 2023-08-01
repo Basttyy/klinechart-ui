@@ -1,4 +1,4 @@
-import { OrderInfo, OrderModalType, OrderResource, OrderType } from "./types";
+import { OrderInfo, OrderModalType, OrderPlacedCallback, OrderResource, OrderType } from "./types";
 
 type MethodType = 'POST'|'GET'|'DELETE'|'PUT'
 
@@ -20,6 +20,7 @@ export default class DefaultOrderController implements OrderResource {
       entryPoint: resp.data.entrypoint,
       stopLoss: resp.data.stoploss,
       takeProfit: resp.data.takeprofit,
+      lotSize: resp.data.lotsize,
       pl: resp.data.pl,
       sessionId: resp.data.test_session_id,
       orderId: resp.data.id,
@@ -30,7 +31,7 @@ export default class DefaultOrderController implements OrderResource {
     }
   }
 
-  async retrieveOrders(session_id?: number, type?: OrderType): Promise<OrderInfo[]> {
+  async retrieveOrders(type?: OrderType, session_id?: number): Promise<OrderInfo[]> {
     try {
       const response = await this.makeFetchWithAuthAndBody('GET', `${this.apiurl}/positions`)
       const result = await response!.json()
@@ -38,6 +39,7 @@ export default class DefaultOrderController implements OrderResource {
         entryPoint: data.entrypoint,
         stopLoss: data.stoploss,
         takeProfit: data.takeprofit,
+        lotSize: data.lotsize,
         pl: data.pl,
         sessionId: data.test_session_id,
         orderId: data.id,
@@ -51,7 +53,7 @@ export default class DefaultOrderController implements OrderResource {
     }
   }
 
-  async openOrder(action: OrderType, entry_price: number, stop_loss?: number | undefined, take_profit?: number | undefined): Promise<OrderInfo> {
+  async openOrder(action: OrderType, lot_size: number, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo|null> {
     const response = await this.makeFetchWithAuthAndBody('POST', `${this.apiurl}/positions`, {
       test_session_id: this.testsesson_id,
       action: action,
@@ -62,18 +64,24 @@ export default class DefaultOrderController implements OrderResource {
     // const response = await fetch(`${this.apiurl}/orders/${order_id}`)
     const data = await response?.json()
     return {
+      orderId: data.id,
+      sessionId: data.test_session_id,
+      action: data.action,
       entryPoint: data.entrypoint,
+      exitPoint: data.exitpoint,
       stopLoss: data.stoploss,
       takeProfit: data.takeprofit,
+      lotSize: data.lotsize,
+      pips: data.pips,
       pl: data.pl,
-      sessionId: data.test_session_id,
-      orderId: data.id,
       entryTime: data.entrytime,
-      action: data.action
+      exitTime: data.exittime,
+      exitType: data.exittype,
+      partials: data.partials
     }
   }
 
-  async closeOrder(order_id: number): Promise<boolean> {
+  async closeOrder(order_id: number, lotsize?: number): Promise<boolean> {
     try {
       const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order_id}`)
       const data = await response?.json()
@@ -83,28 +91,34 @@ export default class DefaultOrderController implements OrderResource {
     }
   }
 
-  async modifyOrder(order_id: number, action?: OrderType, entry_price?: number | undefined, stop_loss?: number | undefined, take_profit?: number | undefined, pl?: number | undefined): Promise<OrderInfo> {
-    const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order_id}`, {
+  async modifyOrder(order: OrderInfo): Promise<OrderInfo> {
+    const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order.orderId}`, {
       test_session_id: this.testsesson_id,
-      action: action,
-      entrypoint: entry_price,
-      stoploss: stop_loss,
-      takeprofit: take_profit,
+      action: order.action,
+      entrypoint: order.entryPoint,
+      stoploss: order.stopLoss,
+      takeprofit: order.takeProfit,
     })
     const data = await response?.json()
     return {
+      orderId: data.id,
+      sessionId: data.test_session_id,
+      action: data.action,
       entryPoint: data.entrypoint,
+      exitPoint: data.exitpoint,
       stopLoss: data.stoploss,
       takeProfit: data.takeprofit,
+      lotSize: data.lotsize,
+      pips: data.pips,
       pl: data.pl,
-      sessionId: data.test_session_id,
-      orderId: data.id,
       entryTime: data.entrytime,
-      action: data.action
+      exitTime: data.exittime,
+      exitType: data.exittype,
+      partials: data.partials
     }
   }
 
-  launchOrderModal(type: OrderModalType, currentprice: number): void {
+  launchOrderModal(type: OrderModalType, callback: OrderPlacedCallback): void {
     return ;
   }
 

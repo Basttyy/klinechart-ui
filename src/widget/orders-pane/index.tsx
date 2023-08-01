@@ -59,7 +59,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
         const orderlist = await props.orderController.retrieveOrders()
         setLoadingVisible(false)
         loading = false
-        setOrderList(orderlist)
+        setOrderList(orderlist!)
       }
       getList()
     }
