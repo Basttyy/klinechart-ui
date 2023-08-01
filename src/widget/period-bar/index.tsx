@@ -14,10 +14,11 @@
 
 import { Component, Show, createSignal, onMount, onCleanup } from 'solid-js'
 
-import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
+import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../types'
 
 import i18n from '../../i18n'
 import DefaultDatafeed from '../../DefaultDatafeed'
+import { Chart, Nullable, utils } from 'klinecharts'
 
 export interface PeriodBarProps {
   locale: string
@@ -36,6 +37,7 @@ export interface PeriodBarProps {
   onOrderMenuClick: () => void
   orderController: OrderResource
   datafeed: Datafeed
+  widget: Nullable<Chart>
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
@@ -58,6 +60,23 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const onSymbolClickLog = () => {
     console.log("symbol tool was clicked")
+  }
+
+  const onOrderPlaced = (order: OrderInfo|null) => {
+    props.widget?.createOverlay({
+      name: 'positionLine',
+      id: `positionline_${order?.orderId}`,
+      groupId: 'positionLine',
+      points: [
+        { timestamp: Date.parse(order?.entryTime!), value: order?.entryPoint }
+      ],
+      lock: order?.action === 'buy' || order?.action === 'sell',
+
+      // onDrawStart: (event): boolean => {
+      //   console.log(`${event.overlay.name} is about to be drawn on coordinate ${event.x}`)
+      //   return true
+      // }
+    })
   }
 
   onMount(() => {
@@ -86,7 +105,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
         </svg>
       </div>
-      {/* <Show when={props.symbol}>
+      <Show when={props.symbol}>
         <div
           class="symbol"
           onClick={onSymbolClickLog}>
@@ -95,8 +114,8 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           </Show>
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
-      </Show> */}
-      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('h' as any,3,'h' as any)}}>Place order</button>
+      </Show>
+      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button>
       <div class="item tools period_home">
         <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period">{props.period.text}</button>
         {

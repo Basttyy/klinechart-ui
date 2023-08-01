@@ -16,7 +16,7 @@ import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, 
 
 import {
   init, dispose, utils, Nullable, Chart, OverlayMode, Styles,
-  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial
+  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial, KLineData
 } from 'klinecharts'
 
 import lodashSet from 'lodash/set'
@@ -32,6 +32,7 @@ import {
 import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
+import { currenttick, setCurrentTick } from './store/tickStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -98,6 +99,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
   const [loadingVisible, setLoadingVisible] = createSignal(false)
+
+  const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
@@ -214,6 +217,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
 
     if (widget) {
+      setInstanceapi(widget)
       const watermarkContainer = widget.getDom('candle_pane', DomPosition.Main)
       if (watermarkContainer) {
         let watermark = document.createElement('div')
@@ -324,8 +328,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const [from, to] = adjustFromTo(p, timestamp, 500)
         const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
         widget?.applyNewData(kLineDataList, kLineDataList.length > 0)
+        setCurrentTick(kLineDataList[kLineDataList.length -1])
         props.datafeed.subscribe(s, p, data => {
+          setCurrentTick(data)
           widget?.updateData(data)
+          console.log(currenttick()?.close)
         })
         loading = false
         setLoadingVisible(false)
@@ -562,6 +569,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         }}
         orderController={props.orderController}
         datafeed={props.datafeed}
+        widget={instanceapi()}
       />
       <div
         class="klinecharts-pro-content"

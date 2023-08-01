@@ -16,6 +16,7 @@ import { KLineData, Styles, DeepPartial } from 'klinecharts'
 
 export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
 export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
+export type ExitType = 'stoploss'|'takeprofit'|'breakeven'|'manualclose'
 export interface SymbolInfo {
   ticker: string
   name?: string
@@ -30,16 +31,20 @@ export interface SymbolInfo {
 }
 
 export interface OrderInfo {
+  orderId: number
+  action: OrderType
   entryPoint: number
+  exitPoint?: number
   stopLoss?: number
   takeProfit?: number
+  lotSize: number
+  pips?: number
   pl?: number
-  sessionId: number
-  orderId: number
   entryTime: string
   exitTime?: string
-  exitPoint?: number
-  action: OrderType
+  exitType?: ExitType
+  partials?: string
+  sessionId?: number
 }
 
 export interface Period {
@@ -59,12 +64,12 @@ export interface Datafeed {
 }
 
 export interface OrderResource {
-  retrieveOrder (order_id: number): Promise<OrderInfo>
-  retrieveOrders ( session_id?: number, type?: OrderType): Promise<OrderInfo[]>
-  openOrder (action: OrderType, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo>
+  retrieveOrder (order_id: number): Promise<OrderInfo|null>
+  retrieveOrders (type?: OrderType, session_id?: number): Promise<OrderInfo[]|null>
+  openOrder (action: OrderType, lot_size: number, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo|null>
   closeOrder (order_id: number): Promise<boolean>
-  modifyOrder (order_id: number, action?: OrderType, entry_price?: number, stop_loss?: number, take_profit?: number, pl?: number): Promise<OrderInfo>
-  launchOrderModal (type: OrderModalType, currentprice: number, callback: OrderPlacedCallback): void
+  modifyOrder (order: OrderInfo): Promise<OrderInfo|null>
+  launchOrderModal (type: OrderModalType, callback: OrderPlacedCallback): void
 }
 
 export interface ChartProOptions {
