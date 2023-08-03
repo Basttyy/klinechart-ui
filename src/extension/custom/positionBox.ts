@@ -27,6 +27,10 @@ const calcStop = (middle:number, bottom:number, dp:number) => {
   return (middle - bottom).toFixed(dp)
 }
 
+const calcPL = (middle:number, dp:number) => {
+  return (currenttick()!.close-middle).toFixed(dp)
+}
+
 const textStyle = {
   style: 'fill',
   color: 'white',
@@ -57,7 +61,7 @@ const positionBox: OverlayTemplate = {
     let texts;
     const result:any = []
     let multiplier = 10**precision.price
-    console.log(currenttick()?.close)
+    // console.log(currenttick()?.close)
     if (coordinates.length > 1) {
       if(coordinates[0].y > coordinates[1].y) {
         coordinates[0].y = coordinates[1].y
@@ -78,7 +82,8 @@ const positionBox: OverlayTemplate = {
       // console.log('outside', coordinates[1].y, coordinates[0].y)
       // making sure the middle line does not cross over the top line
       // if(coordinates[1].y < coordinates[0].y+10) {
-      //   coordinates[1].y = coordinates[0].y+10
+        // coordinates[1].y = coordinates[0].y+10
+        // coordinates[0].y = coordinates[1].y-20
       // }
       
 
@@ -101,16 +106,16 @@ const positionBox: OverlayTemplate = {
         }
 
         // make sure middle line does not meet top or bottom line 
-        setInitialMiddlePos(coordinates[1].y)
-        if(coordinates[1].y !== initialMiddlePos()) {
-          alert('moving')
-        }
+        // setInitialMiddlePos(coordinates[1].y)
+        // if(coordinates[1].y !== initialMiddlePos()) {
+        //   alert('moving')
+        // }
 
         let target = calcTarget(points[0].value!, points[1].value!, precision.price)
         let stop = calcStop(points[1].value!, points[2].value!, precision.price)
         const tags = [
           `Target: ${target} (NN%) ${(Number(target)*multiplier).toFixed(0)}, Amount:`, 
-          `Open P&L: ${currenttick()!.close-points[1].value!}, Qty: qty, \n Risk/Reward ratio: ${(Number(target)/Number(stop)).toFixed(1)}`, 
+          `Open P&L: ${calcPL(points[1].value!, precision.price)} ${currenttick()!.close-points[1].value!}, Qty: qty, \n Risk/Reward ratio: ${(Number(target)/Number(stop)).toFixed(1)}`, 
           `Stop: ${stop} (NN%) ${(Number(stop)*multiplier).toFixed(0)}, Amount:`
         ]
 
@@ -150,7 +155,11 @@ const positionBox: OverlayTemplate = {
     
     
     return result
-  }
+  },
+  // onRightClick: (event): boolean => {
+  //   alert(`object ${event.overlay.name} was clicked`)
+  //   return true;
+  // }
 }
 
 export default positionBox
