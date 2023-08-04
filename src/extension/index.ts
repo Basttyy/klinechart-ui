@@ -21,6 +21,9 @@ import xabcd from './xabcd'
 import positionLine from './custom/positionLine'
 import fibonaccDiagonal from './custom/fibonacciDiagonal'
 import positionBox from './custom/positionBox'
+import buyLine from './position/buyLine'
+import buyLossLine from './position/buyLossLine'
+import sellLine from './position/sellLine'
 
 const overlays = [
   arrow,
@@ -28,7 +31,7 @@ const overlays = [
   fibonacciCircle, fibonacciSegment, fibonacciSpiral,
   fibonacciSpeedResistanceFan, fibonacciExtension, gannBox,
   threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd,
-  positionBox, positionLine
+  positionBox, positionLine, buyLine, buyLossLine, sellLine
 ]
 
 export default overlays

@@ -12,9 +12,8 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding } from 'klinecharts'
+import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils } from 'klinecharts'
 
-import { formatThousands, getLinearSlopeIntercept } from '../utils'
 import { currenttick } from '../../store/tickStore'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[] }
@@ -26,8 +25,7 @@ type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[] }
  * @param extendParallelLineCount
  * @returns {Array}
  */
-function getParallelLines (coordinates: Coordinate[], bounding: Bounding, extendParallelLineCount?: number, canSlope: boolean = false): lineobj {
-  const count = extendParallelLineCount ?? 0
+function getParallelLines (coordinates: Coordinate[], bounding: Bounding): lineobj {
   const lines: LineAttrs[] = []
   const texts: TextAttrs[] = []
   let data: lineobj = { 'lines': lines, 'texts': texts }
@@ -35,35 +33,27 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, extend
       const startX = 0
       const endX = bounding.width
       data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
-      data.texts.push({ x: endX - endX*0.0027*5, y: coordinates[0].y, text: 'entry', baseline: 'bottom' })
-      if (coordinates.length > 1) {
-        data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
-        data.texts.push({ x: endX - endX*0.0027*2, y: coordinates[1].y, text: 'sl', baseline: 'bottom' })
-        if (coordinates.length > 2) {
-          data.lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
-          data.texts.push({ x: endX - endX*0.0027*11, y: coordinates[2].y, text: 'tp', baseline: 'bottom' })
-        }
-      }
+      data.texts.push({ x: endX - utils.calcTextWidth('sell '), y: coordinates[0].y, text: 'sell', baseline: 'bottom' })
   }
   return data
 }
 
-const positionLine: OverlayTemplate = {
-  name: 'positionLine',
-  totalStep: 4,
+const sellLine: OverlayTemplate = {
+  name: 'sellLine',
+  totalStep: 2,
   needDefaultPointFigure: true,
-  needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, }) => {
-    // console.log(`hello from overlay ${overlay.id} and ${currenttick()?.close}`)
-    const parallel = getParallelLines(coordinates, bounding, 1)
+    const parallel = getParallelLines(coordinates, bounding)
     return [
       {
         type: 'line',
         attrs: parallel.lines,
         styles: {
           style: 'dashed',
-          color: 'green'
+          dashedValue: [4, 4],
+          size: 1,
+          color: '#fb7b50'
         }
       },
       {
@@ -71,11 +61,11 @@ const positionLine: OverlayTemplate = {
         attrs: parallel.texts,
         // isCheckEvent: false,
         styles: {
-          color: 'green'
+          color: '#fb7b50'
         }
       }
     ]
   }
 }
 
-export default positionLine
+export default sellLine

@@ -66,6 +66,8 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
   }, isStack, paneOptions) ?? null
 }
 
+export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
+
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
   let widget: Nullable<Chart> = null
@@ -99,8 +101,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
   const [loadingVisible, setLoadingVisible] = createSignal(false)
-
-  const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
@@ -332,7 +332,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         props.datafeed.subscribe(s, p, data => {
           setCurrentTick(data)
           widget?.updateData(data)
-          console.log(currenttick()?.close)
         })
         loading = false
         setLoadingVisible(false)
