@@ -37,6 +37,7 @@ export interface PeriodBarProps {
   onOrderMenuClick: () => void
   orderController: OrderResource
   datafeed: Datafeed
+  rootEl: string
   widget: Nullable<Chart>
 }
 
@@ -200,12 +201,15 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         class='item tools'
         onClick={() => {
           if (!fullScreen()) {
-            const el = ref?.parentElement
+            // const el = ref?.parentElement
+            const el = document.querySelector(`#${props.rootEl}`)
             if (el) {
               // @ts-expect-error
               const enterFullScreen = el.requestFullscreen ?? el.webkitRequestFullscreen ?? el.mozRequestFullScreen ?? el.msRequestFullscreen
               enterFullScreen.call(el)
               // setFullScreen(true)
+            } else {
+              alert('Unable to get the app root element')
             }
           } else {
             // @ts-expect-error
