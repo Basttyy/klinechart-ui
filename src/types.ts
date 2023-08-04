@@ -89,6 +89,7 @@ export interface ChartProOptions {
   datafeed: Datafeed
   dataTimestamp: number
   orderController: OrderResource
+  rootElementId: string
 }
 
 export interface ChartPro {

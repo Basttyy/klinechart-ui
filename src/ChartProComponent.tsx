@@ -568,6 +568,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         }}
         orderController={props.orderController}
         datafeed={props.datafeed}
+        rootEl={props.rootElementId}
         widget={instanceapi()}
       />
       <div

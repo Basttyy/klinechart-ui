@@ -75,7 +75,10 @@ export default class KLineChartPro implements ChartPro {
           subIndicators={options.subIndicators ?? []}
           datafeed={options.datafeed}
           dataTimestamp={options.dataTimestamp}
-          orderController={options.orderController}/>
+          orderController={options.orderController}
+          rootElementId={options.rootElementId}
+          
+          />
       ),
       this._container
     )
