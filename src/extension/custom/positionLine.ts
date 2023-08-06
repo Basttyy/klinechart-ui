@@ -55,7 +55,7 @@ const positionLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, }) => {
-    console.log(`hello from overlay ${overlay.id} and ${currenttick()?.close}`)
+    // console.log(`hello from overlay ${overlay.id} and ${currenttick()?.close}`)
     const parallel = getParallelLines(coordinates, bounding, 1)
     return [
       {

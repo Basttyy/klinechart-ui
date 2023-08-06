@@ -19,6 +19,10 @@ import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../ty
 import i18n from '../../i18n'
 import DefaultDatafeed from '../../DefaultDatafeed'
 import { Chart, Nullable, utils } from 'klinecharts'
+import { random } from 'lodash'
+import { currenttick } from '../../store/tickStore'
+import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
+import { instanceapi } from '../../ChartProComponent'
 
 export interface PeriodBarProps {
   locale: string
@@ -38,7 +42,6 @@ export interface PeriodBarProps {
   orderController: OrderResource
   datafeed: Datafeed
   rootEl: string
-  widget: Nullable<Chart>
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
@@ -63,21 +66,31 @@ const PeriodBar: Component<PeriodBarProps> = props => {
     console.log("symbol tool was clicked")
   }
 
-  const onOrderPlaced = (order: OrderInfo|null) => {
-    props.widget?.createOverlay({
-      name: 'positionLine',
-      id: `positionline_${order?.orderId}`,
-      groupId: 'positionLine',
+  const drawLine = (order: OrderInfo|null) => {
+    // console.log('draw line is called')
+    order!.entryPoint = order?.entryPoint! - 0.00001+0.00001
+    instanceapi()?.createOverlay({
+      name: 'simpleTag',
+      id: `buyline_${random(100)}`,
+      groupId: 'tag',
       points: [
-        { timestamp: Date.parse(order?.entryTime!), value: order?.entryPoint }
+        { timestamp: Date.parse(order?.entryTime!), value: order?.entryPoint },
+        // { timestamp: currenttick()?.timestamp, value: currenttick()?.open },
+        // { timestamp: currenttick()?.timestamp, value: currenttick()?.high }
       ],
-      lock: order?.action === 'buy' || order?.action === 'sell',
-
-      // onDrawStart: (event): boolean => {
-      //   console.log(`${event.overlay.name} is about to be drawn on coordinate ${event.x}`)
-      //   return true
-      // }
+      lock: false
     })
+  }
+
+  const onOrderPlaced = (order: OrderInfo|null) => {
+    if (order) {
+      let orderlist = orderList()
+      if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
+        orderlist.push(order)
+        setOrderList(orderlist)
+      }
+      drawOrder(order)
+    }
   }
 
   onMount(() => {
@@ -117,6 +130,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         </div>
       </Show>
       <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button>
+      {/* <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button> */}
       <div class="item tools period_home">
         <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period">{props.period.text}</button>
         {

@@ -1,4 +1,4 @@
-import { OrderInfo, OrderModalType, OrderPlacedCallback, OrderResource, OrderType } from "./types";
+import { OrderInfo, OrderModalType, OrderModifyInfo, OrderPlacedCallback, OrderResource, OrderType } from "./types";
 
 type MethodType = 'POST'|'GET'|'DELETE'|'PUT'
 
@@ -81,24 +81,18 @@ export default class DefaultOrderController implements OrderResource {
     }
   }
 
-  async closeOrder(order_id: number, lotsize?: number): Promise<boolean> {
+  async closeOrder(order_id: number, lotsize?: number): Promise<OrderInfo|null> {
     try {
       const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order_id}`)
       const data = await response?.json()
-      return true
+      return data
     } catch (err) {
-      return false
+      return null
     }
   }
 
-  async modifyOrder(order: OrderInfo): Promise<OrderInfo> {
-    const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order.orderId}`, {
-      test_session_id: this.testsesson_id,
-      action: order.action,
-      entrypoint: order.entryPoint,
-      stoploss: order.stopLoss,
-      takeprofit: order.takeProfit,
-    })
+  async modifyOrder(order: OrderModifyInfo): Promise<OrderInfo|null> {
+    const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order.id}`, order)
     const data = await response?.json()
     return {
       orderId: data.id,

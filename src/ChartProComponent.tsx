@@ -33,6 +33,7 @@ import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
 import { currenttick, setCurrentTick } from './store/tickStore'
+import { setOrderContr, setOrderList } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -65,6 +66,8 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
     }
   }, isStack, paneOptions) ?? null
 }
+
+export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -99,8 +102,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
   const [loadingVisible, setLoadingVisible] = createSignal(false)
-
-  const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
@@ -178,6 +179,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   }
 
   onMount(() => {
+    setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
       customApi: {
@@ -332,7 +334,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         props.datafeed.subscribe(s, p, data => {
           setCurrentTick(data)
           widget?.updateData(data)
-          console.log(currenttick()?.close)
         })
         loading = false
         setLoadingVisible(false)
@@ -448,16 +449,24 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     }
   })
 
+  createEffect( async () => {
+    let orders = await props.orderController.retrieveOrders()
+
+    if (orders) {
+      setOrderList(orders)
+    }
+  })
+
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
-      {/* <Show when={symbolSearchModalVisible()}>
+      <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal
           locale={props.locale}
           datafeed={props.datafeed}
           onSymbolSelected={symbol => { setSymbol(symbol) }}
           onClose={() => { setSymbolSearchModalVisible(false) }}/>
-      </Show> */}
+      </Show>
       <Show when={indicatorModalVisible()}>
         <IndicatorModal
           locale={props.locale}
@@ -570,7 +579,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         orderController={props.orderController}
         datafeed={props.datafeed}
         rootEl={props.rootElementId}
-        widget={instanceapi()}
       />
       <div
         class="klinecharts-pro-content"
