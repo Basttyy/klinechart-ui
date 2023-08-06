@@ -47,19 +47,19 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
 
     text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true)
-    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
+    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   return data
 }
 
-const buyLossLine: OverlayTemplate = {
-  name: 'buyLossLine',
+const buyProfitLine: OverlayTemplate = {
+  name: 'buyProfitLine',
   totalStep: 3,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! >= currenttick()?.close! || overlay.points[1].value! >= currenttick()?.low!) {
+    if (overlay.points[1].value! <= currenttick()?.close! || overlay.points[1].value! <= currenttick()?.high!) {
       instanceapi()?.removeOverlay({
         id: overlay.id,
         groupId: overlay.groupId,
@@ -86,7 +86,7 @@ const buyLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#fb7b50'
+          color: '#00698b'
         }
       },
       {
@@ -103,7 +103,7 @@ const buyLossLine: OverlayTemplate = {
         attrs: parallel.recttexts[1],
         styles: {
           color: 'white',
-          backgroundColor: '#fb7b50'
+          backgroundColor: '#00698b'
         }
       }
     ]
@@ -137,7 +137,7 @@ const buyLossLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
+        styles: { color: 'white', backgroundColor: '#00698b' },
       }
     ]
   },
@@ -148,11 +148,11 @@ const buyLossLine: OverlayTemplate = {
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+    if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
     }
     return true
   }
 }
 
-export default buyLossLine
+export default buyProfitLine

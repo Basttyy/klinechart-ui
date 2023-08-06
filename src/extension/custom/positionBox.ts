@@ -15,21 +15,9 @@
 import { createSignal, createMemo, createEffect } from 'solid-js';
 import { OverlayTemplate } from 'klinecharts'
 import { currenttick } from '../../store/tickStore'
+import { useOrder } from '../../store/positionStore';
 
 const [initialMiddlePos, setInitialMiddlePos] = createSignal(0);
-
-
-const calcTarget = (top:number, middle:number, dp:number) => {
-  return (top - middle).toFixed(dp)
-}
-
-const calcStop = (middle:number, bottom:number, dp:number) => {
-  return (middle - bottom).toFixed(dp)
-}
-
-const calcPL = (middle:number, dp:number) => {
-  return (currenttick()!.close-middle).toFixed(dp)
-}
 
 const textStyle = {
   style: 'fill',
@@ -60,7 +48,7 @@ const positionBox: OverlayTemplate = {
     let high;
     let texts;
     const result:any = []
-    let multiplier = 10**precision.price
+    let multiplier = 10*precision.price
     // console.log(currenttick()?.close)
     if (coordinates.length > 1) {
       if(coordinates[0].y > coordinates[1].y) {
@@ -111,11 +99,11 @@ const positionBox: OverlayTemplate = {
         //   alert('moving')
         // }
 
-        let target = calcTarget(points[0].value!, points[1].value!, precision.price)
-        let stop = calcStop(points[1].value!, points[2].value!, precision.price)
+        let target = useOrder().calcTarget(points[0].value!, points[1].value!, precision.price)
+        let stop = useOrder().calcStopOrTarget(points[1].value!, points[2].value!, precision.price)
         const tags = [
           `Target: ${target} (NN%) ${(Number(target)*multiplier).toFixed(0)}, Amount:`, 
-          `Open P&L: ${calcPL(points[1].value!, precision.price)} ${currenttick()!.close-points[1].value!}, Qty: qty, \n Risk/Reward ratio: ${(Number(target)/Number(stop)).toFixed(1)}`, 
+          `Open P&L: ${useOrder().calcPL(points[1].value!, precision.price)} ${currenttick()!.close-points[1].value!}, Qty: qty, \n Risk/Reward ratio: ${(Number(target)/Number(stop)).toFixed(1)}`, 
           `Stop: ${stop} (NN%) ${(Number(stop)*multiplier).toFixed(0)}, Amount:`
         ]
 

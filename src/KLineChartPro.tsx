@@ -77,8 +77,7 @@ export default class KLineChartPro implements ChartPro {
           dataTimestamp={options.dataTimestamp}
           orderController={options.orderController}
           rootElementId={options.rootElementId}
-          
-          />
+        />
       ),
       this._container
     )

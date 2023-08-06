@@ -17,6 +17,7 @@ import { OverlayCreate, OverlayMode } from 'klinecharts'
 import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
 import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
+import { orderList } from '../../store/positionStore'
 
 export interface OrderPanelProps {
   context: string
@@ -33,7 +34,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
 
   const [value, setValue] = createSignal('')
   const [loadingVisible, setLoadingVisible] = createSignal(true)
-  const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
+  const [ordersList, setOrdersList] = createSignal<OrderInfo[]>([])
 
   const onOrderSelected = (order: OrderInfo) => {
     alert(`${order.orderId} is selected`)
@@ -46,23 +47,13 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   onMount(() => {
     setLoadingVisible(true)
     loading = true
-    if (!loading) { //Will check if order list is set in localstorage
-      // get the order list from local storage
-      const getList = () => {
-
-        setLoadingVisible(false)
-        loading = false
-      }
-      getList()
-    } else {  //we will retrieve from api service instead
-      const getList =async (action?: OrderType) => {
-        const orderlist = await props.orderController.retrieveOrders()
-        setLoadingVisible(false)
-        loading = false
-        setOrderList(orderlist!)
-      }
-      getList()
+    const getList =async (action?: OrderType) => {
+      const orderlist = action ? orderList().filter(order => (order.action == action)) : ordersList()
+      setOrdersList(orderlist)
+      setLoadingVisible(false)
+      loading = false
     }
+    getList()
   })
   return (
     <div

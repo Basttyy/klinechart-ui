@@ -16,7 +16,6 @@ import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Poi
 
 import { currenttick } from '../../store/tickStore'
 import { useOrder } from '../../store/positionStore'
-import { instanceapi } from '../../ChartProComponent'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -41,70 +40,48 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
 
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buy | ${text}` ?? '', align: 'right', baseline: 'middle' })
+      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
 
     text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true)
-    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
+    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   return data
 }
 
-const buyLossLine: OverlayTemplate = {
-  name: 'buyLossLine',
+const buystopProfitLine: OverlayTemplate = {
+  name: 'buystopProfitLine',
   totalStep: 3,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! >= currenttick()?.close! || overlay.points[1].value! >= currenttick()?.low!) {
-      instanceapi()?.removeOverlay({
-        id: overlay.id,
-        groupId: overlay.groupId,
-        name: overlay.name
-      })
+    if (overlay.points[0].value! <= currenttick()?.close! || overlay.points[0].value! <= currenttick()?.high!) {
+      useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
     return [
       {
         type: 'line',
-        attrs: parallel.lines[0],
+        attrs: parallel.lines,
         styles: {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
           color: '#00698b'
         },
-        ignoreEvent: true
-      },
-      {
-        type: 'line',
-        attrs: parallel.lines[1],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#fb7b50'
-        }
+        ignoreEvent: false
       },
       {
         type: 'rectText',
-        attrs: parallel.recttexts[0],
+        attrs: parallel.recttexts,
         styles: {
           color: 'white',
           backgroundColor: '#00698b'
         },
-        ignoreEvent: true
-      },
-      {
-        type: 'rectText',
-        attrs: parallel.recttexts[1],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
+        ignoreEvent: false
       }
     ]
   },
@@ -132,27 +109,16 @@ const buyLossLine: OverlayTemplate = {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
         styles: { color: 'white', backgroundColor: '#00698b' },
-        ignoreEvent: true
+        ignoreEvent: false
       },
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
+        styles: { color: 'white', backgroundColor: '#00698b' },
+        ignoreEvent: false
       }
     ]
   },
-  onPressedMoving: (event): boolean => {
-    let coordinate: Partial<Coordinate>[] = [
-      {x: event.x, y: event.y}
-    ]
-    const points = instanceapi()?.convertFromPixel(coordinate, {
-      paneId: event.overlay.paneId
-    })
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
-      event.overlay.points[1].value = (points as Partial<Point>[])[0].value
-    }
-    return true
-  }
 }
 
-export default buyLossLine
+export default buystopProfitLine

@@ -21,7 +21,8 @@ import DefaultDatafeed from '../../DefaultDatafeed'
 import { Chart, Nullable, utils } from 'klinecharts'
 import { random } from 'lodash'
 import { currenttick } from '../../store/tickStore'
-import { drawOrder } from '../../store/positionStore'
+import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
+import { instanceapi } from '../../ChartProComponent'
 
 export interface PeriodBarProps {
   locale: string
@@ -41,7 +42,6 @@ export interface PeriodBarProps {
   orderController: OrderResource
   datafeed: Datafeed
   rootEl: string
-  widget: Nullable<Chart>
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
@@ -69,7 +69,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const drawLine = (order: OrderInfo|null) => {
     // console.log('draw line is called')
     order!.entryPoint = order?.entryPoint! - 0.00001+0.00001
-    props.widget?.createOverlay({
+    instanceapi()?.createOverlay({
       name: 'simpleTag',
       id: `buyline_${random(100)}`,
       groupId: 'tag',
@@ -83,8 +83,14 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onOrderPlaced = (order: OrderInfo|null) => {
-    props.widget?.convertFromPixel()
-    drawOrder(order, props.widget)
+    if (order) {
+      let orderlist = orderList()
+      if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
+        orderlist.push(order)
+        setOrderList(orderlist)
+      }
+      drawOrder(order)
+    }
   }
 
   onMount(() => {

@@ -47,19 +47,31 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
 
     text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true)
-    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
+    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
+  }
+  if (coordinates.length > 2) {
+    data.lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
+
+    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[2].value!, precision.price, true)
+    data.recttexts.push({ x: endX, y: coordinates[2].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   return data
 }
 
-const buyLossLine: OverlayTemplate = {
-  name: 'buyLossLine',
-  totalStep: 3,
+const buyProfitLossLine: OverlayTemplate = {
+  name: 'buyProfitLossLine',
+  totalStep: 4,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! >= currenttick()?.close! || overlay.points[1].value! >= currenttick()?.low!) {
+    if (overlay.points[1].value! <= currenttick()?.close! || overlay.points[1].value! <= currenttick()?.high!) { //TP was hit
+      instanceapi()?.removeOverlay({
+        id: overlay.id,
+        groupId: overlay.groupId,
+        name: overlay.name
+      })
+    } else if (overlay.points[2].value! >= currenttick()?.close! || overlay.points[2].value! >= currenttick()?.high!) {
       instanceapi()?.removeOverlay({
         id: overlay.id,
         groupId: overlay.groupId,
@@ -86,6 +98,16 @@ const buyLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
+          color: '#00698b'
+        }
+      },
+      {
+        type: 'line',
+        attrs: parallel.lines[2],
+        styles: {
+          style: 'dashed',
+          dashedValue: [4, 4],
+          size: 1,
           color: '#fb7b50'
         }
       },
@@ -101,6 +123,14 @@ const buyLossLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: parallel.recttexts[1],
+        styles: {
+          color: 'white',
+          backgroundColor: '#00698b'
+        }
+      },
+      {
+        type: 'rectText',
+        attrs: parallel.recttexts[2],
         styles: {
           color: 'white',
           backgroundColor: '#fb7b50'
@@ -119,13 +149,16 @@ const buyLossLine: OverlayTemplate = {
       textAlign = 'right'
       x = bounding.width
     }
-    let text, text2
+    let text, text2, text3
 
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
     if (!utils.isValid(text2) && overlay.points[1].value !== undefined) {
       text2 = utils.formatPrecision(overlay.points[1].value, precision.price)
+    }
+    if (!utils.isValid(text2) && overlay.points[2].value !== undefined) {
+      text3 = utils.formatPrecision(overlay.points[2].value, precision.price)
     }
     return [
       {
@@ -137,6 +170,11 @@ const buyLossLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
+        styles: { color: 'white', backgroundColor: '#00698b' },
+      },
+      {
+        type: 'rectText',
+        attrs: { x, y: coordinates[2].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
         styles: { color: 'white', backgroundColor: '#fb7b50' },
       }
     ]
@@ -148,11 +186,14 @@ const buyLossLine: OverlayTemplate = {
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+    if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
+    }
+    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+      event.overlay.points[2].value = (points as Partial<Point>[])[0].value
     }
     return true
   }
 }
 
-export default buyLossLine
+export default buyProfitLossLine

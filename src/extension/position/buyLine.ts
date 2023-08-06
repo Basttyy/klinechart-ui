@@ -13,32 +13,7 @@
  */
 
 import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay } from 'klinecharts'
-
-import { currenttick } from '../../store/tickStore'
-import { instanceapi } from '../../ChartProComponent'
-
-type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[] }
-
-/**
- * 获取平行线
- * @param coordinates
- * @param bounding
- * @param extendParallelLineCount
- * @returns {Array}
- */
-function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overlay: Overlay): lineobj {
-  const lines: LineAttrs[] = []
-  const texts: TextAttrs[] = []
-  let data: lineobj = { 'lines': lines, 'texts': texts }
-  if (coordinates.length > 0) {
-      const startX = 0
-      const endX = bounding.width
-      data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
-      data.texts.push({ x: endX - utils.calcTextWidth('buy '), y: coordinates[0].y, text: 'buy', baseline: 'bottom' })
-      // overlay.currentStep = 1
-  }
-  return data
-}
+import { useOrder } from '../../store/positionStore'
 
 const buyLine: OverlayTemplate = {
   name: 'buyLine',
@@ -46,9 +21,8 @@ const buyLine: OverlayTemplate = {
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
-  createPointFigures: ({ overlay, coordinates, bounding, }) => {
-    // console.log(`overlay ${overlay.id} with x: ${coordinates[0].x} and y: ${coordinates[0].y} , with time: ${overlay.points[0].timestamp} and price: ${overlay.points[0].value}`)
-    // const parallel = getParallelLines(coordinates, bounding, overlay)
+  createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
+    let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
     return [
       {
         type: 'line',
@@ -62,12 +36,13 @@ const buyLine: OverlayTemplate = {
         ignoreEvent: true
       },
       {
-        type: 'text',
-        attrs: { x: bounding.width - utils.calcTextWidth('buy '), y: coordinates[0].y, text: 'buy', baseline: 'bottom' },
-        // isCheckEvent: false,
+        type: 'rectText',
+        attrs: { x: bounding.width, y: coordinates[0].y, text: `buy | ${text}` ?? '', align: 'right', baseline: 'middle' },
         styles: {
-          color: '#00698b'
-        }
+          color: 'white',
+          backgroundColor: '#00698b'
+        },
+        ignoreEvent: true
       }
     ]
   },
