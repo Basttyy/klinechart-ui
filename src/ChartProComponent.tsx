@@ -16,7 +16,7 @@ import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, 
 
 import {
   init, dispose, utils, Nullable, Chart, OverlayMode, Styles,
-  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial
+  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial, KLineData
 } from 'klinecharts'
 
 import lodashSet from 'lodash/set'
@@ -26,12 +26,14 @@ import { SelectDataSourceItem, Loading } from './component'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
-  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal
+  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel
 } from './widget'
 
 import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
+import { currenttick, setCurrentTick } from './store/tickStore'
+import { setOrderContr, setOrderList } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -65,6 +67,8 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
   }, isStack, paneOptions) ?? null
 }
 
+export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
+
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
   let widget: Nullable<Chart> = null
@@ -92,6 +96,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [screenshotUrl, setScreenshotUrl] = createSignal('')
 
   const [drawingBarVisible, setDrawingBarVisible] = createSignal(props.drawingBarVisible)
+  
+  const [orderPanelVisible, setOrderPanelVisible] = createSignal(props.orderPanelVisible)
 
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
@@ -173,6 +179,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   }
 
   onMount(() => {
+    setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
       customApi: {
@@ -212,6 +219,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
 
     if (widget) {
+      setInstanceapi(widget)
       const watermarkContainer = widget.getDom('candle_pane', DomPosition.Main)
       if (watermarkContainer) {
         let watermark = document.createElement('div')
@@ -322,7 +330,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const [from, to] = adjustFromTo(p, timestamp, 500)
         const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
         widget?.applyNewData(kLineDataList, kLineDataList.length > 0)
+        setCurrentTick(kLineDataList[kLineDataList.length -1])
         props.datafeed.subscribe(s, p, data => {
+          setCurrentTick(data)
           widget?.updateData(data)
         })
         loading = false
@@ -439,6 +449,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     }
   })
 
+  createEffect( async () => {
+    let orders = await props.orderController.retrieveOrders()
+
+    if (orders) {
+      setOrderList(orders)
+    }
+  })
+
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
@@ -532,13 +550,20 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         locale={props.locale}
         symbol={symbol()}
         spread={drawingBarVisible()}
+        order_spread={orderPanelVisible()}
         period={period()}
         periods={props.periods}
         onMenuClick={async () => {
           try {
             await startTransition(() => setDrawingBarVisible(!drawingBarVisible()))
-            widget?.resize()
+            documentResize()
           } catch (e) {}    
+        }}
+        onOrderMenuClick={async () => {
+          try {
+            await startTransition(() => setOrderPanelVisible(!orderPanelVisible()))
+            documentResize()
+          } catch (e) {}
         }}
         onSymbolClick={() => { setSymbolSearchModalVisible(!symbolSearchModalVisible()) }}
         onPeriodChange={setPeriod}
@@ -551,9 +576,13 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             setScreenshotUrl(url)
           }
         }}
+        orderController={props.orderController}
+        datafeed={props.datafeed}
+        rootEl={props.rootElementId}
       />
       <div
-        class="klinecharts-pro-content">
+        class="klinecharts-pro-content"
+        data-orders-pane-visible={orderPanelVisible()}>  
         <Show when={loadingVisible()}>
           <Loading/>
         </Show>
@@ -571,6 +600,12 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           class='klinecharts-pro-widget'
           data-drawing-bar-visible={drawingBarVisible()}/>
       </div>
+      <Show when={orderPanelVisible()}>
+        <OrdersPanel
+          context='this is the order panel context'
+          orderController={props.orderController}
+        />
+      </Show>
     </>
   )
 }

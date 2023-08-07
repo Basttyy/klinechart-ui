@@ -1,0 +1,60 @@
+@import (reference) '../../base.less';
+
+@gap: 8px;
+
+.@{prefix-cls}-order-panel {
+  width: 100%;
+  height: @order-panel-height;
+  box-sizing: border-box;
+  border-top: solid 1px var(--klinecharts-pro-border-color);
+  overflow: auto;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+
+  .@{prefix-cls}-order-pane-list {
+    height: 100%;
+    margin-left: -20px;
+    margin-right: -20px;
+    li {
+      width: 100%;
+      justify-content: space-between;
+      border-bottom: solid 2px var(--klinecharts-pro-border-color);
+      &:hover {
+        background-color: var(--klinecharts-pro-hover-background-color);
+      }
+      &.selected {
+        background-color: var(--klinecharts-pro-selected-color)!important;
+        fill: var(--klinecharts-pro-primary-color);
+        stroke: var(--klinecharts-pro-primary-color);
+      }
+      div {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .order-header {
+          span {
+            font-weight: bold;
+          }
+        }
+        span {
+          width: 130px;
+          margin-right: 5px;
+          margin-left: 5px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .split-line {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--klinecharts-pro-border-color);
+    margin-bottom: @gap;
+  }
+}

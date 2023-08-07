@@ -8,9 +8,32 @@
   width: 100%;
   box-sizing: border-box;
   border-bottom: solid 1px var(--klinecharts-pro-border-color);
+  overflow: auto;
   .menu-container {
     display: flex;
     height: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: @drawing-bar-width;
+    box-sizing: border-box;
+    border-right: solid 1px var(--klinecharts-pro-border-color);
+    svg {
+      fill: var(--klinecharts-pro-text-color);
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      transition: all .2s;
+      &.rotate {
+        transform: rotate(180deg);
+        transform-origin: center;
+      }
+    }
+  }
+  .order-container {
+    display: flex;
+    height: 100%;
+    margin-left: auto;
     flex-direction: row;
     justify-content: center;
     align-items: center;
@@ -78,6 +101,7 @@
     height: 100%;
     padding: 0 12px;
     border-right: solid 1px var(--klinecharts-pro-border-color);
+    white-space: nowrap;
     &:hover {
       fill: var(--klinecharts-pro-primary-color);
       color: var(--klinecharts-pro-primary-color);
@@ -91,5 +115,70 @@
   .period + .tools {
     border-left: solid 1px var(--klinecharts-pro-border-color);
     margin-left: 8px;
+  }
+  .period_home{
+    position: relative;
+  }
+  .period_list{
+    position: absolute;
+    top: 30px;
+    left: 0px;
+    white-space: nowrap;
+    background-color: var(--klinecharts-pro-popover-background-color);
+    z-index: 99;
+    box-shadow: 0 6px 12px 0 rgba(0, 0, 0, .3);
+    min-height: auto;
+    max-height: 320px;
+    min-width: 100px;
+    overflow: auto;
+    li {
+      height: 40px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      cursor: pointer;
+      list-style-type: none;
+      &:hover {
+        background-color: var(--klinecharts-pro-hover-background-color);
+      }
+ 
+    }
+  }
+  
+  .period_range {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    z-index: 99;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    outline: none;
+    background-color: #76808F;
+    margin: 5px;
+  }
+  
+  .period_range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background-color: #76808F;
+    border-radius: 50%;
+  }
+  .period_range::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: #76808F;
+    border-radius: 50%;
+  }
+  
+  /* For IE and Edge */
+  .period_range::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: #76808F;
+    border-radius: 50%;
   }
 }

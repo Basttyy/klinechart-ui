@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { Coordinate, Bounding, LineAttrs, utils } from 'klinecharts'
+import { Coordinate, Bounding, LineAttrs, utils, Nullable } from 'klinecharts'
 
 export function getRotateCoordinate (coordinate: Coordinate, targetCoordinate: Coordinate, angle: number): Coordinate {
   const x = (coordinate.x - targetCoordinate.x) * Math.cos(angle) - (coordinate.y - targetCoordinate.y) * Math.sin(angle) + targetCoordinate.x
@@ -55,4 +55,27 @@ export function getDistance (coordinate1: Coordinate, coordinate2: Coordinate,):
   const xDis = Math.abs(coordinate1.x - coordinate2.x)
   const yDis = Math.abs(coordinate1.y - coordinate2.y)
   return Math.sqrt(xDis * xDis + yDis * yDis)
+}
+
+//the methods added by Tradingio Team
+export function formatThousands (value: string | number, sign: string): string {
+  const vl = `${value}`
+  if (sign.length === 0) {
+    return vl
+  }
+  if (vl.includes('.')) {
+    const arr = vl.split('.')
+    return `${arr[0].replace(/(\d)(?=(\d{3})+$)/g, $1 => `${$1}${sign}`)}.${arr[1]}`
+  }
+  return vl.replace(/(\d)(?=(\d{3})+$)/g, $1 => `${$1}${sign}`)
+}
+
+export function getLinearSlopeIntercept (coordinate1: Coordinate, coordinate2: Coordinate): Nullable<number[]> {
+  const difX = coordinate1.x - coordinate2.x
+  if (difX !== 0) {
+    const k = (coordinate1.y - coordinate2.y) / difX
+    const b = coordinate1.y - k * coordinate1.x
+    return [k, b]
+  }
+  return null
 }

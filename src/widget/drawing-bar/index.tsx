@@ -199,6 +199,16 @@ const DrawingBar: Component<DrawingBarProps> = props => {
           }
         </span>
       </div>
+      <div
+        class="item">
+        <span
+          style="width:32px;height:32px"
+          onClick={() => {
+            props.onDrawingItemClick({ name: 'positionBox', lock: lock(), mode: mode() as OverlayMode })
+          }}>
+          box
+        </span>
+      </div>
       <span class="split-line"/>
       <div
         class="item">

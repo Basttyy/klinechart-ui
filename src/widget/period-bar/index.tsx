@@ -14,13 +14,20 @@
 
 import { Component, Show, createSignal, onMount, onCleanup } from 'solid-js'
 
-import { SymbolInfo, Period } from '../../types'
+import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../types'
 
 import i18n from '../../i18n'
+import DefaultDatafeed from '../../DefaultDatafeed'
+import { Chart, Nullable, utils } from 'klinecharts'
+import { random } from 'lodash'
+import { currenttick } from '../../store/tickStore'
+import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
+import { instanceapi } from '../../ChartProComponent'
 
 export interface PeriodBarProps {
   locale: string
   spread: boolean
+  order_spread: boolean
   symbol: SymbolInfo
   period: Period
   periods: Period[]
@@ -31,15 +38,59 @@ export interface PeriodBarProps {
   onTimezoneClick: () => void
   onSettingClick: () => void
   onScreenshotClick: () => void
+  onOrderMenuClick: () => void
+  orderController: OrderResource
+  datafeed: Datafeed
+  rootEl: string
 }
 
 const PeriodBar: Component<PeriodBarProps> = props => {
   let ref: Node
 
   const [fullScreen, setFullScreen] = createSignal(false)
+  const [showPeriodList, setShowPeriodList] = createSignal(false);
+  const [showSpeed, setShowSpeed] = createSignal(false)
+  const [pausedStatus, setPausedStatus] = createSignal(false)
+  const [range, setRange] = createSignal(1);
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
+  }
+
+  const handleRangeChange = (event:any) => {
+    setRange(event.target.value);
+    (props.datafeed as any).setInterval = range() * 100
+  }
+
+  const onSymbolClickLog = () => {
+    console.log("symbol tool was clicked")
+  }
+
+  const drawLine = (order: OrderInfo|null) => {
+    // console.log('draw line is called')
+    order!.entryPoint = order?.entryPoint! - 0.00001+0.00001
+    instanceapi()?.createOverlay({
+      name: 'simpleTag',
+      id: `buyline_${random(100)}`,
+      groupId: 'tag',
+      points: [
+        { timestamp: Date.parse(order?.entryTime!), value: order?.entryPoint },
+        // { timestamp: currenttick()?.timestamp, value: currenttick()?.open },
+        // { timestamp: currenttick()?.timestamp, value: currenttick()?.high }
+      ],
+      lock: false
+    })
+  }
+
+  const onOrderPlaced = (order: OrderInfo|null) => {
+    if (order) {
+      let orderlist = orderList()
+      if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
+        orderlist.push(order)
+        setOrderList(orderlist)
+      }
+      drawOrder(order)
+    }
   }
 
   onMount(() => {
@@ -71,14 +122,53 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       <Show when={props.symbol}>
         <div
           class="symbol"
-          onClick={props.onSymbolClick}>
+          onClick={onSymbolClickLog}>
           <Show when={props.symbol.logo}>
             <img alt="symbol" src={props.symbol.logo}/>
           </Show>
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
       </Show>
-      {
+      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button>
+      {/* <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button> */}
+      <div class="item tools period_home">
+        <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period">{props.period.text}</button>
+        {
+          showPeriodList() &&
+          <div class="period_list">
+            {
+              props.periods.map(p => (
+                <li 
+                  onClick={() => {
+                    props.onPeriodChange(p)
+                    setShowPeriodList(false)
+                  }}
+                >
+                  {p.text}
+                </li>
+              ))
+            }
+          </div>
+        }
+      </div>
+      <button class="item tools" 
+        onClick={() => {
+          setPausedStatus(!pausedStatus());
+          (props.datafeed as any).setIsPaused = pausedStatus()
+        }}
+      >
+        {pausedStatus() ? 'Play' : 'Pause'}
+      </button>
+      <div class="item tools period_home">
+        <button onclick={() => setShowSpeed(!showSpeed())} class="item period">Speed {range()}</button>
+        {
+          showSpeed() &&
+          // <div class="period_list">
+            <input class="period_range" type="range" min="1" max="10" value={range()} onInput={handleRangeChange} />
+          // </div>
+        }
+      </div>
+      {/* {
         props.periods.map(p => (
           <span
             class={`item period ${p.text === props.period.text ? 'selected' : ''}`}
@@ -86,7 +176,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
             {p.text}
           </span>
         ))
-      }
+      } */}
       <div
         class='item tools'
         onClick={props.onIndicatorClick}>
@@ -125,12 +215,15 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         class='item tools'
         onClick={() => {
           if (!fullScreen()) {
-            const el = ref?.parentElement
+            // const el = ref?.parentElement
+            const el = document.querySelector(`#${props.rootEl}`)
             if (el) {
               // @ts-expect-error
               const enterFullScreen = el.requestFullscreen ?? el.webkitRequestFullscreen ?? el.mozRequestFullScreen ?? el.msRequestFullscreen
               enterFullScreen.call(el)
               // setFullScreen(true)
+            } else {
+              alert('Unable to get the app root element')
             }
           } else {
             // @ts-expect-error
@@ -157,6 +250,14 @@ const PeriodBar: Component<PeriodBarProps> = props => {
             </>
           )
         }
+      </div>
+      <div class='order-container'>
+        <svg
+          class={props.order_spread ? '' : 'rotate'}
+          viewBox="0 0 1024 1024"
+          onClick={props.onOrderMenuClick}>
+          <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
+        </svg>
       </div>
     </div>
   )

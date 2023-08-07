@@ -31,6 +31,7 @@ const Logo = (
 export default class KLineChartPro implements ChartPro {
   constructor (options: ChartProOptions) {
     if (utils.isString(options.container)) {
+      console.log(options.container as string)
       this._container = document.getElementById(options.container as string)
       if (!this._container) {
         throw new Error('Container is null')
@@ -38,6 +39,7 @@ export default class KLineChartPro implements ChartPro {
     } else {
       this._container = options.container as HTMLElement
     }
+    console.log(this._container, 'hello')
     this._container.classList.add('klinecharts-pro')
     this._container.setAttribute('data-theme', options.theme ?? 'light')
 
@@ -50,6 +52,7 @@ export default class KLineChartPro implements ChartPro {
           theme={options.theme ?? 'light'}
           locale={options.locale ?? 'zh-CN'}
           drawingBarVisible={options.drawingBarVisible ?? true}
+          orderPanelVisible={options.orderPanelVisible ?? false}
           symbol={options.symbol}
           period={options.period}
           periods={
@@ -57,6 +60,7 @@ export default class KLineChartPro implements ChartPro {
               { multiplier: 1, timespan: 'minute', text: '1m' },
               { multiplier: 5, timespan: 'minute', text: '5m' },
               { multiplier: 15, timespan: 'minute', text: '15m' },
+              { multiplier: 30, timespan: 'minute', text: '30m' },
               { multiplier: 1, timespan: 'hour', text: '1H' },
               { multiplier: 2, timespan: 'hour', text: '2H' },
               { multiplier: 4, timespan: 'hour', text: '4H' },
@@ -67,10 +71,13 @@ export default class KLineChartPro implements ChartPro {
             ]
           }
           timezone={options.timezone ?? 'Asia/Shanghai'}
-          mainIndicators={options.mainIndicators ?? ['MA']}
-          subIndicators={options.subIndicators ?? ['VOL']}
+          mainIndicators={options.mainIndicators ?? []}
+          subIndicators={options.subIndicators ?? []}
           datafeed={options.datafeed}
-          dataTimestamp={options.dataTimestamp}/>
+          dataTimestamp={options.dataTimestamp}
+          orderController={options.orderController}
+          rootElementId={options.rootElementId}
+        />
       ),
       this._container
     )

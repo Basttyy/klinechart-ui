@@ -14,6 +14,9 @@
 
 import { KLineData, Styles, DeepPartial } from 'klinecharts'
 
+export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
+export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
+export type ExitType = 'stoploss'|'takeprofit'|'breakeven'|'manualclose'
 export interface SymbolInfo {
   ticker: string
   name?: string
@@ -27,6 +30,38 @@ export interface SymbolInfo {
   logo?: string
 }
 
+export interface OrderInfo {
+  orderId: number
+  action: OrderType
+  entryPoint: number
+  exitPoint?: number
+  stopLoss?: number
+  takeProfit?: number
+  lotSize: number
+  pips?: number
+  pl?: number
+  entryTime?: string
+  exitTime?: string
+  exitType?: ExitType
+  partials?: string
+  sessionId?: number
+}
+
+export interface OrderModifyInfo {
+  id: number
+  action?: OrderType
+  entrypoint?: number
+  exitpoint?: number
+  stoploss?: number
+  takeprofit?: number
+  lotsize?: number
+  pips?: number
+  pl?: number
+  exittime?: string
+  exittype?: ExitType
+  partials?: string
+}
+
 export interface Period {
   multiplier: number
   timespan: string
@@ -34,12 +69,22 @@ export interface Period {
 }
 
 export type DatafeedSubscribeCallback = (data: KLineData) => void
+export type OrderPlacedCallback = (data: OrderInfo|null) => void     //this should be called when a user has successfully placed an order from consumer project side
 
 export interface Datafeed {
   searchSymbols (search?: string): Promise<SymbolInfo[]>
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
   unsubscribe (symbol: SymbolInfo, period: Period): void
+}
+
+export interface OrderResource {
+  retrieveOrder (order_id: number): Promise<OrderInfo|null>
+  retrieveOrders (type?: OrderType, session_id?: number): Promise<OrderInfo[]|null>
+  openOrder (action: OrderType, lot_size: number, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo|null>
+  closeOrder (order_id: number, lotsize?: number): Promise<OrderInfo|null>
+  modifyOrder (order: OrderModifyInfo): Promise<OrderInfo|null>
+  launchOrderModal (type: OrderModalType, callback: OrderPlacedCallback): void
 }
 
 export interface ChartProOptions {
@@ -49,6 +94,7 @@ export interface ChartProOptions {
   theme?: string
   locale?: string
   drawingBarVisible?: boolean
+  orderPanelVisible?: boolean
   symbol: SymbolInfo
   period: Period
   periods?: Period[]
@@ -57,6 +103,8 @@ export interface ChartProOptions {
   subIndicators?: string[]
   datafeed: Datafeed
   dataTimestamp: number
+  orderController: OrderResource
+  rootElementId: string
 }
 
 export interface ChartPro {
