@@ -83,6 +83,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onOrderPlaced = (order: OrderInfo|null) => {
+    console.log(order)
     if (order) {
       let orderlist = orderList()
       if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
