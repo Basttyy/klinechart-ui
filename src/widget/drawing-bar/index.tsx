@@ -69,9 +69,11 @@ const DrawingBar: Component<DrawingBarProps> = props => {
       {
         overlays().map(item => (
           <div
-            class="item"
-            tabIndex={0}
-            onBlur={() => { setPopoverKey('') }}>
+            class="item" tabIndex={0}
+            onBlur={() => { 
+              setPopoverKey('') 
+            }}
+          >
             <span
               style="width:32px;height:32px"
               onClick={() => { props.onDrawingItemClick({ groupId: GROUP_ID, name: item.icon, visible: visible(), lock: lock(), mode: mode() as OverlayMode }) }}>
