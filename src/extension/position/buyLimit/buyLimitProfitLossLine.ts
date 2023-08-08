@@ -65,12 +65,13 @@ const buyLimitProfitLossLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value == currenttick()?.close! ) { //TP was hit
+    if (overlay.points[0].value! >= currenttick()?.close! ) { //TP was hit
       instanceapi()?.removeOverlay({
         id: overlay.id,
         groupId: overlay.groupId,
         name: overlay.name
       })
+      useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
     return [
@@ -178,7 +179,7 @@ const buyLimitProfitLossLine: OverlayTemplate = {
       paneId: event.overlay.paneId
     })
     if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
-      event.overlay.points[0].value = (points as Partial<Point>[])[0].value
+      event.overlay.points[1].value = (points as Partial<Point>[])[0].value
     }
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
       event.overlay.points[2].value = (points as Partial<Point>[])[0].value

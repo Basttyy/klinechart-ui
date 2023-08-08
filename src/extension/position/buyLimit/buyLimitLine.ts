@@ -12,8 +12,10 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay } from 'klinecharts'
+import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay, Point } from 'klinecharts'
 import { useOrder } from '../../../store/positionStore'
+import { currenttick } from '../../../store/tickStore'
+import { instanceapi } from '../../../ChartProComponent'
 
 const buyLimitLine: OverlayTemplate = {
   name: 'buyLimitLine',
@@ -23,6 +25,14 @@ const buyLimitLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
+    if (overlay.points[0].value! >= currenttick()?.close! ) {
+      instanceapi()?.removeOverlay({
+        id: overlay.id,
+        groupId: overlay.groupId,
+        name: overlay.name
+      })
+      useOrder().triggerPending(overlay, 'buy')
+    }
     return [
       {
         type: 'line',
@@ -69,6 +79,19 @@ const buyLimitLine: OverlayTemplate = {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
     return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
+  },
+  onPressedMoving: (event): boolean => {
+    let coordinate: Partial<Coordinate>[] = [
+      {x: event.x, y: event.y}
+    ]
+    const points = instanceapi()?.convertFromPixel(coordinate, {
+      paneId: event.overlay.paneId
+    })
+    
+    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+      event.overlay.points[0].value = (points as Partial<Point>[])[0].value
+    }
+    return true
   }
 }
 

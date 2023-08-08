@@ -59,12 +59,13 @@ const buyLimitLossLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! >= currenttick()?.close! || overlay.points[1].value! >= currenttick()?.low!) {
+    if (overlay.points[0].value! >= currenttick()?.close!) {
       instanceapi()?.removeOverlay({
         id: overlay.id,
         groupId: overlay.groupId,
         name: overlay.name
       })
+      useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
     return [
@@ -76,8 +77,7 @@ const buyLimitLossLine: OverlayTemplate = {
           dashedValue: [4, 4],
           size: 1,
           color: '#00698b'
-        },
-        ignoreEvent: true
+        }
       },
       {
         type: 'line',
@@ -95,8 +95,7 @@ const buyLimitLossLine: OverlayTemplate = {
         styles: {
           color: 'white',
           backgroundColor: '#00698b'
-        },
-        ignoreEvent: true
+        }
       },
       {
         type: 'rectText',
@@ -132,7 +131,7 @@ const buyLimitLossLine: OverlayTemplate = {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
         styles: { color: 'white', backgroundColor: '#00698b' },
-        ignoreEvent: true
+        // ignoreEvent: true
       },
       {
         type: 'rectText',
@@ -148,6 +147,8 @@ const buyLimitLossLine: OverlayTemplate = {
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
+    console.log(points, event.overlay.points[0].value)
+    
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
     }

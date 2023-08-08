@@ -59,12 +59,13 @@ const buyLimitProfitLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! <= currenttick()?.close! || overlay.points[1].value! <= currenttick()?.high!) {
+    if (overlay.points[0].value! >= currenttick()?.close!) {
       instanceapi()?.removeOverlay({
         id: overlay.id,
         groupId: overlay.groupId,
         name: overlay.name
       })
+      useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
     return [
@@ -95,7 +96,7 @@ const buyLimitProfitLine: OverlayTemplate = {
           color: 'white',
           backgroundColor: '#00698b'
         },
-        ignoreEvent: true
+        // ignoreEvent: true
       },
       {
         type: 'rectText',
@@ -131,7 +132,7 @@ const buyLimitProfitLine: OverlayTemplate = {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
         styles: { color: 'white', backgroundColor: '#00698b' },
-        ignoreEvent: true
+        // ignoreEvent: true
       },
       {
         type: 'rectText',
