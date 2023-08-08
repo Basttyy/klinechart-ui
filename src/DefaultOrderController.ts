@@ -31,7 +31,7 @@ export default class DefaultOrderController implements OrderResource {
     }
   }
 
-  async retrieveOrders(type?: OrderType, session_id?: number): Promise<OrderInfo[]> {
+  async retrieveOrders(action?: OrderType, session_id?: number): Promise<OrderInfo[]> {
     try {
       const response = await this.makeFetchWithAuthAndBody('GET', `${this.apiurl}/positions`)
       const result = await response!.json()

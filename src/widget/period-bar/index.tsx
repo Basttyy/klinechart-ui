@@ -66,22 +66,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
     console.log("symbol tool was clicked")
   }
 
-  const drawLine = (order: OrderInfo|null) => {
-    // console.log('draw line is called')
-    order!.entryPoint = order?.entryPoint! - 0.00001+0.00001
-    instanceapi()?.createOverlay({
-      name: 'simpleTag',
-      id: `buyline_${random(100)}`,
-      groupId: 'tag',
-      points: [
-        { timestamp: Date.parse(order?.entryTime!), value: order?.entryPoint },
-        // { timestamp: currenttick()?.timestamp, value: currenttick()?.open },
-        // { timestamp: currenttick()?.timestamp, value: currenttick()?.high }
-      ],
-      lock: false
-    })
-  }
-
   const onOrderPlaced = (order: OrderInfo|null) => {
     if (order) {
       let orderlist = orderList()

@@ -1,5 +1,5 @@
 import { Chart, Nullable, Overlay } from 'klinecharts';
-import { OrderInfo, OrderResource, OrderType } from '../types';
+import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType } from '../types';
 import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';
 import { instanceapi } from '../ChartProComponent';
@@ -93,7 +93,32 @@ export const useOrder = () => {
     doJob()
   }
 
-  return { calcTarget, calcStopOrTarget, calcPL, triggerPending }
+  const updateOrder = (order: OrderModifyInfo) => {
+    const doJob = async () => {
+      await ordercontr()?.modifyOrder(order)
+    }
+    doJob()
+  }
+
+  const closeOrder = (overlay: Overlay, type: ExitType): void => { 
+    instanceapi()?.removeOverlay({
+      id: overlay.id,
+      groupId: overlay.groupId,
+      name: overlay.name
+    })
+    let id = overlay.id
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      useOrder().updateOrder({
+        id: order.orderId,
+        exitpoint: currenttick()?.close,
+        exittype: type,
+        pips: order.pips
+      })
+    }
+  }
+
+  return { calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder }
 };
 
 export const drawOrder = (order: OrderInfo|null) => {
@@ -157,6 +182,7 @@ export const drawOrder = (order: OrderInfo|null) => {
     case 'sell':
       if (!order?.stopLoss && !order?.takeProfit) {
         name = 'sellLine'
+        lock = true
       } else if (order.stopLoss && !order.takeProfit) {
         name = 'sellLossLine'
         points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
