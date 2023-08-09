@@ -147,7 +147,6 @@ const buyLimitLossLine: OverlayTemplate = {
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    console.log(points, event.overlay.points[0].value)
     
     if ((points as Partial<Point>[])[0].value! < event.overlay.points[0].value! && event.figureIndex == 1) {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
