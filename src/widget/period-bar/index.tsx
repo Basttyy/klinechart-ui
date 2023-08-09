@@ -52,6 +52,13 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const [showSpeed, setShowSpeed] = createSignal(false)
   const [pausedStatus, setPausedStatus] = createSignal(false)
   const [range, setRange] = createSignal(1);
+  const [overflow, setOverflow] = createSignal(true)
+
+  const offAllPeriodOverlay = () => {
+    setShowPeriodList(false)
+    setShowSpeed(false)
+    setOverflow(true)
+  }
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
@@ -67,6 +74,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onOrderPlaced = (order: OrderInfo|null) => {
+    console.log(order)
     if (order) {
       let orderlist = orderList()
       if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
@@ -93,8 +101,9 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   return (
     <div
-      ref={el => { ref = el }}
-      class="klinecharts-pro-period-bar">
+      ref={el => { ref = el }} class="klinecharts-pro-period-bar"
+      style={`${overflow() ? "overflow-x: auto;" : ""}`}
+    >
       <div class='menu-container'>
         <svg
           class={props.spread ? '' : 'rotate'}
@@ -114,9 +123,16 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         </div>
       </Show>
       <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button>
-      {/* <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button> */}
       <div class="item tools period_home">
-        <button onclick={() => setShowPeriodList(!showPeriodList())} class="item period">{props.period.text}</button>
+        <button class="item period"
+          onclick={() => {
+            if(!showPeriodList()) offAllPeriodOverlay()
+            setOverflow(!overflow())
+            setShowPeriodList(!showPeriodList())
+          }} 
+        >
+          {props.period.text}
+        </button>
         {
           showPeriodList() &&
           <div class="period_list">
@@ -125,6 +141,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
                 <li 
                   onClick={() => {
                     props.onPeriodChange(p)
+                    setOverflow(!overflow())
                     setShowPeriodList(false)
                   }}
                 >
@@ -144,7 +161,15 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         {pausedStatus() ? 'Play' : 'Pause'}
       </button>
       <div class="item tools period_home">
-        <button onclick={() => setShowSpeed(!showSpeed())} class="item period">Speed {range()}</button>
+        <button class="item period"
+          onclick={() => {
+            if(!showSpeed()) offAllPeriodOverlay()
+            setOverflow(!overflow())
+            setShowSpeed(!showSpeed())
+          }}
+        >
+          Speed {range()}
+        </button>
         {
           showSpeed() &&
           // <div class="period_list">

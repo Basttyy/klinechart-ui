@@ -167,15 +167,15 @@ export const drawOrder = (order: OrderInfo|null) => {
       break
     case 'buylimit':
       if (!order?.stopLoss && !order?.takeProfit) {
-        name = 'buylimitLine'
+        name = 'buyLimitLine'
       } else if (order.stopLoss && !order.takeProfit) {
-        name = 'buylimitLossLine'
+        name = 'buyLimitLossLine'
         points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
       } else if (!order.stopLoss && order.takeProfit) {
-        name = 'buylimitProfitLine'
+        name = 'buyLimitProfitLine'
         points.push({ timestamp: Date.parse(order?.entryTime!), value: order.takeProfit })
       } else if (order.stopLoss && order.takeProfit) {
-        name = 'buylimitProfitLossLine'
+        name = 'buyLimitProfitLossLine'
         points.push({ timestamp: Date.parse(order?.entryTime!), value: order.takeProfit })
         points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
       }
