@@ -149,8 +149,15 @@ const buyLimitLossLine: OverlayTemplate = {
     })
     console.log(points, event.overlay.points[0].value)
     
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+    if ((points as Partial<Point>[])[0].value! < event.overlay.points[0].value! && event.figureIndex == 1) {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
+    }
+    if (
+      (points as Partial<Point>[])[0].value! < currenttick()?.close! && 
+      (points as Partial<Point>[])[0].value! > event.overlay.points[1].value! && 
+      event.figureIndex == 0
+    ) {
+      event.overlay.points[0].value = (points as Partial<Point>[])[0].value
     }
     return true
   }
