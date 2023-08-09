@@ -33,7 +33,7 @@ import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
 import { currenttick, setCurrentTick } from './store/tickStore'
-import { setOrderContr, setOrderList } from './store/positionStore'
+import { orderList, ordercontr, setOrderContr, setOrderList } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -68,6 +68,7 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
 }
 
 export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
+export const [symbol, setSymbol] = createSignal<SymbolInfo>()
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -81,7 +82,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [styles, setStyles] = createSignal(props.styles)
   const [locale, setLocale] = createSignal(props.locale)
 
-  const [symbol, setSymbol] = createSignal(props.symbol)
   const [period, setPeriod] = createSignal(props.period)
   const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
   const [mainIndicators, setMainIndicators] = createSignal([...(props.mainIndicators!)])
@@ -103,9 +103,12 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   const [loadingVisible, setLoadingVisible] = createSignal(false)
 
+  const [backgroudTimer, setBackgroundTimer] = createSignal<NodeJS.Timeout>()
+
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
   })
+  setSymbol(props.symbol)
 
   props.ref({
     setTheme,
@@ -117,7 +120,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     setTimezone: (timezone: string) => { setTimezone({ key: timezone, text: translateTimezone(props.timezone, locale()) }) },
     getTimezone: () => timezone().key,
     setSymbol,
-    getSymbol: () => symbol(),
+    getSymbol: () => symbol()!,
     setPeriod,
     getPeriod: () => period()
   })
@@ -257,7 +260,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const p = period()
         const [to] = adjustFromTo(p, timestamp!, 1)
         const [from] = adjustFromTo(p, to, 500)
-        const kLineDataList = await props.datafeed.getHistoryKLineData(symbol(), p, from, to)
+        const kLineDataList = await props.datafeed.getHistoryKLineData(symbol()!, p, from, to)
         widget?.applyMoreData(kLineDataList, kLineDataList.length > 0)
         loading = false
       }
@@ -300,8 +303,22 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
   })
 
+  createEffect(() => {   // Looking for optimum way to clear objects irrespective of how the user exit the page
+    const cleanupFunc = () => {
+      console.log("on cleanup called")
+      window.removeEventListener('resize', documentResize)
+      clearInterval(backgroudTimer())
+      dispose(widgetRef!)
+      window.removeEventListener('unload', cleanupFunc)
+    }
+
+    window.addEventListener('unload', cleanupFunc)
+  })
+
   onCleanup(() => {
+    console.log("on cleanup called")
     window.removeEventListener('resize', documentResize)
+    clearInterval(backgroudTimer())
     dispose(widgetRef!)
   })
 
@@ -321,7 +338,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       if (prev) {
         props.datafeed.unsubscribe(prev.symbol, prev.period)
       }
-      const s = symbol()
+      const s = symbol()!
       const p = period()
       loading = true
       setLoadingVisible(true)
@@ -457,6 +474,31 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     }
   })
 
+  // Will comment this out until we find a way to make sure the object is cleared when user no longer on this page
+  // createEffect( () => {
+  //   const id = setInterval(() => {
+  //     const updateRunningOrders = async () => {
+  //       const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+  //       if (orders && symbol() !== undefined) {
+  //         let i = 0
+  //         while(i < orders.length) {
+  //           if (orders[i].pl !== null && orders[i].pips !== null) {
+  //             await ordercontr()?.modifyOrder({
+  //               id: orders[i].orderId, //in a real application this should be calculated on backend
+  //               pips: orders[i].pips, //in a real application this should be calculated on backend
+  //               pl: orders[i].pips! * symbol()!.dollarPerPip!
+  //             })
+  //             await new Promise(resolve => setTimeout(resolve, 400));
+  //           }
+  //           i++
+  //         }
+  //       }
+  //     }
+  //     updateRunningOrders ()
+  //   }, 1 * 60 * 1000)     // Run this job every 1min
+  //   setBackgroundTimer(id)
+  // })
+
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
@@ -548,7 +590,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       </Show>
       <PeriodBar
         locale={props.locale}
-        symbol={symbol()}
+        symbol={symbol()!}
         spread={drawingBarVisible()}
         order_spread={orderPanelVisible()}
         period={period()}

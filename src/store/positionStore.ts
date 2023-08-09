@@ -113,7 +113,8 @@ export const useOrder = () => {
         id: order.orderId,
         exitpoint: currenttick()?.close,
         exittype: type,
-        pips: order.pips
+        pips: order.pips,   //in a real application this should be calculated on backend
+        pl: order.pl    //in a real application this should be calculated on backend
       })
     }
   }

@@ -16,7 +16,7 @@ import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Poi
 
 import { currenttick } from '../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../store/positionStore'
-import { instanceapi } from '../../ChartProComponent'
+import { instanceapi, symbol } from '../../ChartProComponent'
 import { OrderInfo } from '../../types'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
@@ -45,10 +45,10 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       let id = overlay.id
       let order: OrderInfo|null
       if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        useOrder().updateOrder({
-          id: order.orderId,
-          pips: order.pips
-        })
+        order.pips = parseFloat(text)
+        order.pl = order.pips * symbol()?.dollarPerPip!
+        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+        setOrderList(orderlist)
       }
       data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buy | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
@@ -154,7 +154,6 @@ const buyLossLine: OverlayTemplate = {
       paneId: event.overlay.paneId
     })
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
-      console.log((points as Partial<Point>[])[0].value)
       let id = event.overlay.id
       let order: OrderInfo|null
       if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found

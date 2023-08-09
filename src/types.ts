@@ -26,6 +26,7 @@ export interface SymbolInfo {
   pricePrecision?: number
   volumePrecision?: number
   priceCurrency?: string
+  dollarPerPip?: number
   type?: string
   logo?: string
 }
