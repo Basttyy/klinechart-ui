@@ -41,41 +41,41 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
   if (coordinates.length > 0) {
       data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
 
-      text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-      let id = overlay.id
-      let order: OrderInfo|null
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order.pips = parseFloat(text)
-        order.pl = order.pips * symbol()?.dollarPerPip!
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-      }
-      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' })
+      text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
+      // let id = overlay.id
+      // let order: OrderInfo|null
+      // if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      //   order.pips = parseFloat(text)
+      //   order.pl = order.pips * symbol()?.dollarPerPip!
+      //   const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+      //   setOrderList(orderlist)
+      // }
+      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `sellstop | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
 
-    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true)
+    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true, 'sell')
     data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 2) {
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
 
-    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true)
+    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true, 'sell')
     data.recttexts.push({ x: endX, y: coordinates[1].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   return data
 }
 
-const buystopProfitLossLine: OverlayTemplate = {
-  name: 'buystopProfitLossLine',
+const sellstopProfitLossLine: OverlayTemplate = {
+  name: 'sellstopProfitLossLine',
   totalStep: 3,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! <= currenttick()?.close! || overlay.points[0].value! <= currenttick()?.high!) {
-      useOrder().triggerPending(overlay, 'buy')
+    if (overlay.points[0].value! >= currenttick()?.close! || overlay.points[0].value! >= currenttick()?.high!) {
+      useOrder().triggerPending(overlay, 'sell')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
     return [
@@ -87,7 +87,7 @@ const buystopProfitLossLine: OverlayTemplate = {
             style: 'dashed',
             dashedValue: [4, 4],
             size: 1,
-            color: '#00698b'
+            color: '#fb7b50'
           },
           {
             style: 'dashed',
@@ -109,7 +109,7 @@ const buystopProfitLossLine: OverlayTemplate = {
         styles: [
           {
             color: 'white',
-            backgroundColor: '#00698b'
+            backgroundColor: '#fb7b50'
           },
           {
             color: 'white',
@@ -149,7 +149,7 @@ const buystopProfitLossLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' },
+        styles: { color: 'white', backgroundColor: '#fb7b50' },
       },
       {
         type: 'rectText',
@@ -174,21 +174,21 @@ const buystopProfitLossLine: OverlayTemplate = {
     let order: OrderInfo|null
     
     if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-      if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+      if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
         order!.entryPoint = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
         const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
         setOrderList(orderlist)
         event.overlay.points[0].value = order?.entryPoint
         //the overlay represented an order that does not exist on our pool, it should be handled here
       }
-      else if ((points as Partial<Point>[])[0].value! < event.overlay.points[0].value! && event.figureIndex == 1) {
+      else if ((points as Partial<Point>[])[0].value! > event.overlay.points[0].value! && event.figureIndex == 1) {
         order!.takeProfit = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
         const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
         setOrderList(orderlist)
         event.overlay.points[1].value = order?.takeProfit
         //the overlay represented an order that does not exist on our pool, it should be handled here
       }
-      if ((points as Partial<Point>[])[0].value! > event.overlay.points[0].value! && event.figureIndex == 2) {
+      if ((points as Partial<Point>[])[0].value! < event.overlay.points[0].value! && event.figureIndex == 2) {
         order!.stopLoss = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
         const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
         setOrderList(orderlist)
@@ -237,4 +237,4 @@ const buystopProfitLossLine: OverlayTemplate = {
   }
 }
 
-export default buystopProfitLossLine
+export default sellstopProfitLossLine

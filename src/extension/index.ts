@@ -35,15 +35,21 @@ import buyLimitLine from './position/buyLimit/buyLimitLine'
 import buyLimitLossLine from './position/buyLimit/buyLimitLossLine'
 import buyLimitProfitLine from './position/buyLimit/buyLimitProfitLine'
 import buyLimitProfitLossLine from './position/buyLimit/buyLimitProfitLossLine'
+import buystopLossLine from './position/buyStop/buystopLossLine'
+import buystopProfitLossLine from './position/buyStop/buystopProfitLossLine'
+import sellstopLine from './position/sellStop/sellstopLine'
+import sellstopProfitLine from './position/sellStop/sellstopProfitLine'
+import sellstopProfitLossLine from './position/sellStop/sellstopProfitLossLine'
 
 const overlays = [
   arrow, circle, rect, triangle, parallelogram, fibonaccDiagonal, fibonacciCircle,
   fibonacciSegment, fibonacciSpiral, fibonacciSpeedResistanceFan, fibonacciExtension,
   gannBox, threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd, positionBox,
   positionLine, buyLine, buyLossLine, buyProfitLine, buyProfitLossLine, buystopLine,
-  buystopProfitLine,
-  buyLimitLine, buyLimitLossLine, buyLimitProfitLine, buyLimitProfitLossLine,
-  sellLine, sellLossLine, sellProfitLine, sellProfitLossLine
+  buystopProfitLine, buystopLossLine, buystopProfitLossLine, buyLimitLine,
+  buyLimitLossLine, buyLimitProfitLine, buyLimitProfitLossLine,sellLine, sellLossLine,
+  sellProfitLine, sellProfitLossLine, sellstopLine, sellstopProfitLine, sellLossLine,
+  sellstopProfitLossLine
 ]
 
 export default overlays
