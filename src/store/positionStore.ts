@@ -1,8 +1,8 @@
-import { Chart, Nullable, Overlay } from 'klinecharts';
+import { Chart, Nullable, Overlay, OverlayEvent, Point } from 'klinecharts';
 import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType } from '../types';
 import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';
-import { instanceapi } from '../ChartProComponent';
+import { instanceapi, symbol } from '../ChartProComponent';
 
 export const [chartapi, setChartapi] = createSignal<Nullable<Chart>>(null);
 export const [ordercontr, setOrderContr] = createSignal<Nullable<OrderResource>>(null)
@@ -119,7 +119,68 @@ export const useOrder = () => {
     }
   }
 
-  return { calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder }
+  const updatePipsAndPL = (overlay:Overlay, text:any) => {
+    let id = overlay.id
+    // console.log(id, 'inside func')
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      order.pips = parseFloat(text)
+      order.pl = order.pips * symbol()?.dollarPerPip!
+      const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+      setOrderList(orderlist)
+    }
+  }
+
+  const updateStopLossAndReturnValue = (event:OverlayEvent, points:Partial<Point>|Partial<Point>[]|undefined) => {
+    let id = event.overlay.id
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      order!.stopLoss = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
+      const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+      setOrderList(orderlist)
+      return order?.stopLoss
+    }
+  }
+
+  const updateEntryPointAndReturnValue = (event:OverlayEvent, points:Partial<Point>|Partial<Point>[]|undefined) => {
+    let id = event.overlay.id
+      let order: OrderInfo|null
+      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+        order!.entryPoint = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
+        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+        setOrderList(orderlist)
+        return order?.entryPoint
+      }
+  }
+
+  const updateTakeProfitAndReturnValue = (event:OverlayEvent, points:Partial<Point>|Partial<Point>[]|undefined) => {
+    let id = event.overlay.id
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      order!.takeProfit = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
+      const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+      setOrderList(orderlist)
+      return order?.takeProfit
+    }
+  }
+
+  const updatePositionOrder = (event:OverlayEvent) => {
+    let id = event.overlay.id
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      useOrder().updateOrder({
+        id: order.orderId,
+        stoploss: order.stopLoss,
+        entrypoint: order.entryPoint,
+        takeprofit: order.takeProfit
+      })
+    }
+  }
+
+  return { calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder, 
+    updatePipsAndPL, updateStopLossAndReturnValue, updateEntryPointAndReturnValue, updateTakeProfitAndReturnValue,
+    updatePositionOrder
+  }
 };
 
 export const drawOrder = (order: OrderInfo|null) => {
