@@ -35,6 +35,7 @@ export interface PeriodBarProps {
   onScreenshotClick: () => void
   onOrderMenuClick: () => void
   orderController: OrderResource
+  freeResources: () => void
   datafeed: Datafeed
   rootEl: string
 }
@@ -78,6 +79,13 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         setOrderList(orderlist)
       }
     }
+  }
+
+  const onExitClicked = () => {
+    console.log('onExit clicked')
+    props.freeResources()
+    window.history.back()
+    //TODO: Other tasks to be carried out here before exiting chart
   }
 
   onMount(() => {
@@ -255,6 +263,11 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           )
         }
       </div>
+      <button class="item tools" 
+        onClick={onExitClicked}
+      >
+        Exit
+      </button>
       <div class='order-container'>
         <svg
           class={props.order_spread ? '' : 'rotate'}
