@@ -21,16 +21,16 @@ import xabcd from './xabcd'
 import positionLine from './custom/positionLine'
 import fibonaccDiagonal from './custom/fibonacciDiagonal'
 import positionBox from './custom/positionBox'
-import buyLine from './position/buyLine'
-import buyLossLine from './position/buyLossLine'
-import buyProfitLine from './position/buyProfitLine'
-import buyProfitLossLine from './position/buyProfitLossLine'
-import sellLine from './position/sellLine'
-import sellLossLine from './position/sellLossLine'
-import sellProfitLine from './position/sellProfitLine'
-import sellProfitLossLine from './position/sellProfitLossLine'
-import buystopLine from './position/buystopLine'
-import buystopProfitLine from './position/buystopProfitLine'
+import buyLine from './position/buy/buyLine'
+import buyLossLine from './position/buy/buyLossLine'
+import buyProfitLine from './position/buy/buyProfitLine'
+import buyProfitLossLine from './position/buy/buyProfitLossLine'
+import sellLine from './position/sell/sellLine'
+import sellLossLine from './position/sell/sellLossLine'
+import sellProfitLine from './position/sell/sellProfitLine'
+import sellProfitLossLine from './position/sell/sellProfitLossLine'
+import buystopLine from './position/buyStop/buystopLine'
+import buystopProfitLine from './position/buyStop/buystopProfitLine'
 import buyLimitLine from './position/buyLimit/buyLimitLine'
 import buyLimitLossLine from './position/buyLimit/buyLimitLossLine'
 import buyLimitProfitLine from './position/buyLimit/buyLimitProfitLine'
@@ -42,8 +42,8 @@ const overlays = [
   gannBox, threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd, positionBox,
   positionLine, buyLine, buyLossLine, buyProfitLine, buyProfitLossLine, buystopLine,
   buystopProfitLine,
-  sellLine, sellLossLine, sellProfitLine, sellProfitLossLine,
-  buyLimitLine, buyLimitLossLine, buyLimitProfitLine, buyLimitProfitLossLine
+  buyLimitLine, buyLimitLossLine, buyLimitProfitLine, buyLimitProfitLossLine,
+  sellLine, sellLossLine, sellProfitLine, sellProfitLossLine
 ]
 
 export default overlays

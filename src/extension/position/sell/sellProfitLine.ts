@@ -14,9 +14,9 @@
 
 import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
 
-import { currenttick } from '../../store/tickStore'
-import { useOrder } from '../../store/positionStore'
-import { instanceapi } from '../../ChartProComponent'
+import { currenttick } from '../../../store/tickStore'
+import { useOrder } from '../../../store/positionStore'
+import { instanceapi } from '../../../ChartProComponent'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }

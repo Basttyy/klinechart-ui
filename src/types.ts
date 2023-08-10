@@ -16,7 +16,7 @@ import { KLineData, Styles, DeepPartial } from 'klinecharts'
 
 export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
 export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
-export type ExitType = 'stoploss'|'takeprofit'|'breakeven'|'manualclose'
+export type ExitType = 'stoploss'|'takeprofit'|'breakeven'|'manualclose'|'cancel'
 export interface SymbolInfo {
   ticker: string
   name?: string
@@ -85,7 +85,8 @@ export interface OrderResource {
   openOrder (action: OrderType, lot_size: number, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo|null>
   closeOrder (order_id: number, lotsize?: number): Promise<OrderInfo|null>
   modifyOrder (order: OrderModifyInfo): Promise<OrderInfo|null>
-  launchOrderModal (type: OrderModalType, callback: OrderPlacedCallback): void
+  unsetSlOrTP (order_id: string|number, slortp: 'sl'|'tp'): Promise<OrderInfo|null>
+  launchOrderModal (type: OrderModalType, callback: OrderPlacedCallback, order?: OrderModifyInfo): void
 }
 
 export interface ChartProOptions {

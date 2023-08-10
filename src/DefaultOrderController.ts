@@ -112,7 +112,28 @@ export default class DefaultOrderController implements OrderResource {
     }
   }
 
-  launchOrderModal(type: OrderModalType, callback: OrderPlacedCallback): void {
+  async unsetSlOrTP(order_id: string|number, slortp: 'sl'|'tp'): Promise<OrderInfo | null> {
+    const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/positions/${order_id}/unset/${slortp}`)
+    const data = await response?.json()
+    return {
+      orderId: data.id,
+      sessionId: data.test_session_id,
+      action: data.action,
+      entryPoint: data.entrypoint,
+      exitPoint: data.exitpoint,
+      stopLoss: data.stoploss,
+      takeProfit: data.takeprofit,
+      lotSize: data.lotsize,
+      pips: data.pips,
+      pl: data.pl,
+      entryTime: data.entrytime,
+      exitTime: data.exittime,
+      exitType: data.exittype,
+      partials: data.partials
+    }
+  }
+
+  launchOrderModal(type: OrderModalType, callback: OrderPlacedCallback, order?: OrderModifyInfo): void {
     return ;
   }
 

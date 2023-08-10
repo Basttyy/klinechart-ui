@@ -13,20 +13,15 @@
  */
 
 import { OverlayTemplate, utils } from 'klinecharts'
-import { useOrder } from '../../store/positionStore'
-import { currenttick } from '../../store/tickStore'
+import { useOrder } from '../../../store/positionStore'
 
-const buystopLine: OverlayTemplate = {
-  name: 'buystopLine',
+const sellLine: OverlayTemplate = {
+  name: 'sellLine',
   totalStep: 2,
   needDefaultPointFigure: true,
-  needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! <= currenttick()?.close! || overlay.points[0].value! <= currenttick()?.high!) {
-      useOrder().triggerPending(overlay, 'buy')
-    }
-    let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
+    let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
     return [
       {
         type: 'line',
@@ -35,16 +30,18 @@ const buystopLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#00698b'
-        }
+          color: '#fb7b50'
+        },
+        ignoreEvent: true
       },
       {
         type: 'rectText',
-        attrs: { x: bounding.width, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' },
+        attrs: { x: bounding.width, y: coordinates[0].y, text: `sell | ${text}` ?? '', align: 'right', baseline: 'middle' },
         styles: {
           color: 'white',
-          backgroundColor: '#00698b'
-        }
+          backgroundColor: '#fb7b50'
+        },
+        ignoreEvent: true
       }
     ]
   },
@@ -70,8 +67,8 @@ const buystopLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
+    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#fb7b50' } }
   }
 }
 
-export default buystopLine
+export default sellLine

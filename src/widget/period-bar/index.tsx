@@ -17,12 +17,7 @@ import { Component, Show, createSignal, onMount, onCleanup } from 'solid-js'
 import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../types'
 
 import i18n from '../../i18n'
-import DefaultDatafeed from '../../DefaultDatafeed'
-import { Chart, Nullable, utils } from 'klinecharts'
-import { random } from 'lodash'
-import { currenttick } from '../../store/tickStore'
 import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
-import { instanceapi } from '../../ChartProComponent'
 
 export interface PeriodBarProps {
   locale: string
@@ -76,12 +71,12 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const onOrderPlaced = (order: OrderInfo|null) => {
     console.log(order)
     if (order) {
+      drawOrder(order)
       let orderlist = orderList()
       if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
         orderlist.push(order)
         setOrderList(orderlist)
       }
-      drawOrder(order)
     }
   }
 
