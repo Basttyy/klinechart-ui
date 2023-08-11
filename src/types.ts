@@ -106,6 +106,7 @@ export interface ChartProOptions {
   datafeed: Datafeed
   dataTimestamp: number
   orderController: OrderResource
+  navigateBack: () => void
   rootElementId: string
 }
 

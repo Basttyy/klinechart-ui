@@ -122,23 +122,32 @@ export const useOrder = () => {
   }
 
   const closeOrder = (overlay: Overlay, type: ExitType): void => {
-    let id = overlay.id
-    let order: OrderInfo|null
-    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-      updateOrder({
-        id: order.orderId,
-        exitpoint: currenttick()?.close,
-        exittype: type,
-        pips: order.pips,   //in a real application this should be calculated on backend
-        pl: order.pl    //in a real application this should be calculated on backend
-      })
-      
-      instanceapi()?.removeOverlay({
-        id: overlay.id,
-        groupId: overlay.groupId,
-        name: overlay.name
-      })
+    const doJob = async () => {
+      let id = overlay.id
+      let order: OrderInfo|null
+      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+        instanceapi()?.removeOverlay({    //remove the overlay first to prevent flooding this backend with api calls
+          id: overlay.id,
+          groupId: overlay.groupId,
+          name: overlay.name
+        })
+        const updatedorder = await ordercontr()?.modifyOrder({
+          id: order.orderId,
+          exitpoint: currenttick()?.close,
+          exittype: type,
+          pips: order.pips,   //in a real application this should be calculated on backend
+          pl: order.pl    //in a real application this should be calculated on backend
+        })!
+        
+        if (updatedorder) {
+          const orderlist = orderList().map(orda => (orda.orderId === updatedorder?.orderId ? updatedorder : orda))
+          setOrderList(orderlist)
+        } else {
+          drawOrder(order)  // draw the order overlay back cose we couldn't close it
+        }
+      }
     }
+    doJob()
   }
 
   return { calcTarget, calcStopOrTarget, calcPL, triggerPending, removeStopOrTP, updateOrder, closeOrder }

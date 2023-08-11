@@ -84,7 +84,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const onExitClicked = () => {
     console.log('onExit clicked')
     props.freeResources()
-    window.history.back()
+    // window.location.href = '/dashboard'
     //TODO: Other tasks to be carried out here before exiting chart
   }
 
@@ -266,7 +266,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       <button class="item tools" 
         onClick={onExitClicked}
       >
-        Exit
+        Dashboard
       </button>
       <div class='order-container'>
         <svg

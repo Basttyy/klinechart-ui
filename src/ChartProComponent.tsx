@@ -77,6 +77,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   let priceUnitDom: HTMLElement
 
   let loading = false
+  let timerId: NodeJS.Timer
 
   const [theme, setTheme] = createSignal(props.theme)
   const [styles, setStyles] = createSignal(props.styles)
@@ -102,8 +103,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
   const [loadingVisible, setLoadingVisible] = createSignal(false)
-
-  const [backgroudTimer, setBackgroundTimer] = createSignal<NodeJS.Timeout>()
 
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
@@ -182,10 +181,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   }
 
   const cleanup = () => {   //Cleanup objects when leaving chart page
-    console.log("on cleanup called")
-    window.removeEventListener('resize', documentResize)
-    clearInterval(backgroudTimer())
-    dispose(widgetRef!)
+    console.log("cleanup called")
+    clearInterval(timerId)
+    props.navigateBack()
   }
 
   onMount(() => {
@@ -313,7 +311,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   onCleanup(() => {
     console.log("on cleanup called")
     window.removeEventListener('resize', documentResize)
-    clearInterval(backgroudTimer())
+    clearInterval(timerId)
     dispose(widgetRef!)
   })
 
@@ -471,7 +469,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   // Will comment this out until we find a way to make sure the object is cleared when user no longer on this page
   createEffect( () => {
-    const id = setInterval(() => {
+    timerId = setInterval(() => {
       const updateRunningOrders = async () => {
         const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
         if (orders && symbol() !== undefined) {
@@ -490,8 +488,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         }
       }
       updateRunningOrders ()
-    }, 1 * 60 * 1000)     // Run this job every 1min
-    setBackgroundTimer(id)
+    }, 1 * 120 * 1000)     // Run this job every 1min
   })
 
   return (

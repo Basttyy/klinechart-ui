@@ -57,6 +57,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
       return
     }
     if (action == 'edit') {
+      console.log('action is edit')
       props.orderController.launchOrderModal('modifyorder', onOrderEdited, {
         id: order.orderId,
         stoploss: order.stopLoss,
