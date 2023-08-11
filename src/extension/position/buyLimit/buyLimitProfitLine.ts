@@ -41,6 +41,7 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
 
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
+      useOrder().updatePipsAndPL(overlay, text)
       data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buyLimit | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {
@@ -149,13 +150,22 @@ const buyLimitProfitLine: OverlayTemplate = {
       paneId: event.overlay.paneId
     })
     if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
-      event.overlay.points[1].value = (points as Partial<Point>[])[0].value
+      // event.overlay.points[1].value = (points as Partial<Point>[])[0].value
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if (res) event.overlay.points[1].value = res
     }
 
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close! && event.figureIndex == 0) {
-      event.overlay.points[0].value = (points as Partial<Point>[])[0].value
+      // event.overlay.points[0].value = (points as Partial<Point>[])[0].value
+      const res = useOrder().updateEntryPointAndReturnValue(event, points)
+      if(res) event.overlay.points[0].value = res
     }
     return true
+  },
+  onPressedMoveEnd: (event): boolean => {
+    useOrder().updatePositionOrder(event)
+    //the overlay represented an order that does not exist on our pool, it should be handled here
+    return false
   }
 }
 
