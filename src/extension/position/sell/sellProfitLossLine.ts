@@ -43,6 +43,7 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       data.texts.push({ x: endX - utils.calcTextWidth('sell '), y: coordinates[0].y, text: 'sell', baseline: 'bottom' })
 
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
+      useOrder().updatePipsAndPL(overlay, text)
       data.recttexts.push({ x: endX, y: coordinates[0].y, text: `sell | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {

@@ -33,7 +33,7 @@ import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
 import { currenttick, setCurrentTick } from './store/tickStore'
-import { orderList, ordercontr, setOrderContr, setOrderList } from './store/positionStore'
+import { drawOrder, orderList, ordercontr, setOrderContr, setOrderList } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -464,6 +464,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
     if (orders) {
       setOrderList(orders)
+      orders.forEach(order => {
+        if (order.exitType)
+          return
+        drawOrder(order)
+      });
     }
   })
 

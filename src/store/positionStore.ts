@@ -135,8 +135,8 @@ export const useOrder = () => {
           id: order.orderId,
           exitpoint: currenttick()?.close,
           exittype: type,
-          pips: order.pips,   //in a real application this should be calculated on backend
-          pl: order.pl    //in a real application this should be calculated on backend
+          pips: type == 'cancel' ? undefined : order.pips,   //in a real application this should be calculated on backend
+          pl: type == 'cancel' ? undefined : order.pl    //in a real application this should be calculated on backend
         })!
         
         if (updatedorder) {
