@@ -14,9 +14,9 @@
 
 import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
 
-import { currenttick } from '../../store/tickStore'
-import { useOrder } from '../../store/positionStore'
-import { instanceapi } from '../../ChartProComponent'
+import { currenttick } from '../../../store/tickStore'
+import { useOrder } from '../../../store/positionStore'
+import { instanceapi } from '../../../ChartProComponent'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -52,30 +52,17 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
     text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true, 'sell')
     data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
-  if (coordinates.length > 2) {
-    data.lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
-    data.texts.push({ x: endX - utils.calcTextWidth('sl '), y: coordinates[2].y, text: 'sl', baseline: 'bottom' })
-
-    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[2].value!, precision.price, true, 'sell')
-    data.recttexts.push({ x: endX, y: coordinates[2].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
-  }
   return data
 }
 
-const sellProfitLossLine: OverlayTemplate = {
-  name: 'sellProfitLossLine',
-  totalStep: 4,
+const sellProfitLine: OverlayTemplate = {
+  name: 'sellProfitLine',
+  totalStep: 3,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! >= currenttick()?.close! || overlay.points[1].value! >= currenttick()?.high!) { //TP was hit
-      instanceapi()?.removeOverlay({
-        id: overlay.id,
-        groupId: overlay.groupId,
-        name: overlay.name
-      })
-    } else if (overlay.points[2].value! <= currenttick()?.close! || overlay.points[2].value! <= currenttick()?.high!) {
+    if (overlay.points[1].value! >= currenttick()?.close! || overlay.points[1].value! >= currenttick()?.high!) {
       instanceapi()?.removeOverlay({
         id: overlay.id,
         groupId: overlay.groupId,
@@ -106,16 +93,6 @@ const sellProfitLossLine: OverlayTemplate = {
         }
       },
       {
-        type: 'line',
-        attrs: parallel.lines[2],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#fb7b50'
-        }
-      },
-      {
         type: 'rectText',
         attrs: parallel.recttexts[0],
         styles: {
@@ -131,14 +108,6 @@ const sellProfitLossLine: OverlayTemplate = {
           color: 'white',
           backgroundColor: '#00698b'
         }
-      },
-      {
-        type: 'rectText',
-        attrs: parallel.recttexts[2],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
       }
     ]
   },
@@ -153,16 +122,13 @@ const sellProfitLossLine: OverlayTemplate = {
       textAlign = 'right'
       x = bounding.width
     }
-    let text, text2, text3
+    let text, text2
 
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
     if (!utils.isValid(text2) && overlay.points[1].value !== undefined) {
       text2 = utils.formatPrecision(overlay.points[1].value, precision.price)
-    }
-    if (!utils.isValid(text2) && overlay.points[2].value !== undefined) {
-      text3 = utils.formatPrecision(overlay.points[2].value, precision.price)
     }
     return [
       {
@@ -175,11 +141,6 @@ const sellProfitLossLine: OverlayTemplate = {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
         styles: { color: 'white', backgroundColor: '#00698b' },
-      },
-      {
-        type: 'rectText',
-        attrs: { x, y: coordinates[2].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
       }
     ]
   },
@@ -193,11 +154,8 @@ const sellProfitLossLine: OverlayTemplate = {
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
     }
-    if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
-      event.overlay.points[2].value = (points as Partial<Point>[])[0].value
-    }
     return true
   }
 }
 
-export default sellProfitLossLine
+export default sellProfitLine

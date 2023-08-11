@@ -17,7 +17,8 @@ import { OverlayCreate, OverlayMode } from 'klinecharts'
 import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
 import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
-import { orderList } from '../../store/positionStore'
+import { drawOrder, orderList, useOrder } from '../../store/positionStore'
+import { instanceapi } from '../../ChartProComponent'
 
 export interface OrderPanelProps {
   context: string
@@ -30,9 +31,7 @@ const GROUP_ID = 'order_panel'
 
 const OrdersPanel: Component<OrderPanelProps> = props => {
   let loading = true
-  let list_headers = ['Order Id', 'Session Id', 'Action Type', 'Entry Point', 'Take Profit', 'Stop Loss', 'Profit/Loss', 'Exit Point', 'Entry Time', 'Exit Time', 'Edit Order', 'Close Order']
 
-  const [value, setValue] = createSignal('')
   const [loadingVisible, setLoadingVisible] = createSignal(true)
   const [ordersList, setOrdersList] = createSignal<OrderInfo[]>([])
 
@@ -40,8 +39,35 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
     alert(`${order.orderId} is selected`)
   }
 
-  const performOrderAction = (order: OrderInfo, action: 'edit'|'close') => {
+  const onOrderEdited = (order: OrderInfo|null) => {
+    console.log(order)
+    if (order) {
+      drawOrder(order)
+      let orderlist = orderList()
+      orderlist.map(orda => (orda.orderId === order.orderId ? order : orda))
+      setOrdersList(orderlist)
+    }
+  }
+
+  const performOrderAction = (order: OrderInfo, action: 'edit'|'close'|'cancel') => {
     console.log(`${action} ${order.orderId}: was clicked`)
+    let overlay = instanceapi()?.getOverlayById(`orderline_${order.orderId}`)
+    if (!overlay) {
+      console.log(`order line not found for order id ${order.orderId}`)
+      return
+    }
+    if (action == 'edit') {
+      console.log('action is edit')
+      props.orderController.launchOrderModal('modifyorder', onOrderEdited, {
+        id: order.orderId,
+        stoploss: order.stopLoss,
+        takeprofit: order.takeProfit,
+        entrypoint: order.action == 'buy' || order.action == 'sell' ? undefined : order.entryPoint,
+        lotsize: order.action == 'buy' || order.action == 'sell' ? undefined : order.lotSize
+      })
+      return
+    }
+    useOrder().closeOrder(overlay, action == 'close' ? 'manualclose' : 'cancel')
   }
 
   onMount(() => {
@@ -108,7 +134,7 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
                     <Button
                       type='cancel'
                       class='close-button'
-                      onClick={() => {performOrderAction(order, 'close')}}>Close</Button>
+                      onClick={() => {performOrderAction(order, order.action == 'buy' || order.action == 'sell' ? 'close' : 'cancel')}}>{ order.action == 'buy' || order.action == 'sell' ? 'Close' : 'Cancel'}</Button>
                   </span>
                 </div>
               </li>

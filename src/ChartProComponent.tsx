@@ -77,6 +77,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   let priceUnitDom: HTMLElement
 
   let loading = false
+  let timerId: NodeJS.Timer
 
   const [theme, setTheme] = createSignal(props.theme)
   const [styles, setStyles] = createSignal(props.styles)
@@ -102,8 +103,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
   const [loadingVisible, setLoadingVisible] = createSignal(false)
-
-  const [backgroudTimer, setBackgroundTimer] = createSignal<NodeJS.Timeout>()
 
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
@@ -179,6 +178,12 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       }
     }
     return [from, to]
+  }
+
+  const cleanup = () => {   //Cleanup objects when leaving chart page
+    console.log("cleanup called")
+    clearInterval(timerId)
+    props.navigateBack()
   }
 
   onMount(() => {
@@ -303,22 +308,10 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
   })
 
-  createEffect(() => {   // Looking for optimum way to clear objects irrespective of how the user exit the page
-    const cleanupFunc = () => {
-      console.log("on cleanup called")
-      window.removeEventListener('resize', documentResize)
-      clearInterval(backgroudTimer())
-      dispose(widgetRef!)
-      window.removeEventListener('unload', cleanupFunc)
-    }
-
-    window.addEventListener('unload', cleanupFunc)
-  })
-
   onCleanup(() => {
     console.log("on cleanup called")
     window.removeEventListener('resize', documentResize)
-    clearInterval(backgroudTimer())
+    clearInterval(timerId)
     dispose(widgetRef!)
   })
 
@@ -475,29 +468,28 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   })
 
   // Will comment this out until we find a way to make sure the object is cleared when user no longer on this page
-  // createEffect( () => {
-  //   const id = setInterval(() => {
-  //     const updateRunningOrders = async () => {
-  //       const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
-  //       if (orders && symbol() !== undefined) {
-  //         let i = 0
-  //         while(i < orders.length) {
-  //           if (orders[i].pl !== null && orders[i].pips !== null) {
-  //             await ordercontr()?.modifyOrder({
-  //               id: orders[i].orderId, //in a real application this should be calculated on backend
-  //               pips: orders[i].pips, //in a real application this should be calculated on backend
-  //               pl: orders[i].pips! * symbol()!.dollarPerPip!
-  //             })
-  //             await new Promise(resolve => setTimeout(resolve, 400));
-  //           }
-  //           i++
-  //         }
-  //       }
-  //     }
-  //     updateRunningOrders ()
-  //   }, 1 * 60 * 1000)     // Run this job every 1min
-  //   setBackgroundTimer(id)
-  // })
+  createEffect( () => {
+    timerId = setInterval(() => {
+      const updateRunningOrders = async () => {
+        const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+        if (orders && symbol() !== undefined) {
+          let i = 0
+          while(i < orders.length) {
+            if (orders[i].pl !== null && orders[i].pips !== null) {
+              await ordercontr()?.modifyOrder({
+                id: orders[i].orderId, //in a real application this should be calculated on backend
+                pips: orders[i].pips, //in a real application this should be calculated on backend
+                pl: orders[i].pips! * symbol()!.dollarPerPip!
+              })
+              await new Promise(resolve => setTimeout(resolve, 400));
+            }
+            i++
+          }
+        }
+      }
+      updateRunningOrders ()
+    }, 1 * 120 * 1000)     // Run this job every 1min
+  })
 
   return (
     <>
@@ -618,6 +610,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             setScreenshotUrl(url)
           }
         }}
+        freeResources={cleanup}
         orderController={props.orderController}
         datafeed={props.datafeed}
         rootEl={props.rootElementId}
