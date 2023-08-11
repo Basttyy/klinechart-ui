@@ -13,9 +13,10 @@
  */
 
 import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay, Point } from 'klinecharts'
-import { useOrder } from '../../../store/positionStore'
+import { useOrder, setOrderList, orderList } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { instanceapi } from '../../../ChartProComponent'
+import { OrderInfo } from '../../../types'
 
 const buyLimitLine: OverlayTemplate = {
   name: 'buyLimitLine',
@@ -89,10 +90,16 @@ const buyLimitLine: OverlayTemplate = {
     })
     
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
-      event.overlay.points[0].value = (points as Partial<Point>[])[0].value
+      const res = useOrder().updateEntryPointAndReturnValue(event, points)
+      if(res) event.overlay.points[0].value = res
     }
     return true
-  }
+  },
+  onPressedMoveEnd: (event): boolean => {
+    useOrder().updatePositionOrder(event)
+    //the overlay represented an order that does not exist on our pool, it should be handled here
+    return false
+  },
 }
 
 export default buyLimitLine
