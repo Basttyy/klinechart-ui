@@ -39,29 +39,34 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
 
   if (coordinates.length > 0) {
       data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
-
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
       useOrder().updatePipsAndPL(overlay, text)
-      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buyLimit | ${text}` ?? '', align: 'right', baseline: 'middle' })
+      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `sellLimit | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
 
     text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true)
-    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
+    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
+  }
+  if (coordinates.length > 2) {
+    data.lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
+
+    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[2].value!, precision.price, true)
+    data.recttexts.push({ x: endX, y: coordinates[2].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   return data
 }
 
-const buyLimitLossLine: OverlayTemplate = {
-  name: 'buyLimitLossLine',
-  totalStep: 3,
+const sellLimitProfitLossLine: OverlayTemplate = {
+  name: 'sellLimitProfitLossLine',
+  totalStep: 4,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! >= currenttick()?.close!) {
-      useOrder().triggerPending(overlay, 'buy')
+    if (overlay.points[0].value! <= currenttick()?.close! ) { //TP was hit
+      useOrder().triggerPending(overlay, 'sell')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
     return [
@@ -72,12 +77,22 @@ const buyLimitLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
+          color: '#fb7b50'
+        },
+      },
+      {
+        type: 'line',
+        attrs: parallel.lines[1],
+        styles: {
+          style: 'dashed',
+          dashedValue: [4, 4],
+          size: 1,
           color: '#00698b'
         }
       },
       {
         type: 'line',
-        attrs: parallel.lines[1],
+        attrs: parallel.lines[2],
         styles: {
           style: 'dashed',
           dashedValue: [4, 4],
@@ -90,12 +105,20 @@ const buyLimitLossLine: OverlayTemplate = {
         attrs: parallel.recttexts[0],
         styles: {
           color: 'white',
+          backgroundColor: '#fb7b50'
+        },
+      },
+      {
+        type: 'rectText',
+        attrs: parallel.recttexts[1],
+        styles: {
+          color: 'white',
           backgroundColor: '#00698b'
         }
       },
       {
         type: 'rectText',
-        attrs: parallel.recttexts[1],
+        attrs: parallel.recttexts[2],
         styles: {
           color: 'white',
           backgroundColor: '#fb7b50'
@@ -114,7 +137,7 @@ const buyLimitLossLine: OverlayTemplate = {
       textAlign = 'right'
       x = bounding.width
     }
-    let text, text2
+    let text, text2, text3
 
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
@@ -122,16 +145,23 @@ const buyLimitLossLine: OverlayTemplate = {
     if (!utils.isValid(text2) && overlay.points[1].value !== undefined) {
       text2 = utils.formatPrecision(overlay.points[1].value, precision.price)
     }
+    if (!utils.isValid(text3) && overlay.points[2].value !== undefined) {
+      text3 = utils.formatPrecision(overlay.points[2].value, precision.price)
+    }
     return [
       {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' },
-        // ignoreEvent: true
+        styles: { color: 'white', backgroundColor: '#fb7b50' },
       },
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
+        styles: { color: 'white', backgroundColor: '#00698b' },
+      },
+      {
+        type: 'rectText',
+        attrs: { x, y: coordinates[2].y, text: text3 ?? '', align: textAlign, baseline: 'middle' },
         styles: { color: 'white', backgroundColor: '#fb7b50' },
       }
     ]
@@ -143,20 +173,30 @@ const buyLimitLossLine: OverlayTemplate = {
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    
-    if ((points as Partial<Point>[])[0].value! < event.overlay.points[0].value! && event.figureIndex == 1) {
-      // event.overlay.points[1].value = (points as Partial<Point>[])[0].value
-      const res = useOrder().updateStopLossAndReturnValue(event, points)
-      if (res) event.overlay.points[1].value = res
+    // for tp
+    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if(res) event.overlay.points[1].value = res
     }
+
+    // for selllimit
     if (
-      (points as Partial<Point>[])[0].value! < currenttick()?.close! && 
-      (points as Partial<Point>[])[0].value! > event.overlay.points[1].value! && 
+      (points as Partial<Point>[])[0].value! > currenttick()?.close! && 
+      (points as Partial<Point>[])[0].value! < event.overlay.points[2].value! && 
       event.figureIndex == 0
     ) {
-      // event.overlay.points[0].value = (points as Partial<Point>[])[0].value
       const res = useOrder().updateEntryPointAndReturnValue(event, points)
-      if(res) event.overlay.points[0].value = res
+      if (res) event.overlay.points[0].value = res
+    }
+
+    // for stoploss
+    if (
+      (points as Partial<Point>[])[0].value! > currenttick()?.close! && 
+      (points as Partial<Point>[])[0].value! > event.overlay.points[0].value! && 
+      event.figureIndex == 2
+    ) {
+      const res = useOrder().updateStopLossAndReturnValue(event, points)
+      if(res) event.overlay.points[2].value = res
     }
     return true
   },
@@ -168,10 +208,12 @@ const buyLimitLossLine: OverlayTemplate = {
   onRightClick: (event): boolean => {
     if (event.figureIndex == 0)
       useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    else if (event.figureIndex == 1)
+      useOrder().removeStopOrTP(event.overlay, 'tp')
     else
       useOrder().removeStopOrTP(event.overlay, 'sl')
     return false
   }
 }
 
-export default buyLimitLossLine
+export default sellLimitProfitLossLine

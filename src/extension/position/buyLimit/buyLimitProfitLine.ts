@@ -61,11 +61,6 @@ const buyLimitProfitLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     if (overlay.points[0].value! >= currenttick()?.close!) {
-      instanceapi()?.removeOverlay({
-        id: overlay.id,
-        groupId: overlay.groupId,
-        name: overlay.name
-      })
       useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
@@ -165,6 +160,13 @@ const buyLimitProfitLine: OverlayTemplate = {
   onPressedMoveEnd: (event): boolean => {
     useOrder().updatePositionOrder(event)
     //the overlay represented an order that does not exist on our pool, it should be handled here
+    return false
+  },
+  onRightClick: (event): boolean => {
+    if (event.figureIndex == 0)
+      useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    else
+      useOrder().removeStopOrTP(event.overlay, 'tp')
     return false
   }
 }
