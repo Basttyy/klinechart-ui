@@ -16,7 +16,7 @@ import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, 
 
 import {
   init, dispose, utils, Nullable, Chart, OverlayMode, Styles,
-  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial
+  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial, KLineData
 } from 'klinecharts'
 
 import lodashSet from 'lodash/set'
@@ -26,12 +26,14 @@ import { SelectDataSourceItem, Loading } from './component'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
-  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal
+  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel
 } from './widget'
 
 import { translateTimezone } from './widget/timezone-modal/data'
 
-import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
+import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
+import { currenttick, setCurrentTick } from './store/tickStore'
+import { drawOrder, currentequity, orderList, ordercontr, setOrderContr, setOrderList, setCurrentequity } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -65,6 +67,11 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
   }, isStack, paneOptions) ?? null
 }
 
+export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
+export const [symbol, setSymbol] = createSignal<SymbolInfo>()
+export const [chartsession, setChartsession] = createSignal<sessionType|null>(null)
+export const [chartsessionCtr, setChartsessionCtr] = createSignal<ChartSessionResource|null>(null)
+
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
   let widget: Nullable<Chart> = null
@@ -72,12 +79,12 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   let priceUnitDom: HTMLElement
 
   let loading = false
+  let timerId: NodeJS.Timer
 
   const [theme, setTheme] = createSignal(props.theme)
   const [styles, setStyles] = createSignal(props.styles)
   const [locale, setLocale] = createSignal(props.locale)
 
-  const [symbol, setSymbol] = createSignal(props.symbol)
   const [period, setPeriod] = createSignal(props.period)
   const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
   const [mainIndicators, setMainIndicators] = createSignal([...(props.mainIndicators!)])
@@ -92,6 +99,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [screenshotUrl, setScreenshotUrl] = createSignal('')
 
   const [drawingBarVisible, setDrawingBarVisible] = createSignal(props.drawingBarVisible)
+  
+  const [orderPanelVisible, setOrderPanelVisible] = createSignal(props.orderPanelVisible)
 
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
@@ -100,6 +109,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [indicatorSettingModalParams, setIndicatorSettingModalParams] = createSignal({
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
   })
+  setSymbol(props.symbol)
+  setChartsession(props.chartSession)
+  setChartsessionCtr(props.chartSessionController)
 
   props.ref({
     setTheme,
@@ -111,7 +123,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     setTimezone: (timezone: string) => { setTimezone({ key: timezone, text: translateTimezone(props.timezone, locale()) }) },
     getTimezone: () => timezone().key,
     setSymbol,
-    getSymbol: () => symbol(),
+    getSymbol: () => symbol()!,
     setPeriod,
     getPeriod: () => period()
   })
@@ -172,7 +184,53 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     return [from, to]
   }
 
+  const cleanup = () => {   //Cleanup objects when leaving chart page
+    const doJob = async () => {
+      setInstanceapi(null)
+      clearInterval(timerId)
+      props.datafeed.unsubscribe()
+  
+      const updateRunningOrders = async (orders: OrderInfo[], symbol: SymbolInfo, orderctr: OrderResource) => {
+        let i = 0, pL = 0
+        if (orders && symbol !== undefined) {
+          while(i < orders.length) {
+            if (orders[i].pl !== null && orders[i].pips !== null) {
+              pL = +pL + +orders[i].pl!
+              await orderctr.modifyOrder({
+                id: orders[i].orderId, //in a real application this should be calculated on backend
+                pips: orders[i].pips, //in a real application this should be calculated on backend
+                pl: orders[i].pips! * symbol!.dollarPerPip!
+              })
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            i++
+          }
+        }
+        return pL
+      }
+      const updateChartSession = async (_session: sessionType, _pl: number, _timestamp: number, _sessionctr: ChartSessionResource) => {
+        const pl = +_session.current_bal + +_pl
+        if (_session) {
+          await _sessionctr?.updateSession({
+            id: _session.id,
+            current_bal: _session.current_bal,
+            equity: pl,
+            chart_timestamp: _timestamp
+          })
+        }
+      }
+      const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+  
+      let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
+      await updateChartSession (chartsession()!, pl, currenttick()!.timestamp, chartsessionCtr()!)
+      dispose(widgetRef!)
+      window.location.href = '/dashboard'
+    }
+    doJob()
+  }
+
   onMount(() => {
+    setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
       customApi: {
@@ -212,6 +270,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
 
     if (widget) {
+      setInstanceapi(widget)
       const watermarkContainer = widget.getDom('candle_pane', DomPosition.Main)
       if (watermarkContainer) {
         let watermark = document.createElement('div')
@@ -249,7 +308,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const p = period()
         const [to] = adjustFromTo(p, timestamp!, 1)
         const [from] = adjustFromTo(p, to, 500)
-        const kLineDataList = await props.datafeed.getHistoryKLineData(symbol(), p, from, to)
+        const kLineDataList = await props.datafeed.getHistoryKLineData(symbol()!, p, from, to)
         widget?.applyMoreData(kLineDataList, kLineDataList.length > 0)
         loading = false
       }
@@ -294,6 +353,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   onCleanup(() => {
     window.removeEventListener('resize', documentResize)
+    clearInterval(timerId)
     dispose(widgetRef!)
   })
 
@@ -313,7 +373,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       if (prev) {
         props.datafeed.unsubscribe(prev.symbol, prev.period)
       }
-      const s = symbol()
+      const s = symbol()!
       const p = period()
       loading = true
       setLoadingVisible(true)
@@ -322,8 +382,22 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const [from, to] = adjustFromTo(p, timestamp, 500)
         const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
         widget?.applyNewData(kLineDataList, kLineDataList.length > 0)
+        setCurrentTick(kLineDataList[kLineDataList.length -1])
         props.datafeed.subscribe(s, p, data => {
+          setCurrentTick(data)
           widget?.updateData(data)
+
+          const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+          if (orders && symbol() !== undefined) {
+            let pl = 0, i = 0
+            while(i < orders.length) {
+              if (orders[i].pl !== null && orders[i].pips !== null) {
+                pl += orders[i].pl!
+              }
+              i++
+            }
+            setCurrentequity(pl)
+          }
         })
         loading = false
         setLoadingVisible(false)
@@ -439,6 +513,50 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     }
   })
 
+  createEffect( async () => {
+    let orders = await props.orderController.retrieveOrders()
+
+    if (orders) {
+      setOrderList(orders)
+      orders.forEach(order => {
+        if (order.exitType)
+          return
+        drawOrder(order)
+      });
+    }
+  })
+
+  createEffect( () => {
+    timerId = setInterval(() => {
+      const updateRunningOrders = async () => {
+        const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+        if (orders && symbol() !== undefined) {
+          let i = 0
+          while(i < orders.length) {
+            if (orders[i].pl !== null && orders[i].pips !== null) {
+              await ordercontr()?.modifyOrder({
+                id: orders[i].orderId, //in a real application this should be calculated on backend
+                pips: orders[i].pips, //in a real application this should be calculated on backend
+                pl: orders[i].pips! * symbol()!.dollarPerPip!
+              })
+              await new Promise(resolve => setTimeout(resolve, 400));
+            }
+            i++
+          }
+        }
+      }
+      const updateChartSession = async () => {
+        let session = chartsession()
+        if (session) {
+          session.chart_timestamp = currenttick()?.timestamp!
+          await chartsessionCtr()?.updateSession(session)
+        }
+      }
+      updateChartSession ()
+      updateRunningOrders ()
+    }, 2 * 60 * 1000)     // Run this job every 2min
+  })
+
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
@@ -530,15 +648,22 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       </Show>
       <PeriodBar
         locale={props.locale}
-        symbol={symbol()}
+        symbol={symbol()!}
         spread={drawingBarVisible()}
+        order_spread={orderPanelVisible()}
         period={period()}
         periods={props.periods}
         onMenuClick={async () => {
           try {
             await startTransition(() => setDrawingBarVisible(!drawingBarVisible()))
-            widget?.resize()
+            documentResize()
           } catch (e) {}    
+        }}
+        onOrderMenuClick={async () => {
+          try {
+            await startTransition(() => setOrderPanelVisible(!orderPanelVisible()))
+            documentResize()
+          } catch (e) {}
         }}
         onSymbolClick={() => { setSymbolSearchModalVisible(!symbolSearchModalVisible()) }}
         onPeriodChange={setPeriod}
@@ -551,9 +676,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             setScreenshotUrl(url)
           }
         }}
+        freeResources={cleanup}
+        orderController={props.orderController}
+        datafeed={props.datafeed}
+        rootEl={props.rootElementId}
       />
       <div
-        class="klinecharts-pro-content">
+        class="klinecharts-pro-content"
+        data-orders-pane-visible={orderPanelVisible()}>  
         <Show when={loadingVisible()}>
           <Loading/>
         </Show>
@@ -571,6 +701,12 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           class='klinecharts-pro-widget'
           data-drawing-bar-visible={drawingBarVisible()}/>
       </div>
+      <Show when={orderPanelVisible()}>
+        <OrdersPanel
+          context='this is the order panel context'
+          orderController={props.orderController}
+        />
+      </Show>
     </>
   )
 }

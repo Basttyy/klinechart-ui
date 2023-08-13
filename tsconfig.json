@@ -17,6 +17,6 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
   },
-  "include": ["src"],
+  "include": ["src","src/types.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
