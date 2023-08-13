@@ -210,7 +210,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       }
       const updateChartSession = async (_session: sessionType, _pl: number, _timestamp: number, _sessionctr: ChartSessionResource) => {
         const pl = +_session.current_bal + +_pl
-        console.log(`equity is ${pl}`)
         if (_session) {
           await _sessionctr?.updateSession({
             id: _session.id,
@@ -224,7 +223,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   
       let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
       await updateChartSession (chartsession()!, pl, currenttick()!.timestamp, chartsessionCtr()!)
-      // await new Promise(resolve => setTimeout(resolve, 50000));
       dispose(widgetRef!)
       window.location.href = '/dashboard'
     }

@@ -148,7 +148,6 @@ export const useOrder = () => {
           const session = chartsession()
           session!.current_bal = +session?.current_bal! + +updatedorder.pl!
           setChartsession(session)
-          console.log(chartsession())
           const orderlist = orderList().map(orda => (orda.orderId === updatedorder?.orderId ? updatedorder : orda))
           setOrderList(orderlist)
         } else {
@@ -166,12 +165,6 @@ export const useOrder = () => {
       order.pips = parseFloat(text)
       order.pl = order.pips * order.lotSize * symbol()?.dollarPerPip!
       const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-      // let session = chartsession()
-      // if (session) {
-      //   const equity = session.equity
-      //   session.equity = equity + order.pl
-      //   setChartsession(session)
-      // }
       setOrderList(orderlist)
     }
   }
@@ -307,10 +300,14 @@ export const drawOrder = (order: OrderInfo|null) => {
         name = 'sellstopLine'
       } else if (order.stopLoss && !order.takeProfit) {
         name = 'sellstopLossLine'
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
       } else if (!order.stopLoss && order.takeProfit) {
         name = 'sellstopProfitLine'
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.takeProfit })
       } else if (order.stopLoss && order.takeProfit) {
         name = 'sellstopProfitLossLine'
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.takeProfit })
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
       }
       break
     case 'selllimit':
@@ -339,5 +336,3 @@ export const drawOrder = (order: OrderInfo|null) => {
     lock
   })
 };
-
-// return { drawOrder };

@@ -82,7 +82,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const onExitClicked = () => {
     props.freeResources()
-    // window.location.href = '/dashboard'
     //TODO: Other tasks to be carried out here before exiting chart
   }
 
