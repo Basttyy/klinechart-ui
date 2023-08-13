@@ -165,12 +165,6 @@ export const useOrder = () => {
       order.pips = parseFloat(text)
       order.pl = order.pips * order.lotSize * symbol()?.dollarPerPip!
       const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-      // let session = chartsession()
-      // if (session) {
-      //   const equity = session.equity
-      //   session.equity = equity + order.pl
-      //   setChartsession(session)
-      // }
       setOrderList(orderlist)
     }
   }
