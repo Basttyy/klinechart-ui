@@ -210,7 +210,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       }
       const updateChartSession = async (_session: sessionType, _pl: number, _timestamp: number, _sessionctr: ChartSessionResource) => {
         const pl = +_session.current_bal + +_pl
-        console.log(`equity is ${pl}`)
         if (_session) {
           await _sessionctr?.updateSession({
             id: _session.id,

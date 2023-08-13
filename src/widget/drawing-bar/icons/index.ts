@@ -47,7 +47,6 @@ import xabcd from './xabcd'
 
 //Added by TradingIo
 import fibonacciDiagonal from './fibonacciDiagonal'
-import positionLine from './positionLine'
 
 import weakMagnet from './weakMagnet'
 import strongMagnet from './strongMagnet'
@@ -78,7 +77,6 @@ export const mapping = {
   priceLine,
   priceChannelLine,
   parallelStraightLine,
-  positionLine,     //by tradingio team
   fibonacciDiagonal,  //by tradingio team
   fibonacciLine,
   fibonacciSegment,
@@ -125,8 +123,7 @@ export function createSingleLineOptions (locale: string): SelectDataSourceItem[]
 export function createMoreLineOptions (locale: string): SelectDataSourceItem[] {
   return [
     { key: 'priceChannelLine', text: i18n('price_channel_line', locale) },
-    { key: 'parallelStraightLine', text: i18n('parallel_straight_line', locale) },
-    { key: 'positionLine', text: i18n('position_line', locale)}
+    { key: 'parallelStraightLine', text: i18n('parallel_straight_line', locale) }
   ]
 }
 

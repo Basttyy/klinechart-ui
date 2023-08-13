@@ -18,7 +18,6 @@ import abcd from './abcd'
 import xabcd from './xabcd'
 
 //Added by TradingIo Team
-import positionLine from './custom/positionLine'
 import fibonaccDiagonal from './custom/fibonacciDiagonal'
 import positionBox from './custom/positionBox'
 import buyLine from './position/buy/buyLine'
@@ -45,11 +44,10 @@ const overlays = [
   arrow, circle, rect, triangle, parallelogram, fibonaccDiagonal, fibonacciCircle,
   fibonacciSegment, fibonacciSpiral, fibonacciSpeedResistanceFan, fibonacciExtension,
   gannBox, threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd, positionBox,
-  positionLine, buyLine, buyLossLine, buyProfitLine, buyProfitLossLine, buystopLine,
-  buystopProfitLine, buystopLossLine, buystopProfitLossLine, buyLimitLine,
-  buyLimitLossLine, buyLimitProfitLine, buyLimitProfitLossLine,sellLine, sellLossLine,
-  sellProfitLine, sellProfitLossLine, sellstopLine, sellstopProfitLine, sellLossLine,
-  sellstopProfitLossLine
+  buyLine, buyLossLine, buyProfitLine, buyProfitLossLine, buystopLine, buystopProfitLine,
+  buystopLossLine, buystopProfitLossLine, buyLimitLine, buyLimitLossLine, buyLimitProfitLine,
+  buyLimitProfitLossLine,sellLine, sellLossLine, sellProfitLine, sellProfitLossLine,
+  sellstopLine, sellstopProfitLine, sellLossLine, sellstopProfitLossLine
 ]
 
 export default overlays

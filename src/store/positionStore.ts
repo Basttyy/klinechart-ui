@@ -148,7 +148,6 @@ export const useOrder = () => {
           const session = chartsession()
           session!.current_bal = +session?.current_bal! + +updatedorder.pl!
           setChartsession(session)
-          console.log(chartsession())
           const orderlist = orderList().map(orda => (orda.orderId === updatedorder?.orderId ? updatedorder : orda))
           setOrderList(orderlist)
         } else {
