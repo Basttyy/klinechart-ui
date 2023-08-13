@@ -18,16 +18,16 @@ import { currenttick } from '../../../store/tickStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 
-const buyLimitLine: OverlayTemplate = {
-  name: 'buyLimitLine',
+const sellLimitLine: OverlayTemplate = {
+  name: 'sellLimitLine',
   totalStep: 2,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-    if (overlay.points[0].value! >= currenttick()?.close! ) {
-      useOrder().triggerPending(overlay, 'buy')
+    if (overlay.points[0].value! <= currenttick()?.close! ) {
+      useOrder().triggerPending(overlay, 'sell')
     }
     return [
       {
@@ -37,16 +37,16 @@ const buyLimitLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#00698b'
+          color: '#fb7b50'
         },
         ignoreEvent: true
       },
       {
         type: 'rectText',
-        attrs: { x: bounding.width, y: coordinates[0].y, text: `buyLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
+        attrs: { x: bounding.width, y: coordinates[0].y, text: `sellLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
         styles: {
           color: 'white',
-          backgroundColor: '#00698b'
+          backgroundColor: '#fb7b50'
         },
         ignoreEvent: true
       }
@@ -74,7 +74,7 @@ const buyLimitLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
+    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#fb7b50' } }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -84,7 +84,7 @@ const buyLimitLine: OverlayTemplate = {
       paneId: event.overlay.paneId
     })
     
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
+    if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
       const res = useOrder().updateEntryPointAndReturnValue(event, points)
       if(res) event.overlay.points[0].value = res
     }
@@ -102,4 +102,4 @@ const buyLimitLine: OverlayTemplate = {
   }
 }
 
-export default buyLimitLine
+export default sellLimitLine
