@@ -25,14 +25,7 @@ const buyLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-    let id = overlay.id
-    let order: OrderInfo|null
-    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-      order.pips = parseFloat(text)
-      order.pl = order.pips * symbol()?.dollarPerPip!
-      const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-      setOrderList(orderlist)
-    }
+    useOrder().updatePipsAndPL(overlay, text)
     return [
       {
         type: 'line',
@@ -81,8 +74,7 @@ const buyLine: OverlayTemplate = {
     return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
   },
   onRightClick: (event): boolean => {
-    console.log(`${event.figureIndex}   ${event.figureKey}`)
-    useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
     //the overlay represented an order that does not exist on our pool, it should be handled here
     return false
   }

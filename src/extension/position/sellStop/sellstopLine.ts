@@ -29,14 +29,6 @@ const sellstopLine: OverlayTemplate = {
       useOrder().triggerPending(overlay, 'sell')
     }
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
-    // let id = overlay.id
-    // let order: OrderInfo|null
-    // if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-    //   order.pips = parseFloat(text)
-    //   order.pl = order.pips * symbol()?.dollarPerPip!
-    //   const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-    //   setOrderList(orderlist)
-    // }
     return [
       {
         type: 'line',

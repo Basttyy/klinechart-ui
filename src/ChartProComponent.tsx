@@ -31,9 +31,9 @@ import {
 
 import { translateTimezone } from './widget/timezone-modal/data'
 
-import { SymbolInfo, Period, ChartProOptions, ChartPro } from './types'
+import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
 import { currenttick, setCurrentTick } from './store/tickStore'
-import { orderList, ordercontr, setOrderContr, setOrderList } from './store/positionStore'
+import { drawOrder, currentequity, orderList, ordercontr, setOrderContr, setOrderList, setCurrentequity } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -69,6 +69,8 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
 
 export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 export const [symbol, setSymbol] = createSignal<SymbolInfo>()
+export const [chartsession, setChartsession] = createSignal<sessionType|null>(null)
+export const [chartsessionCtr, setChartsessionCtr] = createSignal<ChartSessionResource|null>(null)
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -108,6 +110,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
   })
   setSymbol(props.symbol)
+  setChartsession(props.chartSession)
+  setChartsessionCtr(props.chartSessionController)
 
   props.ref({
     setTheme,
@@ -181,9 +185,50 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   }
 
   const cleanup = () => {   //Cleanup objects when leaving chart page
-    console.log("cleanup called")
-    clearInterval(timerId)
-    props.navigateBack()
+    const doJob = async () => {
+      setInstanceapi(null)
+      clearInterval(timerId)
+      props.datafeed.unsubscribe()
+  
+      const updateRunningOrders = async (orders: OrderInfo[], symbol: SymbolInfo, orderctr: OrderResource) => {
+        let i = 0, pL = 0
+        if (orders && symbol !== undefined) {
+          while(i < orders.length) {
+            if (orders[i].pl !== null && orders[i].pips !== null) {
+              pL = +pL + +orders[i].pl!
+              await orderctr.modifyOrder({
+                id: orders[i].orderId, //in a real application this should be calculated on backend
+                pips: orders[i].pips, //in a real application this should be calculated on backend
+                pl: orders[i].pips! * symbol!.dollarPerPip!
+              })
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            i++
+          }
+        }
+        return pL
+      }
+      const updateChartSession = async (_session: sessionType, _pl: number, _timestamp: number, _sessionctr: ChartSessionResource) => {
+        const pl = +_session.current_bal + +_pl
+        console.log(`equity is ${pl}`)
+        if (_session) {
+          await _sessionctr?.updateSession({
+            id: _session.id,
+            current_bal: _session.current_bal,
+            equity: pl,
+            chart_timestamp: _timestamp
+          })
+        }
+      }
+      const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+  
+      let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
+      await updateChartSession (chartsession()!, pl, currenttick()!.timestamp, chartsessionCtr()!)
+      // await new Promise(resolve => setTimeout(resolve, 50000));
+      dispose(widgetRef!)
+      window.location.href = '/dashboard'
+    }
+    doJob()
   }
 
   onMount(() => {
@@ -309,7 +354,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   })
 
   onCleanup(() => {
-    console.log("on cleanup called")
     window.removeEventListener('resize', documentResize)
     clearInterval(timerId)
     dispose(widgetRef!)
@@ -344,6 +388,18 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         props.datafeed.subscribe(s, p, data => {
           setCurrentTick(data)
           widget?.updateData(data)
+
+          const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+          if (orders && symbol() !== undefined) {
+            let pl = 0, i = 0
+            while(i < orders.length) {
+              if (orders[i].pl !== null && orders[i].pips !== null) {
+                pl += orders[i].pl!
+              }
+              i++
+            }
+            setCurrentequity(pl)
+          }
         })
         loading = false
         setLoadingVisible(false)
@@ -464,10 +520,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
     if (orders) {
       setOrderList(orders)
+      orders.forEach(order => {
+        if (order.exitType)
+          return
+        drawOrder(order)
+      });
     }
   })
 
-  // Will comment this out until we find a way to make sure the object is cleared when user no longer on this page
   createEffect( () => {
     timerId = setInterval(() => {
       const updateRunningOrders = async () => {
@@ -487,8 +547,16 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           }
         }
       }
+      const updateChartSession = async () => {
+        let session = chartsession()
+        if (session) {
+          session.chart_timestamp = currenttick()?.timestamp!
+          await chartsessionCtr()?.updateSession(session)
+        }
+      }
+      updateChartSession ()
       updateRunningOrders ()
-    }, 1 * 120 * 1000)     // Run this job every 1min
+    }, 2 * 60 * 1000)     // Run this job every 2min
   })
 
   return (

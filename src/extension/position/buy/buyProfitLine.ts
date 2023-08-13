@@ -44,12 +44,7 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
       let id = overlay.id
       let order: OrderInfo|null
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order.pips = parseFloat(text)
-        order.pl = order.pips * symbol()?.dollarPerPip!
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-      }
+      useOrder().updatePipsAndPL(overlay, text)
       data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buy | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {

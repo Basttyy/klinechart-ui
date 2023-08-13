@@ -13,7 +13,9 @@
  */
 
 import { OverlayTemplate, utils } from 'klinecharts'
-import { useOrder } from '../../../store/positionStore'
+import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
+import { OrderInfo } from '../../../types'
+import { symbol } from '../../../ChartProComponent'
 
 const sellLine: OverlayTemplate = {
   name: 'sellLine',
@@ -22,6 +24,14 @@ const sellLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
+    let id = overlay.id
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      order.pips = parseFloat(text)
+      order.pl = order.pips * symbol()?.dollarPerPip!
+      const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+      setOrderList(orderlist)
+    }
     return [
       {
         type: 'line',
@@ -68,6 +78,11 @@ const sellLine: OverlayTemplate = {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
     return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#fb7b50' } }
+  },
+  onRightClick: (event): boolean => {
+    useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    //the overlay represented an order that does not exist on our pool, it should be handled here
+    return false
   }
 }
 

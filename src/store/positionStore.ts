@@ -1,12 +1,13 @@
 import { Chart, Nullable, Overlay, OverlayEvent, Point } from 'klinecharts';
-import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType } from '../types';
+import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType, sessionType } from '../types';
 import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';
-import { instanceapi, symbol } from '../ChartProComponent';
+import { chartsession, instanceapi, setChartsession, symbol } from '../ChartProComponent';
 
 export const [chartapi, setChartapi] = createSignal<Nullable<Chart>>(null);
 export const [ordercontr, setOrderContr] = createSignal<Nullable<OrderResource>>(null)
 export const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
+export const [currentequity, setCurrentequity] = createSignal<number>(0)
 
 export const useOrder = () => {
   /**
@@ -59,10 +60,14 @@ export const useOrder = () => {
    */
   const calcPL = (middle:number, dp:number, usereal: boolean = false, buysell: 'buy'|'sell' = 'buy'): string => {
     let multiplier = 10**(dp-1), value: string
-    if (buysell === 'buy')
-      value = usereal ? ((currenttick()!.close-middle) * multiplier).toFixed(2) : (currenttick()!.close-middle).toFixed(dp)
-    else
-      value = usereal ? ((middle-currenttick()!.close) * multiplier).toFixed(2) : (middle-currenttick()!.close).toFixed(dp)
+    if (currenttick()) {
+      if (buysell === 'buy')
+        value = usereal ? ((currenttick()!.close-middle) * multiplier).toFixed(2) : (currenttick()!.close-middle).toFixed(dp)
+      else
+        value = usereal ? ((middle-currenttick()!.close) * multiplier).toFixed(2) : (middle-currenttick()!.close).toFixed(dp)
+    } else {
+      value = ''
+    }
     
     return value
   }
@@ -135,11 +140,15 @@ export const useOrder = () => {
           id: order.orderId,
           exitpoint: currenttick()?.close,
           exittype: type,
-          pips: order.pips,   //in a real application this should be calculated on backend
-          pl: order.pl    //in a real application this should be calculated on backend
+          pips: type == 'cancel' ? undefined : order.pips,   //in a real application this should be calculated on backend
+          pl: type == 'cancel' ? undefined : order.pl    //in a real application this should be calculated on backend
         })!
         
         if (updatedorder) {
+          const session = chartsession()
+          session!.current_bal = +session?.current_bal! + +updatedorder.pl!
+          setChartsession(session)
+          console.log(chartsession())
           const orderlist = orderList().map(orda => (orda.orderId === updatedorder?.orderId ? updatedorder : orda))
           setOrderList(orderlist)
         } else {
@@ -152,12 +161,17 @@ export const useOrder = () => {
 
   const updatePipsAndPL = (overlay:Overlay, text:any) => {
     let id = overlay.id
-    // console.log(id, 'inside func')
     let order: OrderInfo|null
     if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
       order.pips = parseFloat(text)
-      order.pl = order.pips * symbol()?.dollarPerPip!
+      order.pl = order.pips * order.lotSize * symbol()?.dollarPerPip!
       const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
+      // let session = chartsession()
+      // if (session) {
+      //   const equity = session.equity
+      //   session.equity = equity + order.pl
+      //   setChartsession(session)
+      // }
       setOrderList(orderlist)
     }
   }

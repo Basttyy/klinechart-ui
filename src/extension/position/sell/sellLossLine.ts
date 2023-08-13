@@ -15,8 +15,9 @@
 import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
 
 import { currenttick } from '../../../store/tickStore'
-import { useOrder } from '../../../store/positionStore'
+import { orderList, useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
+import { OrderInfo } from '../../../types'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -43,6 +44,7 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       data.texts.push({ x: endX - utils.calcTextWidth('sell '), y: coordinates[0].y, text: 'sell', baseline: 'bottom' })
 
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
+      useOrder().updatePipsAndPL(overlay, text)
       data.recttexts.push({ x: endX, y: coordinates[0].y, text: `sell | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {
@@ -155,6 +157,26 @@ const sellLossLine: OverlayTemplate = {
       event.overlay.points[1].value = (points as Partial<Point>[])[0].value
     }
     return true
+  },
+  onPressedMoveEnd: (event): boolean => {
+    let id = event.overlay.id
+    let order: OrderInfo|null
+    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
+      useOrder().updateOrder({
+        id: order.orderId,
+        stoploss: order.stopLoss
+      })
+      return false
+    }
+    //the overlay represented an order that does not exist on our pool, it should be handled here
+    return false
+  },
+  onRightClick: (event): boolean => {
+    if (event.figureIndex == 0)
+      useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    else
+      useOrder().removeStopOrTP(event.overlay, 'sl')
+    return false
   }
 }
 
