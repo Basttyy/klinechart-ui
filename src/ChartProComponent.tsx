@@ -71,6 +71,7 @@ export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 export const [symbol, setSymbol] = createSignal<SymbolInfo>()
 export const [chartsession, setChartsession] = createSignal<sessionType|null>(null)
 export const [chartsessionCtr, setChartsessionCtr] = createSignal<ChartSessionResource|null>(null)
+export const [pausedStatus, setPausedStatus] = createSignal(false)
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -383,6 +384,10 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
         widget?.applyNewData(kLineDataList, kLineDataList.length > 0)
         setCurrentTick(kLineDataList[kLineDataList.length -1])
+        if (pausedStatus()) {
+          setPausedStatus(false);
+          (props.datafeed as any).setIsPaused = pausedStatus()
+        }
         props.datafeed.subscribe(s, p, data => {
           setCurrentTick(data)
           widget?.updateData(data)

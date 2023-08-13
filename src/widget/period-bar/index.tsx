@@ -18,6 +18,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../ty
 
 import i18n from '../../i18n'
 import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
+import { pausedStatus, setPausedStatus } from '../../ChartProComponent'
 
 export interface PeriodBarProps {
   locale: string
@@ -46,7 +47,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const [fullScreen, setFullScreen] = createSignal(false)
   const [showPeriodList, setShowPeriodList] = createSignal(false);
   const [showSpeed, setShowSpeed] = createSignal(false)
-  const [pausedStatus, setPausedStatus] = createSignal(false)
   const [range, setRange] = createSignal(1);
   const [overflow, setOverflow] = createSignal(true)
 
@@ -81,6 +81,8 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onExitClicked = () => {
+    setPausedStatus(!pausedStatus());
+    (props.datafeed as any).setIsPaused = pausedStatus()
     props.freeResources()
     //TODO: Other tasks to be carried out here before exiting chart
   }
@@ -140,6 +142,9 @@ const PeriodBar: Component<PeriodBarProps> = props => {
               props.periods.map(p => (
                 <li 
                   onClick={() => {
+                    setPausedStatus(!pausedStatus());
+                    (props.datafeed as any).setIsPaused = pausedStatus()
+
                     props.onPeriodChange(p)
                     setOverflow(!overflow())
                     setShowPeriodList(false)
