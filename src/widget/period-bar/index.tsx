@@ -70,7 +70,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onOrderPlaced = (order: OrderInfo|null) => {
-    console.log(order)
     if (order) {
       drawOrder(order)
       let orderlist = orderList()
@@ -82,7 +81,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onExitClicked = () => {
-    console.log('onExit clicked')
     props.freeResources()
     // window.location.href = '/dashboard'
     //TODO: Other tasks to be carried out here before exiting chart

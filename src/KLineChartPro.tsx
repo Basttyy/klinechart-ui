@@ -19,6 +19,7 @@ import { utils, Nullable, DeepPartial, Styles } from 'klinecharts'
 import ChartProComponent from './ChartProComponent'
 
 import { SymbolInfo, Period, ChartPro, ChartProOptions } from './types'
+import { onCleanup } from 'solid-js'
 
 const Logo = (
   <svg class="logo" viewBox="0 0 80 92">
@@ -31,7 +32,6 @@ const Logo = (
 export default class KLineChartPro implements ChartPro {
   constructor (options: ChartProOptions) {
     if (utils.isString(options.container)) {
-      console.log(options.container as string)
       this._container = document.getElementById(options.container as string)
       if (!this._container) {
         throw new Error('Container is null')
@@ -39,7 +39,6 @@ export default class KLineChartPro implements ChartPro {
     } else {
       this._container = options.container as HTMLElement
     }
-    console.log(this._container, 'hello')
     this._container.classList.add('klinecharts-pro')
     this._container.setAttribute('data-theme', options.theme ?? 'light')
 
@@ -74,14 +73,21 @@ export default class KLineChartPro implements ChartPro {
           mainIndicators={options.mainIndicators ?? []}
           subIndicators={options.subIndicators ?? []}
           datafeed={options.datafeed}
+          chartSession={options.chartSession}
           dataTimestamp={options.dataTimestamp}
           orderController={options.orderController}
+          chartSessionController={options.chartSessionController}
           navigateBack={options.navigateBack}
           rootElementId={options.rootElementId}
         />
       ),
       this._container
     )
+  }
+
+  destroy () {
+    this._container = null
+    this._chartApi = null
   }
 
   private _container: Nullable<HTMLElement>

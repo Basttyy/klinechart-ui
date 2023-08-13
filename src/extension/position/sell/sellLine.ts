@@ -78,6 +78,11 @@ const sellLine: OverlayTemplate = {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
     return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#fb7b50' } }
+  },
+  onRightClick: (event): boolean => {
+    useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    //the overlay represented an order that does not exist on our pool, it should be handled here
+    return false
   }
 }
 

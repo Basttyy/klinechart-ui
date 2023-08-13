@@ -90,7 +90,7 @@ export default class DefaultDatafeed implements Datafeed {
     this._prevSymbolMarket = symbol.market
   }
 
-  unsubscribe(symbol: SymbolInfo, period: Period): void {
+  unsubscribe(symbol?: SymbolInfo, period?: Period): void {
     // do something
   }
 

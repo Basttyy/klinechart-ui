@@ -74,8 +74,7 @@ const buyLine: OverlayTemplate = {
     return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
   },
   onRightClick: (event): boolean => {
-    console.log(`${event.figureIndex}   ${event.figureKey}`)
-    useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
     //the overlay represented an order that does not exist on our pool, it should be handled here
     return false
   }

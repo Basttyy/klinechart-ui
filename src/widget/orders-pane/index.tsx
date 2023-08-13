@@ -40,7 +40,6 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   }
 
   const onOrderEdited = (order: OrderInfo|null) => {
-    console.log(order)
     if (order) {
       drawOrder(order)
       let orderlist = orderList()
@@ -50,14 +49,11 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   }
 
   const performOrderAction = (order: OrderInfo, action: 'edit'|'close'|'cancel') => {
-    console.log(`${action} ${order.orderId}: was clicked`)
     let overlay = instanceapi()?.getOverlayById(`orderline_${order.orderId}`)
     if (!overlay) {
-      console.log(`order line not found for order id ${order.orderId}`)
       return
     }
     if (action == 'edit') {
-      console.log('action is edit')
       props.orderController.launchOrderModal('modifyorder', onOrderEdited, {
         id: order.orderId,
         stoploss: order.stopLoss,

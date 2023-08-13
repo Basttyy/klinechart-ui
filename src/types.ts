@@ -69,6 +69,35 @@ export interface Period {
   text: string
 }
 
+export interface sessionType {
+	id: number;
+	starting_bal: number;
+	current_bal: number;
+  equity: number;
+	strategy_id: number;
+	user_id: number;
+	pair: string;
+	chart: null;
+	chart_timestamp: number|null;
+	start_date: string;
+	end_date: string;
+}
+
+export interface sessionModifyType {
+	id?: number;
+	starting_bal?: number;
+	current_bal?: number;
+  equity?: number;
+	strategy_id?: number;
+	user_id?: number;
+	pair?: string;
+	chart?: null;
+	chart_timestamp?: number|null;
+	start_date?: string;
+	end_date?: string;
+}
+
+
 export type DatafeedSubscribeCallback = (data: KLineData) => void
 export type OrderPlacedCallback = (data: OrderInfo|null) => void     //this should be called when a user has successfully placed an order from consumer project side
 
@@ -76,7 +105,7 @@ export interface Datafeed {
   searchSymbols (search?: string): Promise<SymbolInfo[]>
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
-  unsubscribe (symbol: SymbolInfo, period: Period): void
+  unsubscribe (symbol?: SymbolInfo, period?: Period): void
 }
 
 export interface OrderResource {
@@ -87,6 +116,11 @@ export interface OrderResource {
   modifyOrder (order: OrderModifyInfo): Promise<OrderInfo|null>
   unsetSlOrTP (order_id: string|number, slortp: 'sl'|'tp'): Promise<OrderInfo|null>
   launchOrderModal (type: OrderModalType, callback: OrderPlacedCallback, order?: OrderModifyInfo): void
+}
+
+export interface ChartSessionResource {
+  retrieveSession (id: number): Promise<sessionType|null>
+  updateSession (session: sessionModifyType): Promise<sessionType|null>
 }
 
 export interface ChartProOptions {
@@ -104,8 +138,10 @@ export interface ChartProOptions {
   mainIndicators?: string[]
   subIndicators?: string[]
   datafeed: Datafeed
+  chartSession: sessionType
   dataTimestamp: number
   orderController: OrderResource
+  chartSessionController: ChartSessionResource
   navigateBack: () => void
   rootElementId: string
 }

@@ -49,7 +49,6 @@ const positionBox: OverlayTemplate = {
     let texts;
     const result:any = []
     let multiplier = 10*precision.price
-    // console.log(currenttick()?.close)
     if (coordinates.length > 1) {
       if(coordinates[0].y > coordinates[1].y) {
         coordinates[0].y = coordinates[1].y
@@ -67,7 +66,6 @@ const positionBox: OverlayTemplate = {
         })
       }
 
-      // console.log('outside', coordinates[1].y, coordinates[0].y)
       // making sure the middle line does not cross over the top line
       // if(coordinates[1].y < coordinates[0].y+10) {
         // coordinates[1].y = coordinates[0].y+10
