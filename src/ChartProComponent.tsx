@@ -223,7 +223,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   
       let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
       await updateChartSession (chartsession()!, pl, currenttick()!.timestamp, chartsessionCtr()!)
-      // await new Promise(resolve => setTimeout(resolve, 50000));
       dispose(widgetRef!)
       window.location.href = '/dashboard'
     }

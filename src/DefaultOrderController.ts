@@ -61,7 +61,7 @@ export default class DefaultOrderController implements OrderResource {
       stoploss: stop_loss,
       takeprofit: take_profit,
     })
-    // const response = await fetch(`${this.apiurl}/orders/${order_id}`)
+    
     const data = await response?.json()
     return {
       orderId: data.id,
@@ -151,11 +151,8 @@ export default class DefaultOrderController implements OrderResource {
     try {
       const res = await fetch(`${endpoint}`, options)
       return res
-      // const data = await res.json()
-      // return data
     } catch (err:any) {
       alert(err.message ?? 'An error occured')
-      // alert('error', err.message ?? 'An error occured')
       return null
     }
   }

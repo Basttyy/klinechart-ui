@@ -300,10 +300,14 @@ export const drawOrder = (order: OrderInfo|null) => {
         name = 'sellstopLine'
       } else if (order.stopLoss && !order.takeProfit) {
         name = 'sellstopLossLine'
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
       } else if (!order.stopLoss && order.takeProfit) {
         name = 'sellstopProfitLine'
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.takeProfit })
       } else if (order.stopLoss && order.takeProfit) {
         name = 'sellstopProfitLossLine'
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.takeProfit })
+        points.push({ timestamp: Date.parse(order?.entryTime!), value: order.stopLoss })
       }
       break
     case 'selllimit':
@@ -332,5 +336,3 @@ export const drawOrder = (order: OrderInfo|null) => {
     lock
   })
 };
-
-// return { drawOrder };

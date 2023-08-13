@@ -23,8 +23,6 @@ import { instanceapi } from '../../ChartProComponent'
 export interface OrderPanelProps {
   context: string
   orderController: OrderResource
-  // onOrderSelected: (order: OrderInfo) => void
-  // onMouseDown: (event: MouseEvent) => void
 }
 
 const GROUP_ID = 'order_panel'
@@ -34,10 +32,6 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
 
   const [loadingVisible, setLoadingVisible] = createSignal(true)
   const [ordersList, setOrdersList] = createSignal<OrderInfo[]>([])
-
-  const onOrderSelected = (order: OrderInfo) => {
-    alert(`${order.orderId} is selected`)
-  }
 
   const onOrderEdited = (order: OrderInfo|null) => {
     if (order) {

@@ -61,11 +61,8 @@ export default class DefaultSessionController implements ChartSessionResource {
     try {
       const res = await fetch(`${endpoint}`, options)
       return res
-      // const data = await res.json()
-      // return data
     } catch (err:any) {
       alert(err.message ?? 'An error occured')
-      // alert('error', err.message ?? 'An error occured')
       return null
     }
   }

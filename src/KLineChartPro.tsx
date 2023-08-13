@@ -19,7 +19,6 @@ import { utils, Nullable, DeepPartial, Styles } from 'klinecharts'
 import ChartProComponent from './ChartProComponent'
 
 import { SymbolInfo, Period, ChartPro, ChartProOptions } from './types'
-import { onCleanup } from 'solid-js'
 
 const Logo = (
   <svg class="logo" viewBox="0 0 80 92">
