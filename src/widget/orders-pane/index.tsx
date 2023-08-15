@@ -53,7 +53,8 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
         stoploss: order.stopLoss,
         takeprofit: order.takeProfit,
         entrypoint: order.action == 'buy' || order.action == 'sell' ? undefined : order.entryPoint,
-        lotsize: order.action == 'buy' || order.action == 'sell' ? undefined : order.lotSize
+        lotsize: order.action == 'buy' || order.action == 'sell' ? undefined : order.lotSize,
+        action: order.action
       })
       return
     }
