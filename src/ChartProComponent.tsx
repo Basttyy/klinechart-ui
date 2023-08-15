@@ -200,7 +200,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
               await orderctr.modifyOrder({
                 id: orders[i].orderId, //in a real application this should be calculated on backend
                 pips: orders[i].pips, //in a real application this should be calculated on backend
-                pl: orders[i].pips! * symbol!.dollarPerPip!
+                pl: orders[i].pips! * orders[i].lotSize * symbol!.dollarPerPip!
               })
               await new Promise(resolve => setTimeout(resolve, 500));
             }
