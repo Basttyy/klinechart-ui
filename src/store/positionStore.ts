@@ -224,6 +224,14 @@ export const useOrder = () => {
 export const drawOrder = (order: OrderInfo|null) => {
   if (!order)
     return
+  let overlay = instanceapi()?.getOverlayById(`orderline_${order!.orderId}`)
+  if(overlay) {
+    instanceapi()?.removeOverlay({    //remove the overlay first to prevent flooding this backend with api calls
+      id: overlay.id,
+      groupId: overlay.groupId,
+      name: overlay.name
+    })
+  }
   let name = ''
   let lock = false;
   order!.entryPoint = order?.entryPoint! - 0.00001+0.00001   //for some reason adding and subtracting the same value stop the overlay from vanishing when dragged
