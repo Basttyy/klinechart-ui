@@ -32,8 +32,8 @@ import {
 import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
-import { currenttick, setCurrentTick } from './store/tickStore'
-import { drawOrder, currentequity, orderList, ordercontr, setOrderContr, setOrderList, setCurrentequity } from './store/positionStore'
+import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
+import { drawOrder, orderList, ordercontr, setOrderContr, setOrderList, setCurrentequity } from './store/positionStore'
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -209,21 +209,21 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         }
         return pL
       }
-      const updateChartSession = async (_session: sessionType, _pl: number, _timestamp: number, _sessionctr: ChartSessionResource) => {
+      const updateChartSession = async (_session: sessionType, _pl: number, _sessionctr: ChartSessionResource) => {
         const pl = +_session.current_bal + +_pl
         if (_session) {
           await _sessionctr?.updateSession({
             id: _session.id,
             current_bal: _session.current_bal,
             equity: pl,
-            chart_timestamp: _timestamp
+            chart_timestamp: tickTimestamp()
           })
         }
       }
       const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
   
       let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
-      await updateChartSession (chartsession()!, pl, currenttick()!.timestamp, chartsessionCtr()!)
+      await updateChartSession (chartsession()!, pl, chartsessionCtr()!)
       dispose(widgetRef!)
       window.location.href = '/dashboard'
     }
@@ -384,12 +384,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
         widget?.applyNewData(kLineDataList, kLineDataList.length > 0)
         setCurrentTick(kLineDataList[kLineDataList.length -1])
-        if (pausedStatus()) {
-          setPausedStatus(false);
-          (props.datafeed as any).setIsPaused = pausedStatus()
-        }
-        props.datafeed.subscribe(s, p, data => {
+        // if (pausedStatus()) {
+        //   setPausedStatus(false);
+        //   (props.datafeed as any).setIsPaused = pausedStatus()
+        // }
+        props.datafeed.subscribe(s, p, (data, timestamp) => {
           setCurrentTick(data)
+          if (timestamp)
+            setTickTimestamp(timestamp)
           widget?.updateData(data)
 
           const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
