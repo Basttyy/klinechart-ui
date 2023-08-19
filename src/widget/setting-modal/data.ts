@@ -13,94 +13,17 @@
  */
 
 import i18n from '../../i18n'
+import getCandleSettings from './settings/candle'
+import getIndicatorSettings from './settings/indicator'
+import getXAxisSettings from './settings/xAxis'
+import getYAxisSettings from './settings/yAxis'
 
 export function getOptions (locale: string) {
   return [
-    // candle
-    {
-      key: 'candle.type',
-      text: i18n('candle_type', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'candle_solid', text: i18n('candle_solid', locale) },
-        { key: 'candle_stroke', text: i18n('candle_stroke', locale) },
-        { key: 'candle_up_stroke', text: i18n('candle_up_stroke', locale) },
-        { key: 'candle_down_stroke', text: i18n('candle_down_stroke', locale) },
-        { key: 'ohlc', text: i18n('ohlc', locale) },
-        { key: 'area', text: i18n('area', locale) }
-      ]
-    },
-    {
-      key: 'candle.tooltip.showRule',
-      text: i18n('candle_tooltip', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'none', text: i18n('none', locale) },
-        { key: 'always', text: i18n('always', locale) },
-        { key: 'follow_cross', text: i18n('follow_cross', locale) }
-      ]
-    },
-    {
-      key: 'candle.priceMark.last.show',
-      text: i18n('last_price_show', locale),
-      component: 'switch'
-    },
-    {
-      key: 'candle.priceMark.high.show',
-      text: i18n('high_price_show', locale),
-      component: 'switch'
-    },
-    {
-      key: 'candle.priceMark.low.show',
-      text: i18n('low_price_show', locale),
-      component: 'switch'
-    },
-
-    // indicator
-    {
-      key: 'indicator.lastValueMark.show',
-      text: i18n('indicator_last_value_show', locale),
-      component: 'switch'
-    },
-    {
-      key: 'indicator.tooltip.showRule',
-      text: i18n('Indicator Tooltip', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'none', text: i18n('none', locale) },
-        { key: 'always', text: i18n('always', locale) },
-        { key: 'follow_cross', text: i18n('follow_cross', locale) }
-      ]
-    },
-
-    //x axis
-    {
-      key: 'xAxis.show',
-      text: i18n('Show xAxis', locale),
-      component: 'switch',
-    },
-
-    // y axis
-    {
-      key: 'yAxis.show',
-      text: i18n('Show yAxis', locale),
-      component: 'switch',
-    },
-    {
-      key: 'yAxis.type',
-      text: i18n('price_axis_type', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'normal', text: i18n('normal', locale) },
-        { key: 'percentage', text: i18n('percentage', locale) },
-        { key: 'log', text: i18n('log', locale) }
-      ],
-    },
-    {
-      key: 'yAxis.reverse',
-      text: i18n('reverse_coordinate', locale),
-      component: 'switch',
-    },
+    ...getCandleSettings(locale),
+    ...getIndicatorSettings(locale),
+    ...getXAxisSettings(locale),
+    ...getYAxisSettings(locale),
 
     // grid
     {
@@ -131,55 +54,56 @@ export function getOptions (locale: string) {
     },
 
     // overlay
-    // {
-    //   key: 'overlay.line.style',
-    //   text: i18n('Overlay Line Style', locale),
-    //   component: 'select',
-    //   dataSource: [
-    //     { key: 'solid', text: i18n('solid', locale) },
-    //     { key: 'dashed', text: i18n('dashed', locale) }
-    //   ]
-    // },
-    // {
-    //   key: 'overlay.arc.style',
-    //   text: i18n('Overlay Arc Style', locale),
-    //   component: 'select',
-    //   dataSource: [
-    //     { key: 'solid', text: i18n('solid', locale) },
-    //     { key: 'dashed', text: i18n('dashed', locale) }
-    //   ]
-    // },
-    // {
-    //   key: 'overlay.rect.style',
-    //   text: i18n('Overlay Rect Style', locale),
-    //   component: 'select',
-    //   dataSource: [
-    //     { key: 'fill', text: i18n('fill', locale) },
-    //     { key: 'stroke', text: i18n('stroke', locale) },
-    //     { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
-    //   ]
-    // },
-    // {
-    //   key: 'overlay.polygon.style',
-    //   text: i18n('Overlay Polygon Style', locale),
-    //   component: 'select',
-    //   dataSource: [
-    //     { key: 'fill', text: i18n('fill', locale) },
-    //     { key: 'stroke', text: i18n('stroke', locale) },
-    //     { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
-    //   ]
-    // },
-    // {
-    //   key: 'overlay.circle.style',
-    //   text: i18n('Overlay Circle Style', locale),
-    //   component: 'select',
-    //   dataSource: [
-    //     { key: 'fill', text: i18n('fill', locale) },
-    //     { key: 'stroke', text: i18n('stroke', locale) },
-    //     { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
-    //   ]
-    // },
+    {
+      key: 'overlay.line.style',
+      text: i18n('Overlay Line Style', locale),
+      component: 'select',
+      dataSource: [
+        { key: 'solid', text: i18n('solid', locale) },
+        { key: 'dashed', text: i18n('dashed', locale) }
+      ]
+    },
+    {
+      key: 'overlay.arc.style',
+      text: i18n('Overlay Arc Style', locale),
+      component: 'select',
+      dataSource: [
+        { key: 'solid', text: i18n('solid', locale) },
+        { key: 'dashed', text: i18n('dashed', locale) }
+      ]
+    },
+    {
+      key: 'overlay.rect.style',
+      text: i18n('Overlay Rect Style', locale),
+      component: 'select',
+      dataSource: [
+        { key: 'fill', text: i18n('fill', locale) },
+        { key: 'stroke', text: i18n('stroke', locale) },
+        { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
+      ]
+    },
+    {
+      key: 'overlay.polygon.style',
+      text: i18n('Overlay Polygon Style', locale),
+      component: 'select',
+      dataSource: [
+        { key: 'fill', text: i18n('fill', locale) },
+        { key: 'stroke', text: i18n('stroke', locale) },
+        { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
+      ]
+    },
+    {
+      key: 'overlay.circle.style',
+      text: i18n('Overlay Circle Style', locale),
+      component: 'select',
+      dataSource: [
+        { key: 'fill', text: i18n('fill', locale) },
+        { key: 'stroke', text: i18n('stroke', locale) },
+        { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
+      ]
+    },
   ]
+
 }
 
 // kline documentation for settings
