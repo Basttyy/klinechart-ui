@@ -147,7 +147,7 @@ const buyLossLine: OverlayTemplate = {
       paneId: event.overlay.paneId
     })
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close! &&
-      (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
+      // (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
       event.figureIndex == 1
     ) {
       let id = event.overlay.id

@@ -98,14 +98,14 @@ export interface sessionModifyType {
 }
 
 
-export type DatafeedSubscribeCallback = (data: KLineData) => void
+export type DatafeedSubscribeCallback = (data: KLineData, timestamp?: number) => void
 export type OrderPlacedCallback = (data: OrderInfo|null) => void     //this should be called when a user has successfully placed an order from consumer project side
 
 export interface Datafeed {
   searchSymbols (search?: string): Promise<SymbolInfo[]>
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
-  unsubscribe (symbol?: SymbolInfo, period?: Period): void
+  unsubscribe (symbol?: SymbolInfo, period?: Period, currtimestamp?: number): void
 }
 
 export interface OrderResource {
