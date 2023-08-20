@@ -1,6 +1,8 @@
 import i18n from '../../../i18n'
+import useDataSource from './dataSource'
 
 const getYAxisSettings = (locale:string) => {
+  const { size, font_weight, font_size } = useDataSource(locale)
 	return [
 		{
       key: 'yAxis.show',
@@ -45,12 +47,7 @@ const getYAxisSettings = (locale:string) => {
       key: 'yAxis.axisLine.size',
       text: i18n('Axis line size', locale),
       component: 'select',
-      dataSource: [
-        { key: 1, text: 1},
-        { key: 2, text: 2},
-        { key: 3, text: 3},
-        { key: 4, text: 4}
-      ]
+      dataSource: size
     },
     {
       key: 'yAxis.tickText.show',
@@ -61,21 +58,13 @@ const getYAxisSettings = (locale:string) => {
 			key: 'yAxis.tickText.size',
 			text: i18n('Tick text size', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
     {
 			key: 'yAxis.tickText.weight',
 			text: i18n('Tick text Weight', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'normal', text: i18n('Normal', locale) }
-			]
+			dataSource: font_weight
 		},
     {
       key: 'yAxis.tickLine.show',
@@ -86,27 +75,13 @@ const getYAxisSettings = (locale:string) => {
       key: 'yAxis.tickLine.size',
       text: i18n('Tick line size', locale),
       component: 'select',
-      dataSource: [
-        { key: 1, text: 1},
-        { key: 2, text: 2},
-        { key: 3, text: 3},
-        { key: 4, text: 4}
-      ]
+      dataSource: size
     },
     {
       key: 'yAxis.tickLine.length',
       text: i18n('Tick line length', locale),
       component: 'select',
-      dataSource: [
-        { key: 1, text: 1},
-        { key: 2, text: 2},
-        { key: 3, text: 3},
-        { key: 4, text: 4},
-        { key: 5, text: 5},
-        { key: 6, text: 6},
-        { key: 7, text: 7},
-        { key: 8, text: 8}
-      ]
+      dataSource: size
     }
 	]
 }

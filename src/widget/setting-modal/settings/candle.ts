@@ -1,6 +1,8 @@
 import i18n from '../../../i18n'
+import useDataSource from './dataSource'
 
 const getCandleSettings = (locale:string) => {
+	const { font_family, font_size, font_weight, size, solid_dashed, fill_stroke, none_always_followCross } = useDataSource(locale)
 	return [
 		{
 			key: 'candle.type',
@@ -19,12 +21,7 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.area.lineSize',
 			text: i18n('Area linesize', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 1, text: 1 },
-				{ key: 2, text: 2 },
-				{ key: 3, text: 3 },
-				{ key: 4, text: 4 }
-			]
+			dataSource: size
 		},
 		{
 			key: 'candle.priceMark.last.show',
@@ -40,29 +37,19 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.priceMark.high.textSize',
 			text: i18n('Pricemark High Textsize', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
 		{
 			key: 'candle.priceMark.high.textFamily',
 			text: i18n('Pricemark High Font family', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'Helvetica Neue', text: i18n('Helvetica Neue', locale) },
-			]
+			dataSource: font_family
 		},
 		{
 			key: 'candle.priceMark.high.textWeight',
 			text: i18n('Pricemark High Font Weight', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'normal', text: i18n('Normal', locale) }
-			]
+			dataSource: font_weight
 		},
 		{
 			key: 'candle.priceMark.low.show',
@@ -73,29 +60,19 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.priceMark.low.textSize',
 			text: i18n('Pricemark Low Textsize', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
 		{
 			key: 'candle.priceMark.low.textFamily',
 			text: i18n('Pricemark Low Font family', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'Helvetica Neue', text: i18n('Helvetica Neue', locale) },
-			]
+			dataSource: font_family
 		},
 		{
 			key: 'candle.priceMark.low.textWeight',
 			text: i18n('Pricemark Low Font Weight', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'normal', text: i18n('Normal', locale) }
-			]
+			dataSource: font_weight
 		},
 		{
 			key: 'candle.priceMark.last.show',
@@ -111,21 +88,13 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.priceMark.last.line.style',
 			text: i18n('Pricemark last line style', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'solid', text: i18n('Solid', locale) },
-				{ key: 'dashed', text: i18n('Dashed', locale) }
-			]
+			dataSource: solid_dashed
 		},
 		{
 			key: 'candle.priceMark.last.line.size',
 			text: i18n('Pricemark last line size', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 1, text: 1 },
-				{ key: 2, text: 2 },
-				{ key: 3, text: 3 },
-				{ key: 4, text: 4 }
-			]
+			dataSource: size
 		},
 		{
 			key: 'candle.priceMark.last.text.show',
@@ -136,34 +105,20 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.priceMark.last.text.style',
 			text: i18n('Pricemark last text style', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'fill', text: i18n('Fill', locale) },
-				{ key: 'stroke', text: i18n('Stroke', locale) },
-				{ key: 'stroke_fill', text: i18n('Stroke fill', locale) }
-			]
+			dataSource: fill_stroke
 		},
 		{
 			key: 'candle.priceMark.last.text.size',
 			text: i18n('Pricemark last text size', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
 			// candle tooltip
 		{
 			key: 'candle.tooltip.showRule',
 			text: i18n('candle_tooltip', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'none', text: i18n('none', locale) },
-				{ key: 'always', text: i18n('always', locale) },
-				{ key: 'follow_cross', text: i18n('follow_cross', locale) }
-			]
+			dataSource: none_always_followCross
 		},
 		{
 			key: 'candle.tooltip.showType',
@@ -187,21 +142,13 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.tooltip.text.size',
 			text: i18n('Tooltip text size', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
 		{
 			key: 'candle.tooltip.text.weight',
 			text: i18n('Tooltip text weight', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'normal', text: 'Normal' },
-			]
+			dataSource: font_weight
 		},
 	]
 }

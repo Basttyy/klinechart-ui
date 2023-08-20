@@ -1,6 +1,9 @@
 import i18n from '../../../i18n'
+import useDataSource from './dataSource'
 
 const getIndicatorSettings = (locale:string) => {
+  const { fill_stroke, font_size, font_weight, none_always_followCross } = useDataSource(locale)
+  
 	return [
 		// {
     //   key: 'indicator.bars.style',
@@ -46,41 +49,25 @@ const getIndicatorSettings = (locale:string) => {
       key: 'indicator.lastValueMark.text.style',
       text: i18n('Lastvaluemark text style', locale),
       component: 'select',
-      dataSource: [
-        { key: 'fill', text: i18n('Fill', locale) },
-        { key: 'stroke', text: i18n('Stroke', locale) },
-        { key: 'stroke_fill', text: i18n('Stroke fill', locale) }
-      ]
+      dataSource: fill_stroke
     },
     {
 			key: 'indicator.lastValueMark.text.size',
 			text: i18n('Lastvaluemark text size', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
     {
 			key: 'indicator.lastValueMark.text.weight',
 			text: i18n('Lastvaluemark text Weight', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'normal', text: i18n('Normal', locale) }
-			]
+			dataSource: font_weight
 		},
     {
       key: 'indicator.tooltip.showRule',
       text: i18n('Tooltip showrule', locale),
       component: 'select',
-      dataSource: [
-        { key: 'none', text: i18n('none', locale) },
-        { key: 'always', text: i18n('always', locale) },
-        { key: 'follow_cross', text: i18n('follow_cross', locale) }
-      ]
+      dataSource: none_always_followCross
     },
     {
       key: 'indicator.tooltip.showType',
@@ -105,21 +92,13 @@ const getIndicatorSettings = (locale:string) => {
 			key: 'indicator.tooltip.text.size',
 			text: i18n('Tooltip text size', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 10, text: 10 },
-				{ key: 12, text: 12 },
-				{ key: 14, text: 14 },
-				{ key: 16, text: 16 },
-				{ key: 18, text: 18 }
-			]
+			dataSource: font_size
 		},
     {
 			key: 'indicator.tooltip.text.weight',
 			text: i18n('Tooltip text Weight', locale),
 			component: 'select',
-			dataSource: [
-				{ key: 'normal', text: i18n('Normal', locale) }
-			]
+			dataSource: font_weight
 		},
 	]
 }

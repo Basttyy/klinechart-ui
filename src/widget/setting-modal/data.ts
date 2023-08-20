@@ -13,95 +13,38 @@
  */
 
 import i18n from '../../i18n'
+import useDataSource from './settings/dataSource'
 import getCandleSettings from './settings/candle'
 import getIndicatorSettings from './settings/indicator'
 import getXAxisSettings from './settings/xAxis'
 import getYAxisSettings from './settings/yAxis'
+import getGridSettings from './settings/grid'
+import getCrosshairSettings from './settings/crosshair'
+import getOverlaySettings from './settings/overlay'
 
 export function getOptions (locale: string) {
+  const { size } = useDataSource(locale)
   return [
     ...getCandleSettings(locale),
     ...getIndicatorSettings(locale),
     ...getXAxisSettings(locale),
     ...getYAxisSettings(locale),
-
-    // grid
-    {
-      key: 'grid.show',
-      text: i18n('grid_show', locale),
-      component: 'switch',
-    },
-
-    // crosshair
-    {
-      key: 'crosshair.show',
-      text: i18n('Show Crosshair', locale),
-      component: 'switch',
-    },
+    ...getGridSettings(locale),
+    ...getCrosshairSettings(locale),
+    ...getOverlaySettings(locale),
 
     // seperator
     {
       key: 'separator.size',
       text: i18n('Seperator size', locale),
       component: 'select',
-      dataSource: [
-        { key: 1, text: '1' },
-        { key: 2, text: '2' },
-        { key: 3, text: '3' },
-        { key: 4, text: '4' },
-        { key: 5, text: '5' },
-      ]
-    },
-
-    // overlay
-    {
-      key: 'overlay.line.style',
-      text: i18n('Overlay Line Style', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'solid', text: i18n('solid', locale) },
-        { key: 'dashed', text: i18n('dashed', locale) }
-      ]
+      dataSource: size
     },
     {
-      key: 'overlay.arc.style',
-      text: i18n('Overlay Arc Style', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'solid', text: i18n('solid', locale) },
-        { key: 'dashed', text: i18n('dashed', locale) }
-      ]
-    },
-    {
-      key: 'overlay.rect.style',
-      text: i18n('Overlay Rect Style', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'fill', text: i18n('fill', locale) },
-        { key: 'stroke', text: i18n('stroke', locale) },
-        { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
-      ]
-    },
-    {
-      key: 'overlay.polygon.style',
-      text: i18n('Overlay Polygon Style', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'fill', text: i18n('fill', locale) },
-        { key: 'stroke', text: i18n('stroke', locale) },
-        { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
-      ]
-    },
-    {
-      key: 'overlay.circle.style',
-      text: i18n('Overlay Circle Style', locale),
-      component: 'select',
-      dataSource: [
-        { key: 'fill', text: i18n('fill', locale) },
-        { key: 'stroke', text: i18n('stroke', locale) },
-        { key: 'stroke_fill', text: i18n('stroke_fill', locale) }
-      ]
-    },
+      key: 'separator.fill',
+      text: i18n('Fill', locale),
+      component: 'switch',
+    }
   ]
 
 }
