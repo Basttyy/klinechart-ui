@@ -63,6 +63,15 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
     useOrder().closeOrder(overlay, action == 'close' ? 'manualclose' : 'cancel')
   }
 
+  const formatNumber = (num:number) => {
+    if(!num) return null
+    if (Number.isInteger(num)) {
+      return num.toString();
+    } else {
+      return num.toFixed(2);
+    }
+  }
+
   onMount(() => {
     setLoadingVisible(true)
     loading = true
@@ -121,24 +130,27 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
                         <span style={'width: 8%'}>{ order.orderId }</span>
                         <span style={'width: 8%'}>{ order.sessionId }</span>
                         <span style={'width: 8%'}>{ order.action }</span>
-                        <span style={'width: 8%'}>{ order.entryPoint }</span>
-                        <span style={'width: 8%'}>{ order.takeProfit }</span>
-                        <span style={'width: 8%'}>{ order.stopLoss }</span>
-                        <span style={'width: 8%'}>{ order.pl }</span>
-                        <span style={'width: 8%'}>{ order.exitPoint }</span>
+                        <span style={'width: 8%'}>{ order.entryPoint || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ order.takeProfit || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ order.stopLoss || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ formatNumber(order.pl!) || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ order.exitPoint || 'N/A' }</span>
                         <span style={'width: 10%'}>{ order.entryTime }</span>
                         <span style={'width: 10%'}>{ order.exitTime }</span>
                         <span style={'width: 8%'}>
-                          <Button
+                          <Button isDisabled={!isRunning()}
                             type='confirm'
                             class='edit-button'
-                            onClick={() => {performOrderAction(order, 'edit')}}>Edit</Button>
+                            onClick={() => {performOrderAction(order, 'edit')}}>
+                              Edit
+                          </Button>
                         </span>
                         <span style={'width: 8%'}>
-                          <Button
+                          <Button isDisabled={!isRunning()}
                             type='cancel'
                             class='close-button'
-                            onClick={() => {performOrderAction(order, order.action == 'buy' || order.action == 'sell' ? 'close' : 'cancel')}}>{ order.action == 'buy' || order.action == 'sell' ? 'Close' : 'Cancel'}</Button>
+                            onClick={() => {performOrderAction(order, order.action == 'buy' || order.action == 'sell' ? 'close' : 'cancel')}}>{ order.action == 'buy' || order.action == 'sell' ? 'Close' : 'Cancel'}
+                          </Button>
                         </span>
                       </div>
                     </li>

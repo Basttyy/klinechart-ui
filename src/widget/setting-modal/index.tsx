@@ -17,7 +17,7 @@ import { Styles, utils, DeepPartial } from 'klinecharts'
 
 import lodashSet from 'lodash/set'
 
-import { Modal, Select, Switch } from '../../component'
+import { Modal, Select, Switch, } from '../../component'
 import type { SelectDataSourceItem } from '../../component'
 
 import i18n from '../../i18n'
@@ -34,6 +34,7 @@ export interface SettingModalProps {
 const SettingModal: Component<SettingModalProps> = props => {
   const [styles, setStyles] = createSignal(props.currentStyles)
   const [options, setOptions] = createSignal(getOptions(props.locale))
+  const [currentSetting, setCurrentSetting] = createSignal('candle')
 
   createEffect(() => {
     setOptions(getOptions(props.locale))
@@ -49,63 +50,87 @@ const SettingModal: Component<SettingModalProps> = props => {
     props.onChange(style)
   }
 
+  const settingsButton = [
+    {text: 'Candle', key: 'candle'},
+    {text: 'Indicator', key: 'indicator'},
+    {text: 'Grid', key: 'grid'},
+    {text: 'X-axis', key: 'xAxis'},
+    {text: 'Y-axis', key: 'yAxis'},
+    {text: 'Separator', key: 'separator'},
+    {text: 'Crosshair', key: 'crosshair'},
+    {text: 'Overlay', key: 'overlay'},
+  ]
+
   return (
     <Modal
       title={i18n('setting', props.locale)}
-      width={560}
       buttons={[
         {
           children: i18n('restore_default', props.locale),
           onClick: () => {
-            props.onRestoreDefault(options())
+            // props.onRestoreDefault(options())
             props.onClose()
           }
         }
       ]}
-      onClose={props.onClose}>
-      <div
-        class="klinecharts-pro-setting-modal-content">
-        <For each={options()}>
-          {
-            option => {
-              let component
-              const value = utils.formatValue(styles(), option.key)
-              switch (option.component) {
-                case 'select': {
-                  component = (
-                    <Select
-                      style={{ width: '120px' }}
-                      value={i18n(value as string, props.locale)}
-                      dataSource={option.dataSource}
-                      onSelected={(data) => {
-                        const newValue = (data as SelectDataSourceItem).key
-                        update(option, newValue)
-                      }}/>
+      onClose={props.onClose}
+    >
+      <div class="klinecharts-pro-setting-modal-content">
+          <div class='sidebar'>
+            {
+              settingsButton.map(el => (
+                <button class={`${currentSetting() == el.key ? 'selected' : ''}`}
+                  onclick={() => setCurrentSetting(el.key)}
+                >{el.text}</button>
+              ))
+            }
+          </div>
+          <div class='content'>
+            <For each={options().filter(el => el.key.includes(currentSetting()))}>
+              {
+                option => {
+                  let component
+                  const value = utils.formatValue(styles(), option.key)
+                  switch (option.component) {
+                    case 'select': {
+                      component = (
+                        <Select
+                          style={{ width: '120px' }}
+                          value={i18n(value as string, props.locale)}
+                          dataSource={option.dataSource}
+                          onSelected={(data) => {
+                            const newValue = (data as SelectDataSourceItem).key
+                            update(option, newValue)
+                          }}/>
+                      )
+                      break
+                    }
+                    case 'switch': {
+                      const open = !!value
+                      component = (
+                        <Switch
+                          open={open}
+                          onChange={() => {
+                            const newValue = !open
+                            update(option, newValue)
+                          }}/>
+                      )
+                      break
+                    }
+                  }
+                  return (
+                    <>
+                      <div class="component">
+                        <span>{option.text}</span>
+                        {component}
+                      </div>
+                      
+                    </>
                   )
-                  break
-                }
-                case 'switch': {
-                  const open = !!value
-                  component = (
-                    <Switch
-                      open={open}
-                      onChange={() => {
-                        const newValue = !open
-                        update(option, newValue)
-                      }}/>
-                  )
-                  break
                 }
               }
-              return (
-                <>
-                  <span>{option.text}</span>
-                  {component}
-                </>
-              )
-            }
-          }
-        </For>
+            </For>
+          </div>
       </div> 
     </Modal>
   )

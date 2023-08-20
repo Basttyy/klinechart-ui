@@ -28,7 +28,7 @@ const Modal: ParentComponent<ModalProps> = (props) => {
     <div
       class="klinecharts-pro-modal">
       <div
-        style={{ width: `${props.width ?? 400}px` }}
+        // style={{ width: `${props.width ?? 400}px` }}
         class="inner">
         <div
           class="title-container">
