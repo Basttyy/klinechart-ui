@@ -196,7 +196,7 @@ const buyProfitLossLine: OverlayTemplate = {
       }
       //the overlay represented an order that does not exist on our pool, it should be handled here
     } else if ((points as Partial<Point>[])[0].value! < currenttick()?.close! &&
-      (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
+      // (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
       event.figureIndex == 2
     ) {
       if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
