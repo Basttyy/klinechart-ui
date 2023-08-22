@@ -44,12 +44,18 @@ export function getOptions (locale: string) {
       key: 'separator.fill',
       text: i18n('Fill', locale),
       component: 'switch',
+    },
+    {
+      key: 'separator.activeBackgroundColor',
+      text: i18n('Background color', locale),
+      component: 'color',
     }
   ]
 
 }
 
 // kline documentation for settings
+
 // {
 //   grid: {
 //     show: true,

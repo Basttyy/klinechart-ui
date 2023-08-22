@@ -15,6 +15,11 @@ const getXAxisSettings = (locale:string) => {
       component: 'switch',
     },
     {
+			key: 'xAxis.axisLine.color',
+			text: i18n('Axis line color', locale),
+			component: 'color',
+		},
+    {
       key: 'xAxis.axisLine.size',
       text: i18n('Axis line size', locale),
       component: 'select',
@@ -38,6 +43,11 @@ const getXAxisSettings = (locale:string) => {
 			dataSource: font_weight
 		},
     {
+			key: 'xAxis.tickText.color',
+			text: i18n('Tick text color', locale),
+			component: 'color',
+		},
+    {
       key: 'xAxis.tickLine.show',
       text: i18n('Show tick line', locale),
       component: 'switch',
@@ -53,6 +63,11 @@ const getXAxisSettings = (locale:string) => {
       text: i18n('Tick line length', locale),
       component: 'select',
       dataSource: size
+    },
+    {
+      key: 'xAxis.tickLine.color',
+      text: i18n('Tick line color', locale),
+      component: 'color'
     }
 	]
 }

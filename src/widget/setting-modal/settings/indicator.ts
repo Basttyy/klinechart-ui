@@ -36,32 +36,52 @@ const getIndicatorSettings = (locale:string) => {
     //   ]
     // },
     {
+      key: 'indicator.ohlc.upColor',
+      text: i18n('Ohlc up-color', locale),
+      component: 'color'
+    },
+    {
+      key: 'indicator.ohlc.downColor',
+      text: i18n('Ohlc down-color', locale),
+      component: 'color'
+    },
+    {
+      key: 'indicator.ohlc.noChangeColor',
+      text: i18n('Ohlc no-change-color', locale),
+      component: 'color'
+    },
+    {
       key: 'indicator.lastValueMark.show',
       text: i18n('indicator_last_value_show', locale),
       component: 'switch'
     },
     {
       key: 'indicator.lastValueMark.text.show',
-      text: i18n('Show lastvaluemark text', locale),
+      text: i18n('Show last value mark text', locale),
       component: 'switch'
     },
     {
       key: 'indicator.lastValueMark.text.style',
-      text: i18n('Lastvaluemark text style', locale),
+      text: i18n('Last value mark text style', locale),
       component: 'select',
       dataSource: fill_stroke
     },
     {
 			key: 'indicator.lastValueMark.text.size',
-			text: i18n('Lastvaluemark text size', locale),
+			text: i18n('Last value mark text size', locale),
 			component: 'select',
 			dataSource: font_size
 		},
     {
 			key: 'indicator.lastValueMark.text.weight',
-			text: i18n('Lastvaluemark text Weight', locale),
+			text: i18n('Last value mark text Weight', locale),
 			component: 'select',
 			dataSource: font_weight
+		},
+    {
+			key: 'indicator.lastValueMark.text.color',
+			text: i18n('Last value mark text color', locale),
+			component: 'color'
 		},
     {
       key: 'indicator.tooltip.showRule',
@@ -100,6 +120,11 @@ const getIndicatorSettings = (locale:string) => {
 			component: 'select',
 			dataSource: font_weight
 		},
+    {
+			key: 'indicator.tooltip.text.color',
+			text: i18n('Tooltip text color', locale),
+			component: 'color',
+		}
 	]
 }
 

@@ -117,6 +117,17 @@ const SettingModal: Component<SettingModalProps> = props => {
                       )
                       break
                     }
+                    case 'color': {
+                      component = (
+                        <input style={'width: 120px'} type="color" value={value as any} 
+                          onchange={(el) => {
+                            const newValue = el.target.value
+                            update(option, newValue)
+                          }} 
+                        />
+                      )
+                      break
+                    }
                   }
                   return (
                     <>
