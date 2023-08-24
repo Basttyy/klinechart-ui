@@ -13,6 +13,7 @@
  */
 
 import { KLineData, Styles, DeepPartial } from 'klinecharts'
+import { ChartObj } from './charttypes'
 
 export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
 export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
@@ -160,3 +161,5 @@ export interface ChartPro {
   setPeriod(period: Period): void
   getPeriod(): Period
 }
+
+export interface ChartObjType extends ChartObj {}

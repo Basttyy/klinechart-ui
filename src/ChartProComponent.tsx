@@ -31,7 +31,7 @@ import {
 
 import { translateTimezone } from './widget/timezone-modal/data'
 
-import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
+import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource, ChartObjType } from './types'
 import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
 import { drawOrder, orderList, ordercontr, setOrderContr, setOrderList, setCurrentequity } from './store/positionStore'
 
@@ -521,6 +521,21 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   })
 
   createEffect( async () => {
+    const chartStateObj = localStorage.getItem('chartstatedata')
+    if (chartStateObj) {
+      const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
+      console.log('Stored object:', chartObj)
+      if (chartObj.figures) {
+        // chartObj.figures.forEach(figure => {
+        //   utils.dra
+        // })
+      }
+      if (chartObj.overlays) {
+        chartObj.overlays.forEach(overlay => {
+          widget?.createOverlay(overlay)
+        })
+      }
+    }
     let orders = await props.orderController.retrieveOrders()
 
     if (orders) {
