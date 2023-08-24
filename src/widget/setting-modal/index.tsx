@@ -22,6 +22,8 @@ import type { SelectDataSourceItem } from '../../component'
 
 import i18n from '../../i18n'
 import { getOptions } from './data'
+import { ChartObjType } from '../../types'
+import { chartsession, chartsessionCtr } from '../../ChartProComponent'
 
 export interface SettingModalProps {
   locale: string
@@ -36,18 +38,40 @@ const SettingModal: Component<SettingModalProps> = props => {
   const [options, setOptions] = createSignal(getOptions(props.locale))
   const [currentSetting, setCurrentSetting] = createSignal('candle')
 
+  let stylee: DeepPartial<Styles> = {}
+
   createEffect(() => {
     setOptions(getOptions(props.locale))
   })
 
   const update = (option: SelectDataSourceItem, newValue: any) => {
+    const chartStateObj = localStorage.getItem('chartstatedata')
+    let chartObj: ChartObjType
+    if (chartStateObj)
+      chartObj = (JSON.parse(chartStateObj) as ChartObjType)
+    else
+      chartObj = {}
+    
+    lodashSet(chartObj.styleObj!, option.key, newValue)
+    localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
     const style = {}
+    lodashSet(style, option.key, newValue)
     lodashSet(style, option.key, newValue)
     const ss = utils.clone(styles())
     lodashSet(ss, option.key, newValue)
     setStyles(ss)
     setOptions(options().map(op => ({ ...op })))
     props.onChange(style)
+  }
+
+  const sync = () => {
+    const chartStateObj = localStorage.getItem('chartstatedata')
+    if (chartStateObj) {
+      chartsessionCtr()?.updateSession({
+        id: chartsession()?.id,
+        chart: btoa(chartStateObj)
+      })
+    }
   }
 
   const settingsButton = [

@@ -12,8 +12,7 @@
  * limitations under the License.
  */
 
-import { KLineData, Styles, DeepPartial } from 'klinecharts'
-import { ChartObj } from './charttypes'
+import { KLineData, Styles, DeepPartial, OverlayCreate, FigureCreate, IndicatorCreate, PaneOptions } from 'klinecharts'
 
 export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
 export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
@@ -78,7 +77,7 @@ export interface sessionType {
 	strategy_id: number;
 	user_id: number;
 	pair: string;
-	chart: null;
+	chart: string;
 	chart_timestamp: number|null;
 	start_date: string;
 	end_date: string;
@@ -92,12 +91,18 @@ export interface sessionModifyType {
 	strategy_id?: number;
 	user_id?: number;
 	pair?: string;
-	chart?: null;
+	chart?: string;
 	chart_timestamp?: number|null;
 	start_date?: string;
 	end_date?: string;
 }
 
+export interface ChartObjType {
+  styleObj?: DeepPartial<Styles>
+  overlays?: [{ value?: string|OverlayCreate, paneId?: string }]
+  figures?: [{ value?: string|FigureCreate, ctx?: CanvasRenderingContext2D}]
+  indicators?: [{ value?: string|IndicatorCreate, isStack?: boolean, paneOptions?: PaneOptions, callback?: () => void }]
+}
 
 export type DatafeedSubscribeCallback = (data: KLineData, timestamp?: number) => void
 export type OrderPlacedCallback = (data: OrderInfo|null) => void     //this should be called when a user has successfully placed an order from consumer project side
@@ -122,6 +127,8 @@ export interface OrderResource {
 export interface ChartSessionResource {
   retrieveSession (id: number): Promise<sessionType|null>
   updateSession (session: sessionModifyType): Promise<sessionType|null>
+  // retrieveChartState (id: number): Promise<ChartObjType|null>
+  // syncState (chart_state: ChartObjType): Promise<boolean>
 }
 
 export interface ChartProOptions {
@@ -161,5 +168,3 @@ export interface ChartPro {
   setPeriod(period: Period): void
   getPeriod(): Period
 }
-
-export interface ChartObjType extends ChartObj {}

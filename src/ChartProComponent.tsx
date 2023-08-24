@@ -521,19 +521,34 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   })
 
   createEffect( async () => {
-    const chartStateObj = localStorage.getItem('chartstatedata')
-    if (chartStateObj) {
-      const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
-      console.log('Stored object:', chartObj)
-      if (chartObj.figures) {
-        // chartObj.figures.forEach(figure => {
-        //   utils.dra
-        // })
-      }
-      if (chartObj.overlays) {
-        chartObj.overlays.forEach(overlay => {
-          widget?.createOverlay(overlay)
-        })
+    if (chartsession()?.chart) {
+      const chartStateObj = atob(chartsession()?.chart!)
+
+      if (chartStateObj) {
+        localStorage.setItem('chartstatedata', chartStateObj)
+        const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
+        console.log('Stored object:', chartObj)
+
+        if (chartObj.figures) {
+          // chartObj.figures.forEach(figure => {
+          //   figure.value
+          // })
+        }
+        if (chartObj.overlays) {
+          chartObj.overlays.forEach(overlay => {
+            if (overlay.value)
+              widget?.createOverlay(overlay.value, overlay.paneId)
+          })
+        }
+        if (chartObj.indicators) {
+          chartObj.indicators.forEach(indicator => {
+            if (indicator.value)
+              widget?.createIndicator(indicator.value, indicator.isStack, indicator.paneOptions, indicator.callback)
+          })
+        }
+        if (chartObj.styleObj) {
+          widget?.setStyles(chartObj.styleObj)
+        }
       }
     }
     let orders = await props.orderController.retrieveOrders()
