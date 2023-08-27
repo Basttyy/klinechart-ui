@@ -68,7 +68,7 @@ const SettingModal: Component<SettingModalProps> = props => {
         {
           children: i18n('restore_default', props.locale),
           onClick: () => {
-            // props.onRestoreDefault(options())
+            props.onRestoreDefault(options())
             props.onClose()
           }
         }
