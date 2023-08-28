@@ -22,7 +22,8 @@ import {
 import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
 
-import { SelectDataSourceItem, Loading } from './component'
+import { SelectDataSourceItem, Loading, Popup } from './component'
+import { showPopup } from './store/overlaySettingStore'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
@@ -231,6 +232,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   }
 
   onMount(() => {
+    document.addEventListener('contextmenu', function(event) {
+      event.preventDefault();
+    });
     setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
@@ -353,6 +357,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   })
 
   onCleanup(() => {
+    document.removeEventListener('contextmenu', function(event) {
+      event.preventDefault();
+    });
     window.removeEventListener('resize', documentResize)
     clearInterval(timerId)
     dispose(widgetRef!)
@@ -567,6 +574,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
+      <Show when={showPopup()}>
+        <Popup/>
+      </Show>
       <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal
           locale={props.locale}

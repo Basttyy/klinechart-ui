@@ -21,6 +21,11 @@ const getGridSettings = (locale:string) => {
       dataSource: size
     },
     {
+      key: 'grid.horizontal.color',
+      text: i18n('Horizontal color', locale),
+      component: 'color'
+    },
+    {
       key: 'grid.vertical.show',
       text: i18n('Show vertical', locale),
       component: 'switch',
@@ -30,6 +35,11 @@ const getGridSettings = (locale:string) => {
       text: i18n('Vertical size', locale),
       component: 'select',
       dataSource: size
+    },
+    {
+      key: 'grid.vertical.color',
+      text: i18n('Vertical color', locale),
+      component: 'color'
     }
 	]
 }

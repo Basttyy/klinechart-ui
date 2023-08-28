@@ -13,8 +13,11 @@
  */
 
 import { OverlayTemplate } from 'klinecharts'
+import { useOverlaySetting } from '../store/overlaySettingStore'
 
 import { getDistance } from './utils'
+
+const { openPopup } = useOverlaySetting()
 
 const circle: OverlayTemplate = {
   name: 'circle',
@@ -40,6 +43,11 @@ const circle: OverlayTemplate = {
       }
     }
     return []
+  },
+  onRightClick: (event): boolean => {
+    event.preventDefault!()
+    openPopup(event.overlay, event)
+    return true
   }
 }
 

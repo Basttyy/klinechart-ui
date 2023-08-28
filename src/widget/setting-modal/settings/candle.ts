@@ -18,20 +18,71 @@ const getCandleSettings = (locale:string) => {
 			]
 		},
 		{
+      key: 'candle.bar.upColor',
+      text: i18n('Bar up color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.downColor',
+      text: i18n('Bar down color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.noChangeColor',
+      text: i18n('Bar no-change color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.upBorderColor',
+      text: i18n('Bar up-border color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.downBorderColor',
+      text: i18n('Bar down-border color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.noChangeBorderColor',
+      text: i18n('Bar no-change-border color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.upWickColor',
+      text: i18n('Bar up-wick color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.downWickColor',
+      text: i18n('Bar down-wick color', locale),
+      component: 'color'
+    },
+		{
+      key: 'candle.bar.noChangeWickColor',
+      text: i18n('Bar no-change-wick color', locale),
+      component: 'color'
+    },
+		{
 			key: 'candle.area.lineSize',
 			text: i18n('Area linesize', locale),
 			component: 'select',
 			dataSource: size
 		},
 		{
-			key: 'candle.priceMark.last.show',
-			text: i18n('last_price_show', locale),
-			component: 'switch'
-		},
+      key: 'candle.area.lineColor',
+      text: i18n('Area line color', locale),
+      component: 'color'
+    },
+
 		{
 			key: 'candle.priceMark.high.show',
 			text: i18n('high_price_show', locale),
 			component: 'switch'
+		},
+		{
+			key: 'candle.priceMark.high.color',
+			text: i18n('Pricemark high color', locale),
+			component: 'color'
 		},
 		{
 			key: 'candle.priceMark.high.textSize',
@@ -57,6 +108,11 @@ const getCandleSettings = (locale:string) => {
 			component: 'switch'
 		},
 		{
+			key: 'candle.priceMark.low.color',
+			text: i18n('Pricemark low color', locale),
+			component: 'color'
+		},
+		{
 			key: 'candle.priceMark.low.textSize',
 			text: i18n('Pricemark Low Textsize', locale),
 			component: 'select',
@@ -78,6 +134,21 @@ const getCandleSettings = (locale:string) => {
 			key: 'candle.priceMark.last.show',
 			text: i18n('Show Pricemark last', locale),
 			component: 'switch'
+		},
+		{
+			key: 'candle.priceMark.last.upColor',
+			text: i18n('Pricemark last up-color', locale),
+			component: 'color'
+		},
+		{
+			key: 'candle.priceMark.last.downColor',
+			text: i18n('Pricemark last down-color', locale),
+			component: 'color'
+		},
+		{
+			key: 'candle.priceMark.last.noChangeColor',
+			text: i18n('Pricemark last no-change-color', locale),
+			component: 'color'
 		},
 		{
 			key: 'candle.priceMark.last.line.show',
@@ -113,6 +184,11 @@ const getCandleSettings = (locale:string) => {
 			component: 'select',
 			dataSource: font_size
 		},
+		{
+			key: 'candle.priceMark.last.text.color',
+			text: i18n('Pricemark last text color', locale),
+			component: 'color'
+		},
 			// candle tooltip
 		{
 			key: 'candle.tooltip.showRule',
@@ -139,6 +215,16 @@ const getCandleSettings = (locale:string) => {
 			]
 		},
 		{
+			key: 'candle.tooltip.rect.color',
+			text: i18n('Tooltip rect color', locale),
+			component: 'color',
+		},
+		{
+			key: 'candle.tooltip.rect.borderColor',
+			text: i18n('Tooltip rect border-color', locale),
+			component: 'color',
+		},
+		{
 			key: 'candle.tooltip.text.size',
 			text: i18n('Tooltip text size', locale),
 			component: 'select',
@@ -150,6 +236,11 @@ const getCandleSettings = (locale:string) => {
 			component: 'select',
 			dataSource: font_weight
 		},
+		{
+			key: 'candle.tooltip.text.color',
+			text: i18n('Tooltip text color', locale),
+			component: 'color',
+		}
 	]
 }
 
