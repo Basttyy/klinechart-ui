@@ -70,6 +70,20 @@ const SettingModal: Component<SettingModalProps> = props => {
     props.onChange(style)
   }
 
+  const restoreDefault = () => {
+    const chartStateObj = localStorage.getItem('chartstatedata')
+    let chartObj: ChartObjType
+    if (chartStateObj) {
+      chartObj = (JSON.parse(chartStateObj) as ChartObjType)
+      if (chartObj.styleObj)
+        chartObj.styleObj = {}
+      
+      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+    }
+    props.onRestoreDefault(options())
+    props.onClose()
+  }
+
   const sync = () => {
     const chartStateObj = localStorage.getItem('chartstatedata')
     if (chartStateObj) {
@@ -98,8 +112,7 @@ const SettingModal: Component<SettingModalProps> = props => {
         {
           children: i18n('restore_default', props.locale),
           onClick: () => {
-            props.onRestoreDefault(options())
-            props.onClose()
+            restoreDefault()
           }
         }
       ]}
