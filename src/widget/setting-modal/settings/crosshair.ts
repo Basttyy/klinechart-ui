@@ -32,6 +32,11 @@ const getCrosshairSettings = (locale:string) => {
       dataSource: size
     },
     {
+      key: 'crosshair.horizontal.line.color',
+      text: i18n('Horizontal Line color', locale),
+      component: 'color'
+    },
+    {
       key: 'crosshair.horizontal.text.show',
       text: i18n('Show horizontal text', locale),
       component: 'switch',
@@ -53,6 +58,16 @@ const getCrosshairSettings = (locale:string) => {
       text: i18n('Horizontal text weight', locale),
       component: 'select',
       dataSource: font_weight
+    },
+    {
+      key: 'crosshair.horizontal.text.color',
+      text: i18n('Horizontal text color', locale),
+      component: 'color'
+    },
+    {
+      key: 'crosshair.horizontal.text.backgroundColor',
+      text: i18n('Horizontal text background color', locale),
+      component: 'color'
     },
     {
       key: 'crosshair.vertical.show',
@@ -77,6 +92,11 @@ const getCrosshairSettings = (locale:string) => {
       dataSource: size
     },
     {
+      key: 'crosshair.vertical.line.color',
+      text: i18n('Vertical line color', locale),
+      component: 'color'
+    },
+    {
       key: 'crosshair.vertical.text.show',
       text: i18n('Show vertical text', locale),
       component: 'switch',
@@ -98,6 +118,16 @@ const getCrosshairSettings = (locale:string) => {
       text: i18n('Vertical text weight', locale),
       component: 'select',
       dataSource: font_weight
+    },
+    {
+      key: 'crosshair.vertical.text.color',
+      text: i18n('Vertical text color', locale),
+      component: 'color'
+    },
+    {
+      key: 'crosshair.vertical.text.backgroundColor',
+      text: i18n('Vertical text background color', locale),
+      component: 'color'
     },
 	]
 }

@@ -50,9 +50,19 @@ const getYAxisSettings = (locale:string) => {
       dataSource: size
     },
     {
+      key: 'yAxis.axisLine.color',
+      text: i18n('Axis line color', locale),
+      component: 'color'
+    },
+    {
       key: 'yAxis.tickText.show',
       text: i18n('Show tick text', locale),
       component: 'switch',
+    },
+    {
+      key: 'yAxis.tickText.color',
+      text: i18n('Tick text color', locale),
+      component: 'color'
     },
     {
 			key: 'yAxis.tickText.size',
@@ -70,6 +80,11 @@ const getYAxisSettings = (locale:string) => {
       key: 'yAxis.tickLine.show',
       text: i18n('Show tick line', locale),
       component: 'switch',
+    },
+    {
+      key: 'yAxis.tickLine.color',
+      text: i18n('Tick line color', locale),
+      component: 'color',
     },
     {
       key: 'yAxis.tickLine.size',

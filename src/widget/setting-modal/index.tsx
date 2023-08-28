@@ -98,7 +98,7 @@ const SettingModal: Component<SettingModalProps> = props => {
         {
           children: i18n('restore_default', props.locale),
           onClick: () => {
-            // props.onRestoreDefault(options())
+            props.onRestoreDefault(options())
             props.onClose()
           }
         }
@@ -144,6 +144,17 @@ const SettingModal: Component<SettingModalProps> = props => {
                             const newValue = !open
                             update(option, newValue)
                           }}/>
+                      )
+                      break
+                    }
+                    case 'color': {
+                      component = (
+                        <input style={'width: 120px'} type="color" value={value as any} 
+                          onchange={(el) => {
+                            const newValue = el.target.value
+                            update(option, newValue)
+                          }} 
+                        />
                       )
                       break
                     }

@@ -20,9 +20,10 @@ import Select, { SelectDataSourceItem } from './select'
 import Input from './input'
 import Loading from './loading'
 import Switch from './switch'
+import Popup from './popup'
 
 export {
-  Button, Checkbox, List, Modal, Select, Input, Loading, Switch
+  Button, Checkbox, List, Modal, Select, Input, Loading, Switch, Popup
 }
 
 export type { SelectDataSourceItem }
