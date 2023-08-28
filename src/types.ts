@@ -99,9 +99,26 @@ export interface sessionModifyType {
 
 export interface ChartObjType {
   styleObj?: DeepPartial<Styles>
-  overlays?: [{ value?: string|OverlayCreate, paneId?: string }]
-  figures?: [{ value?: string|FigureCreate, ctx?: CanvasRenderingContext2D}]
-  indicators?: [{ value?: string|IndicatorCreate, isStack?: boolean, paneOptions?: PaneOptions, callback?: () => void }]
+  overlays?: [
+    {
+      value?: OverlayCreate,
+      paneId: string
+    }
+  ]
+  figures?: [
+    {
+      value?: string|FigureCreate,
+      ctx: CanvasRenderingContext2D
+    }
+  ]
+  indicators?: [
+    {
+      value?: string|IndicatorCreate,
+      isStack?: boolean, paneOptions?:
+      PaneOptions,
+      callback?: () => void
+    }
+  ]
 }
 
 export type DatafeedSubscribeCallback = (data: KLineData, timestamp?: number) => void
@@ -150,7 +167,6 @@ export interface ChartProOptions {
   dataTimestamp: number
   orderController: OrderResource
   chartSessionController: ChartSessionResource
-  navigateBack: () => void
   rootElementId: string
 }
 

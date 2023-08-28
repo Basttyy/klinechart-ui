@@ -12,11 +12,11 @@
  * limitations under the License.
  */
 
-import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, Component, untrack } from 'solid-js'
+import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, Component } from 'solid-js'
 
 import {
   init, dispose, utils, Nullable, Chart, OverlayMode, Styles,
-  TooltipIconPosition, ActionType, PaneOptions, Indicator, DomPosition, FormatDateType, DeepPartial, KLineData
+  TooltipIconPosition, ActionType, Indicator, DomPosition, FormatDateType
 } from 'klinecharts'
 
 import lodashSet from 'lodash/set'
@@ -31,9 +31,12 @@ import {
 
 import { translateTimezone } from './widget/timezone-modal/data'
 
-import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource, ChartObjType } from './types'
+import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
 import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
-import { drawOrder, orderList, ordercontr, setOrderContr, setOrderList, setCurrentequity } from './store/positionStore'
+import { drawOrder, orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
+import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified } from './store/chartStateStore'
+
+const { createIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs } = useChartState()
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -42,29 +45,6 @@ export interface ChartProComponentProps extends Required<Omit<ChartProOptions, '
 interface PrevSymbolPeriod {
   symbol: SymbolInfo
   period: Period
-}
-
-function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStack?: boolean, paneOptions?: PaneOptions): Nullable<string> {
-  if (indicatorName === 'VOL') {
-    paneOptions = { gap: { bottom: 2 }, ...paneOptions }
-  }
-  return widget?.createIndicator({
-    name: indicatorName,
-    // @ts-expect-error
-    createTooltipDataSource: ({ indicator, defaultStyles }) => {
-      const icons = []
-      if (indicator.visible) {
-        icons.push(defaultStyles.tooltip.icons[1])
-        icons.push(defaultStyles.tooltip.icons[2])
-        icons.push(defaultStyles.tooltip.icons[3])
-      } else {
-        icons.push(defaultStyles.tooltip.icons[0])
-        icons.push(defaultStyles.tooltip.icons[2])
-        icons.push(defaultStyles.tooltip.icons[3])
-      }
-      return { icons }
-    }
-  }, isStack, paneOptions) ?? null
 }
 
 export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
@@ -88,8 +68,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   const [period, setPeriod] = createSignal(props.period)
   const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
-  const [mainIndicators, setMainIndicators] = createSignal([...(props.mainIndicators!)])
-  const [subIndicators, setSubIndicators] = createSignal({})
 
   const [timezoneModalVisible, setTimezoneModalVisible] = createSignal(false)
   const [timezone, setTimezone] = createSignal<SelectDataSourceItem>({ key: props.timezone, text: translateTimezone(props.timezone, props.locale) })
@@ -113,6 +91,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   setSymbol(props.symbol)
   setChartsession(props.chartSession)
   setChartsessionCtr(props.chartSessionController)
+  setMainIndicators([...(props.mainIndicators!)])
 
   props.ref({
     setTheme,
@@ -187,7 +166,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   const cleanup = () => {   //Cleanup objects when leaving chart page
     const doJob = async () => {
-      setInstanceapi(null)
       clearInterval(timerId)
       props.datafeed.unsubscribe()
   
@@ -216,7 +194,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             id: _session.id,
             current_bal: _session.current_bal,
             equity: pl,
-            chart_timestamp: tickTimestamp()
+            chart_timestamp: tickTimestamp(),
+            chart: localStorage.getItem('chartstatedata') != null && chartModified() ? btoa(localStorage.getItem('chartstatedata')!) : undefined
           })
         }
       }
@@ -224,7 +203,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   
       let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
       await updateChartSession (chartsession()!, pl, chartsessionCtr()!)
+      setInstanceapi(null)
       dispose(widgetRef!)
+      await new Promise(resolve => setTimeout(resolve, 500));
       window.location.href = '/dashboard'
     }
     doJob()
@@ -384,10 +365,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
         widget?.applyNewData(kLineDataList, kLineDataList.length > 0)
         setCurrentTick(kLineDataList[kLineDataList.length -1])
-        // if (pausedStatus()) {
-        //   setPausedStatus(false);
-        //   (props.datafeed as any).setIsPaused = pausedStatus()
-        // }
+
         props.datafeed.subscribe(s, p, (data, timestamp) => {
           setCurrentTick(data)
           if (timestamp)
@@ -518,57 +496,16 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       widget?.setStyles(styles())
       setWidgetDefaultStyles(lodashClone(widget!.getStyles()))
     }
-  })
-
-  createEffect( async () => {
-    if (chartsession()?.chart) {
-      const chartStateObj = atob(chartsession()?.chart!)
-
-      if (chartStateObj) {
-        localStorage.setItem('chartstatedata', chartStateObj)
-        const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
-        console.log('Stored object:', chartObj)
-
-        if (chartObj.figures) {
-          // chartObj.figures.forEach(figure => {
-          //   figure.value
-          // })
-        }
-        if (chartObj.overlays) {
-          chartObj.overlays.forEach(overlay => {
-            if (overlay.value)
-              widget?.createOverlay(overlay.value, overlay.paneId)
-          })
-        }
-        if (chartObj.indicators) {
-          chartObj.indicators.forEach(indicator => {
-            if (indicator.value)
-              widget?.createIndicator(indicator.value, indicator.isStack, indicator.paneOptions, indicator.callback)
-          })
-        }
-        if (chartObj.styleObj) {
-          widget?.setStyles(chartObj.styleObj)
-        }
-      }
-    }
-    let orders = await props.orderController.retrieveOrders()
-
-    if (orders) {
-      setOrderList(orders)
-      orders.forEach(order => {
-        if (order.exitType)
-          return
-        drawOrder(order)
-      });
-    }
+    redraOverlaysIndiAndFigs()
+    redrawOrders()
   })
 
   createEffect( () => {
     timerId = setInterval(() => {
       const updateRunningOrders = async () => {
         const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+        let i = 0, pl = 0
         if (orders && symbol() !== undefined) {
-          let i = 0
           while(i < orders.length) {
             if (orders[i].pl !== null && orders[i].pips !== null) {
               await ordercontr()?.modifyOrder({
@@ -578,20 +515,36 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
               })
               await new Promise(resolve => setTimeout(resolve, 400));
             }
+            pl += +(orders[i].pips! * symbol()!.dollarPerPip!)
             i++
           }
         }
+        return pl
       }
       const updateChartSession = async () => {
+        let pl = await updateRunningOrders ()
+        
         let session = chartsession()
+        const chart = localStorage.getItem('chartstatedata')
         if (session) {
-          session.chart_timestamp = currenttick()?.timestamp!
-          await chartsessionCtr()?.updateSession(session)
+          pl += + +session.current_bal
+          if (session.chart_timestamp !== tickTimestamp() || chart != null)
+            if (await chartsessionCtr()?.updateSession({
+              id: session.id,
+              current_bal: session.current_bal,
+              equity: pl,
+              chart_timestamp: tickTimestamp(),
+              chart: chart != null && chartModified() ? btoa(chart) : undefined
+            })) {
+              session.equity = pl
+              session.chart_timestamp = tickTimestamp()!
+
+              setChartModified(false)
+            }
         }
       }
       updateChartSession ()
-      updateRunningOrders ()
-    }, 2 * 60 * 1000)     // Run this job every 2min
+    }, 1 * 30 * 1000)     // Run this job every 2min
   })
 
   return (
@@ -610,34 +563,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           mainIndicators={mainIndicators()}
           subIndicators={subIndicators()}
           onClose={() => { setIndicatorModalVisible(false) }}
-          onMainIndicatorChange={data => {
-            const newMainIndicators = [...mainIndicators()]
-            if (data.added) {
-              createIndicator(widget, data.name, true, { id: 'candle_pane' })
-              newMainIndicators.push(data.name)
-            } else {
-              widget?.removeIndicator('candle_pane', data.name)
-              newMainIndicators.splice(newMainIndicators.indexOf(data.name), 1)
-            }
-            setMainIndicators(newMainIndicators)
-          }}
-          onSubIndicatorChange={data => {
-            const newSubIndicators = { ...subIndicators() }
-            if (data.added) {
-              const paneId = createIndicator(widget, data.name)
-              if (paneId) {
-                // @ts-expect-error
-                newSubIndicators[data.name] = paneId
-              }
-            } else {
-              if (data.paneId) {
-                widget?.removeIndicator(data.paneId, data.name)
-                // @ts-expect-error
-                delete newSubIndicators[data.name]
-              }
-            }
-            setSubIndicators(newSubIndicators)
-          }}/>
+          onMainIndicatorChange={data => { pushMainIndicator(data)}}
+          onSubIndicatorChange={data => { pushSubIndicator(data) }}/>
       </Show>
       <Show when={timezoneModalVisible()}>
         <TimezoneModal
@@ -727,7 +654,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         <Show when={drawingBarVisible()}>
           <DrawingBar
             locale={props.locale}
-            onDrawingItemClick={overlay => { widget?.createOverlay(overlay) }}
+            onDrawingItemClick={overlay => { pushOverlay(overlay)}}
             onModeChange={mode => { widget?.overrideOverlay({ mode: mode as OverlayMode }) }}
             onLockChange={lock => { widget?.overrideOverlay({ lock }) }}
             onVisibleChange={visible => { widget?.overrideOverlay({ visible }) }}

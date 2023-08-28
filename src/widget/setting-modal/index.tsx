@@ -24,6 +24,7 @@ import i18n from '../../i18n'
 import { getOptions } from './data'
 import { ChartObjType } from '../../types'
 import { chartsession, chartsessionCtr } from '../../ChartProComponent'
+import { setChartModified } from '../../store/chartStateStore'
 
 export interface SettingModalProps {
   locale: string
@@ -47,13 +48,18 @@ const SettingModal: Component<SettingModalProps> = props => {
   const update = (option: SelectDataSourceItem, newValue: any) => {
     const chartStateObj = localStorage.getItem('chartstatedata')
     let chartObj: ChartObjType
-    if (chartStateObj)
+    if (chartStateObj) {
       chartObj = (JSON.parse(chartStateObj) as ChartObjType)
-    else
-      chartObj = {}
+      chartObj.styleObj = chartObj.styleObj ? chartObj.styleObj : {}
+    } else {
+      chartObj = {
+        styleObj: {}
+      }
+    }
     
     lodashSet(chartObj.styleObj!, option.key, newValue)
     localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+    setChartModified(true)
     const style = {}
     lodashSet(style, option.key, newValue)
     lodashSet(style, option.key, newValue)

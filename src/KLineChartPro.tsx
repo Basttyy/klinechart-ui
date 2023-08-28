@@ -76,7 +76,6 @@ export default class KLineChartPro implements ChartPro {
           dataTimestamp={options.dataTimestamp}
           orderController={options.orderController}
           chartSessionController={options.chartSessionController}
-          navigateBack={options.navigateBack}
           rootElementId={options.rootElementId}
         />
       ),
