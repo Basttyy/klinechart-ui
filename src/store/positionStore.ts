@@ -341,6 +341,6 @@ export const drawOrder = (order: OrderInfo|null) => {
     id: `orderline_${order?.orderId}`,
     groupId: 'orderLine',
     points,
-    lock
+    lock,
   })
 };
