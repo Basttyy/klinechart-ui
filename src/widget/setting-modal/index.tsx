@@ -84,16 +84,6 @@ const SettingModal: Component<SettingModalProps> = props => {
     props.onClose()
   }
 
-  const sync = () => {
-    const chartStateObj = localStorage.getItem('chartstatedata')
-    if (chartStateObj) {
-      chartsessionCtr()?.updateSession({
-        id: chartsession()?.id,
-        chart: btoa(chartStateObj)
-      })
-    }
-  }
-
   const settingsButton = [
     {text: 'Candle', key: 'candle'},
     {text: 'Indicator', key: 'indicator'},

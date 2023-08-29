@@ -37,7 +37,7 @@ import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './
 import { drawOrder, orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
 import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified } from './store/chartStateStore'
 
-const { createIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs } = useChartState()
+const { createIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs } = useChartState()
 
 export interface ChartProComponentProps extends Required<Omit<ChartProOptions, 'container'>> {
   ref: (chart: ChartPro) => void
@@ -190,6 +190,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       }
       const updateChartSession = async (_session: sessionType, _pl: number, _sessionctr: ChartSessionResource) => {
         const pl = +_session.current_bal + +_pl
+        popIndicator() //cater for indi that were removed from the indicator overlay
         if (_session) {
           await _sessionctr?.updateSession({
             id: _session.id,
@@ -531,6 +532,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       const updateChartSession = async () => {
         let pl = await updateRunningOrders ()
         
+        popIndicator() //cater for indi that were removed from the indicator overlay
         let session = chartsession()
         const chart = localStorage.getItem('chartstatedata')
         if (session) {

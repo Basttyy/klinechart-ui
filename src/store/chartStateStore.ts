@@ -15,45 +15,53 @@ type IndicatorChageType = {
   added: boolean
 }
 
-const syncIndiObject = (indicator: Indicator): boolean => {
+const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: PaneOptions): boolean => {
+  console.log(indicator)
   const chartStateObj = localStorage.getItem('chartstatedata')
   let chartObj: ChartObjType
   
-  const overly = refineOverlayObj(_.cloneDeep(event.overlay))
+  const indi = refineIndiObj(_.cloneDeep(indicator))
   if (chartStateObj) {
     chartObj = JSON.parse(chartStateObj!)
-    if (!chartObj.overlays) {
+    if (!chartObj.indicators) {
       chartObj = {
-        overlays: [{
-          value: overly,
-          paneId: event.overlay.paneId
+        styleObj: chartObj.styleObj,
+        overlays: chartObj.overlays,
+        figures: chartObj.figures,
+        indicators: [{
+          value: indi,
+          isStack: isStack,
+          paneOptions
         }]
       }
     } else {
-      if (chartObj.overlays.find(ovaly => ovaly.value?.id === overly.id)) {
+      if (chartObj.indicators.find(_indi => _indi.value?.name === indi.name && _indi.paneOptions?.id === paneOptions?.id)) {
         // @ts-expect-error
-        chartObj.overlays = chartObj.overlays.map(ovaly => (ovaly.value?.id !== overly.id ? ovaly : {
-          value: overly,
-          paneId: event.overlay.paneId
+        chartObj.indicators = chartObj.indicators.map(_indi => (_indi.value?.id !== indi.id ? _indi : {
+          value: indi,
+          isStack,
+          paneOptions
         }))
       } else {
-        chartObj.overlays!.push({
-          value: overly,
-          paneId: event.overlay.paneId
+        chartObj.indicators!.push({
+          value: indi,
+          isStack,
+          paneOptions
         })
       }
     }
   }
   else {
     chartObj = {
-      overlays: [{
-        value: overly,
-        paneId: event.overlay.paneId
+      indicators: [{
+        value: indi,
+        isStack,
+        paneOptions
       }]
     }
   }
-  setChartModified(true)
   localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+  setChartModified(true)
   return false
 }
 
@@ -66,14 +74,16 @@ const syncObject = (event: OverlayEvent): boolean => {
     chartObj = JSON.parse(chartStateObj!)
     if (!chartObj.overlays) {
       chartObj = {
+        styleObj: chartObj.styleObj,
         overlays: [{
           value: overly,
           paneId: event.overlay.paneId
-        }]
+        }],
+        figures: chartObj.figures,
+        indicators: chartObj.indicators
       }
     } else {
       if (chartObj.overlays.find(ovaly => ovaly.value?.id === overly.id)) {
-        // @ts-expect-error
         chartObj.overlays = chartObj.overlays.map(ovaly => (ovaly.value?.id !== overly.id ? ovaly : {
           value: overly,
           paneId: event.overlay.paneId
@@ -94,9 +104,24 @@ const syncObject = (event: OverlayEvent): boolean => {
       }]
     }
   }
-  setChartModified(true)
   localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+  setChartModified(true)
   return false
+}
+
+const refineIndiObj = (indicator: Indicator): IndicatorCreate => {
+  const keys = [
+    'calc', 'regenerateFigures', 'draw', 'createTooltipDataSource'
+  ]
+
+  let cleanIndicator: IndicatorCreate = indicator
+
+  keys.forEach (key => {
+    // @ts-expect-error
+    delete cleanIndicator[key]
+  })
+
+  return cleanIndicator
 }
 
 /**
@@ -119,6 +144,58 @@ const refineOverlayObj = (overlay: Overlay): OverlayCreate => {
     delete cleanOverlay[key]
   })
   return cleanOverlay
+}
+
+const popOverlay = (id: string) => {
+  instanceapi()?.removeOverlay(id)
+
+  const chartStateObj = localStorage.getItem('chartstatedata')
+  if (chartStateObj) {
+    let chartObj: ChartObjType = JSON.parse(chartStateObj)
+
+    chartObj.overlays?.filter(overlay => overlay.value?.id !== id)
+    localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+  }
+}
+
+const popIndicator = (name?: string, paneId?: string) => {
+  const chartStateObj = localStorage.getItem('chartstatedata')
+  console.log(`pop indicators called with params: ${name} and ${paneId}`)
+  if (name && paneId) {
+    console.log(`pop indicators called with params: ${name} and ${paneId}`)
+    instanceapi()?.removeIndicator(paneId, name)
+  
+    if (chartStateObj) {
+      let chartObj: ChartObjType = JSON.parse(chartStateObj)
+  
+      chartObj.indicators = chartObj.indicators?.filter(indi => indi.paneOptions?.id !== paneId && indi.value?.name !== name)
+      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+    }
+    return
+  }
+
+  const newMainIndicators = [...mainIndicators()]
+  const newSubIndicators = { ...subIndicators() }
+
+  if (chartStateObj) {
+    let chartObj: ChartObjType = JSON.parse(chartStateObj)
+
+    chartObj.indicators = chartObj.indicators?.filter(indi => {
+      let inSub = false
+      const inMain = newMainIndicators.find(name => indi.value?.name === name && indi.paneOptions?.id === 'candle_pane')
+      const entries = Object.entries(newSubIndicators)
+      for (const [key, value] of entries) {
+        if (indi.value?.name === key && indi.paneOptions?.id === value) {
+          inSub = true
+          break
+        }
+      }
+
+      return inMain || inSub
+    })
+    setChartModified(true)
+    localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+  }
 }
 
 export const useChartState = () => {
@@ -146,9 +223,11 @@ export const useChartState = () => {
     }, isStack, paneOptions) ?? null
 
     if (name && docallback) {
-      const indi = widget?.getIndicatorByPaneId(paneOptions?.id, name)
-      syncIndiObject(indi)
+      const indi = widget?.getIndicatorByPaneId(name, indicatorName)
+      if (indi)
+        syncIndiObject(indi as Indicator, isStack, paneOptions)
     }
+    return name
   }
 
   const pushOverlay = (overlay: OverlayCreate) => {
@@ -162,6 +241,10 @@ export const useChartState = () => {
         },
         onPressedMoveEnd: (event): boolean => {
           return syncObject(event)
+        },
+        onRightClick: (event): boolean => {
+          popOverlay(event.overlay.id)
+          return false
         }
       })
     }
@@ -170,10 +253,10 @@ export const useChartState = () => {
   const pushMainIndicator = (data: IndicatorChageType) => {
     const newMainIndicators = [...mainIndicators()]
     if (data.added) {
-      createIndicator(instanceapi(), data.name, true, { id: 'candle_pane' })
+      createIndicator(instanceapi(), data.name, true, { id: 'candle_pane' }, true)
       newMainIndicators.push(data.name)
     } else {
-      instanceapi()?.removeIndicator('candle_pane', data.name)
+      popIndicator(data.name, 'candle_pane')
       newMainIndicators.splice(newMainIndicators.indexOf(data.name), 1)
     }
     setMainIndicators(newMainIndicators)
@@ -182,14 +265,14 @@ export const useChartState = () => {
   const pushSubIndicator = (data: IndicatorChageType) => {
     const newSubIndicators = { ...subIndicators() }
     if (data.added) {
-      const paneId = createIndicator(instanceapi(), data.name)
+      const paneId = createIndicator(instanceapi(), data.name, undefined, undefined, true)
       if (paneId) {
         // @ts-expect-error
         newSubIndicators[data.name] = paneId
       }
     } else {
       if (data.paneId) {
-        instanceapi()?.removeIndicator(data.paneId, data.name)
+        popIndicator(data.name, data.paneId)
         // @ts-expect-error
         delete newSubIndicators[data.name]
       }
@@ -211,51 +294,76 @@ export const useChartState = () => {
   }
 
   const redraOverlaysIndiAndFigs = async () => {
+
+    const redraw = (chartStateObj: string) => {
+      const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
+
+      if (chartObj.figures) {
+        // chartObj.figures.forEach(figure => {
+        //   figure.value
+        // })
+      }
+      if (chartObj.overlays) {
+        chartObj.overlays.forEach(overlay => {
+          if (overlay.value) {
+            const id = instanceapi()?.createOverlay(overlay.value, overlay.paneId)
+            const ovrly = instanceapi()?.getOverlayById((id as string))
+            if (ovrly) {
+              instanceapi()?.overrideOverlay({
+                onDrawEnd: (event): boolean => {
+                  return syncObject(event)
+                },
+                onPressedMoveEnd: (event): boolean => {
+                  return syncObject(event)
+                }
+              })
+            }
+          }
+        })
+      }
+      if (chartObj.indicators) {
+        setTimeout(() => {
+          console.log('got to redraw indicators')
+          const newMainIndicators = [...mainIndicators()]
+          const newSubIndicators = {...subIndicators}
+  
+          chartObj.indicators!.forEach(indicator => {
+            if (indicator.value) {
+              instanceapi()?.createIndicator(indicator.value, indicator.isStack, indicator.paneOptions)
+              if (indicator.paneOptions?.id === 'candle_pane') {
+                newMainIndicators.push(indicator.value.name)
+              } else {
+                //@ts-expect-error
+                newSubIndicators[indicator.value.name] = indicator.paneOptions?.id
+              }
+            }
+          })
+          setMainIndicators(newMainIndicators)
+          console.log(mainIndicators())
+          setSubIndicators(newSubIndicators)
+          console.log(subIndicators())
+        }, 500);
+      }
+      if (chartObj.styleObj) {
+        instanceapi()?.setStyles(chartObj.styleObj)
+      }
+    }
+
     if (chartsession()?.chart) {
-      const chartStateObj = atob(chartsession()?.chart!)
+      let chartStateObj = atob(chartsession()?.chart!)
 
       if (chartStateObj) {
         if (chartStateObj !== localStorage.getItem('chartstatedata'))
           localStorage.setItem('chartstatedata', chartStateObj)
 
-        const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
-        console.log('Stored object:', chartObj)
-
-        if (chartObj.figures) {
-          // chartObj.figures.forEach(figure => {
-          //   figure.value
-          // })
-        }
-        if (chartObj.overlays) {
-          chartObj.overlays.forEach(overlay => {
-            if (overlay.value) {
-              const id = instanceapi()?.createOverlay(overlay.value, overlay.paneId)
-              const ovrly = instanceapi()?.getOverlayById((id as string))
-              if (ovrly) {
-                instanceapi()?.overrideOverlay({
-                  onDrawEnd: (event): boolean => {
-                    return syncObject(event)
-                  },
-                  onPressedMoveEnd: (event): boolean => {
-                    return syncObject(event)
-                  }
-                })
-              }
-            }
-          })
-        }
-        if (chartObj.indicators) {
-          chartObj.indicators.forEach(indicator => {
-            if (indicator.value)
-              instanceapi()?.createIndicator(indicator.value, indicator.isStack, indicator.paneOptions, indicator.callback)
-          })
-        }
-        if (chartObj.styleObj) {
-          instanceapi()?.setStyles(chartObj.styleObj)
-        }
+        return redraw(chartStateObj)
       }
     }
+
+    const chartStateObj = localStorage.getItem('chartstatedata')!
+    if (chartStateObj)
+      redraw(chartStateObj)
   }
 
-  return { createIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
+  return { createIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
 }

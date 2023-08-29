@@ -97,28 +97,27 @@ export interface sessionModifyType {
 	end_date?: string;
 }
 
+type IndicatorsType = {
+  value?: IndicatorCreate,
+  isStack?: boolean,
+  paneOptions?: PaneOptions
+}
+
+type OverlaysType = {
+  value?: OverlayCreate,
+  paneId: string
+}
+
+type FiguresType = {
+  value?: string|FigureCreate,
+  ctx: CanvasRenderingContext2D
+}
+
 export interface ChartObjType {
   styleObj?: DeepPartial<Styles>
-  overlays?: [
-    {
-      value?: OverlayCreate,
-      paneId: string
-    }
-  ]
-  figures?: [
-    {
-      value?: string|FigureCreate,
-      ctx: CanvasRenderingContext2D
-    }
-  ]
-  indicators?: [
-    {
-      value?: string|IndicatorCreate,
-      isStack?: boolean, paneOptions?:
-      PaneOptions,
-      callback?: () => void
-    }
-  ]
+  overlays?: OverlaysType[]
+  figures?: FiguresType[]
+  indicators?: IndicatorsType[]
 }
 
 export type DatafeedSubscribeCallback = (data: KLineData, timestamp?: number) => void
