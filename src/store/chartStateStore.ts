@@ -16,7 +16,6 @@ type IndicatorChageType = {
 }
 
 const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: PaneOptions): boolean => {
-  console.log(indicator)
   const chartStateObj = localStorage.getItem('chartstatedata')
   let chartObj: ChartObjType
   
@@ -147,22 +146,20 @@ const refineOverlayObj = (overlay: Overlay): OverlayCreate => {
 }
 
 const popOverlay = (id: string) => {
-  instanceapi()?.removeOverlay(id)
-
   const chartStateObj = localStorage.getItem('chartstatedata')
   if (chartStateObj) {
     let chartObj: ChartObjType = JSON.parse(chartStateObj)
 
-    chartObj.overlays?.filter(overlay => overlay.value?.id !== id)
+    chartObj.overlays = chartObj.overlays?.filter(overlay => overlay.value?.id !== id)
     localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+    setChartModified(true)
   }
+  instanceapi()?.removeOverlay(id)
 }
 
 const popIndicator = (name?: string, paneId?: string) => {
   const chartStateObj = localStorage.getItem('chartstatedata')
-  console.log(`pop indicators called with params: ${name} and ${paneId}`)
   if (name && paneId) {
-    console.log(`pop indicators called with params: ${name} and ${paneId}`)
     instanceapi()?.removeIndicator(paneId, name)
   
     if (chartStateObj) {
@@ -315,6 +312,10 @@ export const useChartState = () => {
                 },
                 onPressedMoveEnd: (event): boolean => {
                   return syncObject(event)
+                },
+                onRightClick: (event): boolean => {
+                  popOverlay(event.overlay.id)
+                  return false
                 }
               })
             }
@@ -323,7 +324,6 @@ export const useChartState = () => {
       }
       if (chartObj.indicators) {
         setTimeout(() => {
-          console.log('got to redraw indicators')
           const newMainIndicators = [...mainIndicators()]
           const newSubIndicators = {...subIndicators}
   
@@ -339,9 +339,7 @@ export const useChartState = () => {
             }
           })
           setMainIndicators(newMainIndicators)
-          console.log(mainIndicators())
           setSubIndicators(newSubIndicators)
-          console.log(subIndicators())
         }, 500);
       }
       if (chartObj.styleObj) {
