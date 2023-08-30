@@ -15,6 +15,13 @@ type IndicatorChageType = {
   added: boolean
 }
 
+type IndicatorSettingsType = {
+  visible: boolean;
+  indicatorName: string;
+  paneId: string;
+  calcParams: any[];
+}
+
 const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: PaneOptions): boolean => {
   const chartStateObj = localStorage.getItem('chartstatedata')
   let chartObj: ChartObjType
@@ -110,7 +117,7 @@ const syncObject = (event: OverlayEvent): boolean => {
 
 const refineIndiObj = (indicator: Indicator): IndicatorCreate => {
   const keys = [
-    'calc', 'regenerateFigures', 'draw', 'createTooltipDataSource'
+    'calc', 'figures', 'regenerateFigures', 'draw', 'createTooltipDataSource'
   ]
 
   let cleanIndicator: IndicatorCreate = indicator
@@ -157,51 +164,13 @@ const popOverlay = (id: string) => {
   instanceapi()?.removeOverlay(id)
 }
 
-const popIndicator = (name?: string, paneId?: string) => {
-  const chartStateObj = localStorage.getItem('chartstatedata')
-  if (name && paneId) {
-    instanceapi()?.removeIndicator(paneId, name)
-  
-    if (chartStateObj) {
-      let chartObj: ChartObjType = JSON.parse(chartStateObj)
-  
-      chartObj.indicators = chartObj.indicators?.filter(indi => indi.paneOptions?.id !== paneId && indi.value?.name !== name)
-      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
-    }
-    return
-  }
-
-  const newMainIndicators = [...mainIndicators()]
-  const newSubIndicators = { ...subIndicators() }
-
-  if (chartStateObj) {
-    let chartObj: ChartObjType = JSON.parse(chartStateObj)
-
-    chartObj.indicators = chartObj.indicators?.filter(indi => {
-      let inSub = false
-      const inMain = newMainIndicators.find(name => indi.value?.name === name && indi.paneOptions?.id === 'candle_pane')
-      const entries = Object.entries(newSubIndicators)
-      for (const [key, value] of entries) {
-        if (indi.value?.name === key && indi.paneOptions?.id === value) {
-          inSub = true
-          break
-        }
-      }
-
-      return inMain || inSub
-    })
-    setChartModified(true)
-    localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
-  }
-}
-
 export const useChartState = () => {
 
   function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStack?: boolean, paneOptions?: PaneOptions, docallback = false): Nullable<string> {
     if (indicatorName === 'VOL') {
       paneOptions = { gap: { bottom: 2 }, ...paneOptions }
     }
-    const name = widget?.createIndicator({
+    const paneId = widget?.createIndicator({
       name: indicatorName,
       // @ts-expect-error
       createTooltipDataSource: ({ indicator, defaultStyles }) => {
@@ -219,12 +188,13 @@ export const useChartState = () => {
       }
     }, isStack, paneOptions) ?? null
 
-    if (name && docallback) {
-      const indi = widget?.getIndicatorByPaneId(name, indicatorName)
+    if (paneId && docallback) {
+      const indi = widget?.getIndicatorByPaneId(paneId, indicatorName)
+      console.log(indi)
       if (indi)
-        syncIndiObject(indi as Indicator, isStack, paneOptions)
+        syncIndiObject(indi as Indicator, isStack, { id: paneId })
     }
-    return name
+    return paneId
   }
 
   const pushOverlay = (overlay: OverlayCreate) => {
@@ -262,7 +232,7 @@ export const useChartState = () => {
   const pushSubIndicator = (data: IndicatorChageType) => {
     const newSubIndicators = { ...subIndicators() }
     if (data.added) {
-      const paneId = createIndicator(instanceapi(), data.name, undefined, undefined, true)
+      const paneId = createIndicator(instanceapi(), data.name, false, undefined, true)
       if (paneId) {
         // @ts-expect-error
         newSubIndicators[data.name] = paneId
@@ -275,6 +245,38 @@ export const useChartState = () => {
       }
     }
     setSubIndicators(newSubIndicators)
+  }
+
+  const modifyIndicator = (modalParams: IndicatorSettingsType, params: any) => {
+    const chartStateObj = localStorage.getItem('chartstatedata')
+    if (chartStateObj) {
+      let chartObj: ChartObjType = JSON.parse(chartStateObj)
+
+      chartObj.indicators = chartObj.indicators?.map(indi => {
+        if (indi.value?.name === modalParams.indicatorName) {
+          indi.value.name = modalParams.indicatorName
+          indi.value.calcParams = params
+          indi.paneOptions!.id = modalParams.paneId
+        }
+        return indi
+      })
+      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+      setChartModified(true)
+      instanceapi()?.overrideIndicator({ name: modalParams.indicatorName, calcParams: params }, modalParams.paneId)
+    }
+  }
+  const popIndicator = (name: string, paneId: string) => {
+    const chartStateObj = localStorage.getItem('chartstatedata')
+    instanceapi()?.removeIndicator(paneId, name)
+  
+    if (chartStateObj) {
+      let chartObj: ChartObjType = JSON.parse(chartStateObj)
+  
+      chartObj.indicators = chartObj.indicators?.filter(indi => indi.paneOptions?.id !== paneId && indi.value?.name !== name)
+      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+      setChartModified(true)
+    }
+    return
   }
 
   const redrawOrders = async () => {
@@ -296,9 +298,6 @@ export const useChartState = () => {
       const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
 
       if (chartObj.figures) {
-        // chartObj.figures.forEach(figure => {
-        //   figure.value
-        // })
       }
       if (chartObj.overlays) {
         chartObj.overlays.forEach(overlay => {
@@ -363,5 +362,5 @@ export const useChartState = () => {
       redraw(chartStateObj)
   }
 
-  return { createIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
+  return { createIndicator, modifyIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
 }
