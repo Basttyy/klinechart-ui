@@ -152,23 +152,12 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
                     }
                     case 'color': {
                       component = (
-                        // <input style={'width: 120px'} type="color" value={value as any} 
-                        //   onchange={(el) => {
-                        //     const newValue = el.target.value
-                        //     update(option, newValue)
-												// 		// setBuyStyle((prevStyle) => ({
-												// 		// 	...prevStyle,
-												// 		// 	[option.key]: newValue,
-												// 		// }));
-                        //   }} 
-                        // />
                         <Color 
                         style={{ width: '120px' }}
                         value={value}
                         onChange={(el) => {
                           const newValue = el
                           update(option, newValue)
-                          
                         }}
                         />
                       )

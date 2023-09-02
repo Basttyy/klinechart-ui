@@ -17,7 +17,7 @@ import { Styles, utils, DeepPartial } from 'klinecharts'
 
 import lodashSet from 'lodash/set'
 
-import { Modal, Select, Switch, } from '../../component'
+import { Modal, Select, Switch, Color } from '../../component'
 import type { SelectDataSourceItem } from '../../component'
 
 import i18n from '../../i18n'
@@ -119,11 +119,19 @@ const SettingModal: Component<SettingModalProps> = props => {
                     }
                     case 'color': {
                       component = (
-                        <input style={'width: 120px'} type="color" value={value as any} 
-                          onchange={(el) => {
-                            const newValue = el.target.value
+                        // <input style={'width: 120px'} type="color" value={value as any} 
+                        //   onchange={(el) => {
+                        //     const newValue = el.target.value
+                        //     update(option, newValue)
+                        //   }} 
+                        // />
+                        <Color 
+                          style={{ width: '120px' }}
+                          value={value as any}
+                          onChange={(el) => {
+                            const newValue = el
                             update(option, newValue)
-                          }} 
+                          }}  
                         />
                       )
                       break
