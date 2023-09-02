@@ -128,7 +128,7 @@ const buyProfitLine: OverlayTemplate = {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
         styles: buyStyle(),
-        ignoreEvent: true
+        // ignoreEvent: true
       },
       {
         type: 'rectText',
