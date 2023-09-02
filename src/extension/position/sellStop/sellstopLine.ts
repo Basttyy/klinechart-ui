@@ -17,6 +17,8 @@ import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
+import { sellStyle } from '../../../store/overlayStyleStore'
+import { useOverlaySetting } from '../../../store/overlaySettingStore'
 
 const sellstopLine: OverlayTemplate = {
   name: 'sellstopLine',
@@ -37,16 +39,13 @@ const sellstopLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#fb7b50'
+          color: sellStyle().backgroundColor
         }
       },
       {
         type: 'rectText',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
+        styles: sellStyle()
       }
     ]
   },
@@ -72,7 +71,7 @@ const sellstopLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#fb7b50' } }
+    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle() }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -108,8 +107,9 @@ const sellstopLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-      useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    return false
+      // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    useOverlaySetting().singlePopup(event, 'sell')
+    return true
   }
 }
 

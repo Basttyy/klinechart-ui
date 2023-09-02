@@ -18,6 +18,8 @@ import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
+import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { buyStyle, takeProfitStyle } from '../../../store/overlayStyleStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -76,20 +78,28 @@ const buystopProfitLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines,
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#00698b'
-        }
+        styles: [
+          {
+            style: 'dashed',
+            dashedValue: [4, 4],
+            size: 1,
+            color: buyStyle().backgroundColor
+          },
+          {
+            style: 'dashed',
+            dashedValue: [4, 4],
+            size: 1,
+            color: takeProfitStyle().backgroundColor
+          }
+        ]
       },
       {
         type: 'rectText',
         attrs: parallel.recttexts,
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        }
+        styles: [
+          buyStyle(),
+          takeProfitStyle()
+        ]
       }
     ]
   },
@@ -116,12 +126,12 @@ const buystopProfitLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' }
+        styles: buyStyle()
       },
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' }
+        styles: takeProfitStyle()
       }
     ]
   },
@@ -177,11 +187,8 @@ const buystopProfitLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    if (event.figureIndex === 0)
-      useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    else if (event.figureIndex === 1)
-      useOrder().removeStopOrTP(event.overlay, 'tp')
-    return false
+    useOverlaySetting().profitPopup(event, 'buy')
+    return true
   }
 }
 

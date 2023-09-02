@@ -23,11 +23,11 @@ import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
 
 import { SelectDataSourceItem, Loading, Popup } from './component'
-import { showPopup } from './store/overlaySettingStore'
+import { showPopup, showBuySetting, setCtrlKeyedDown } from './store/overlaySettingStore'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
-  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel
+  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel, BuySettingModal
 } from './widget'
 
 import { translateTimezone } from './widget/timezone-modal/data'
@@ -66,6 +66,18 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
       return { icons }
     }
   }, isStack, paneOptions) ?? null
+}
+
+const handleKeyDown = (event:KeyboardEvent) => {
+  if (event.ctrlKey) {
+    setCtrlKeyedDown(true)
+  }
+}
+
+const handleKeyUp = (event:KeyboardEvent) => {
+  if (!event.ctrlKey) {
+    setCtrlKeyedDown(false)
+  }
 }
 
 export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
@@ -235,6 +247,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     document.addEventListener('contextmenu', function(event) {
       event.preventDefault();
     });
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
     setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
@@ -360,6 +374,8 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     document.removeEventListener('contextmenu', function(event) {
       event.preventDefault();
     });
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("keyup", handleKeyUp);
     window.removeEventListener('resize', documentResize)
     clearInterval(timerId)
     dispose(widgetRef!)
@@ -576,6 +592,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       <i class="icon-close klinecharts-pro-load-icon"/>
       <Show when={showPopup()}>
         <Popup/>
+      </Show>
+      <Show when={showBuySetting()}>
+        <BuySettingModal
+          locale={props.locale}
+        />
       </Show>
       <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal

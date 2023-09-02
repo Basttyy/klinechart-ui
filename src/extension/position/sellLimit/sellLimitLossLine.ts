@@ -17,6 +17,8 @@ import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Poi
 import { currenttick } from '../../../store/tickStore'
 import { useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
+import { sellStyle, stopLossStyle } from '../../../store/overlayStyleStore'
+import { useOverlaySetting } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -72,7 +74,7 @@ const sellLimitLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#fb7b50'
+          color: sellStyle().backgroundColor
         }
       },
       {
@@ -82,24 +84,18 @@ const sellLimitLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#fb7b50'
+          color: stopLossStyle().backgroundColor
         }
       },
       {
         type: 'rectText',
         attrs: parallel.recttexts[0],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
+        styles: sellStyle()
       },
       {
         type: 'rectText',
         attrs: parallel.recttexts[1],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
+        styles: stopLossStyle()
       }
     ]
   },
@@ -126,13 +122,13 @@ const sellLimitLossLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
+        styles: sellStyle(),
         // ignoreEvent: true
       },
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
+        styles: stopLossStyle()
       }
     ]
   },
@@ -167,11 +163,8 @@ const sellLimitLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    if (event.figureIndex == 0)
-      useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    else
-      useOrder().removeStopOrTP(event.overlay, 'sl')
-    return false
+    useOverlaySetting().lossPopup(event, 'sell')
+    return true
   }
 }
 

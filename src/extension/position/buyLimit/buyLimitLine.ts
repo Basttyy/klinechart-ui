@@ -17,6 +17,8 @@ import { useOrder, setOrderList, orderList } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
+import { buyStyle } from '../../../store/overlayStyleStore'
+import { useOverlaySetting } from '../../../store/overlaySettingStore'
 
 const buyLimitLine: OverlayTemplate = {
   name: 'buyLimitLine',
@@ -37,17 +39,14 @@ const buyLimitLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#00698b'
+          color: buyStyle().backgroundColor
         },
         ignoreEvent: true
       },
       {
         type: 'rectText',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buyLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        },
+        styles: buyStyle(),
         ignoreEvent: true
       }
     ]
@@ -74,7 +73,7 @@ const buyLimitLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
+    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: buyStyle() }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -96,9 +95,10 @@ const buyLimitLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
     //the overlay represented an order that does not exist on our pool, it should be handled here
-    return false
+    useOverlaySetting().singlePopup(event, 'buy')
+    return true
   }
 }
 
