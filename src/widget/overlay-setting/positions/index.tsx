@@ -31,10 +31,11 @@ export interface BuySettingModalProps {
   locale: string
 }
 
+
   
 const BuySettingModal: Component<BuySettingModalProps> = props => {
 	const { font_size, font_family, font_weight, fill_stroke, solid_dashed, size } = useDataSource(props.locale)
-	const options = [
+	const Options = [
     {
       key: 'style',
       text: i18n('Style', props.locale),
@@ -87,6 +88,7 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
       component: 'color',
     }
 	]
+  const [options, setOptions] = createSignal(Options)
   
 	const getValue = (key:any) => {
     if(popupOtherInfo()?.overlayType == 'buy'){
@@ -110,6 +112,7 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
     } else if(popupOtherInfo()?.overlayType == 'tp') {
       setTakeProfitStyle((prevStyle) => ({ ...prevStyle, [option.key]: newValue}));
     }
+    setOptions(options().map(op => ({ ...op })))
   }
 
   return (
@@ -119,7 +122,7 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
     >
       <div class="klinecharts-pro-buy-setting-modal-content">
 				<div class="content">
-						<For each={options}>
+						<For each={options()}>
               {
                 option => {
                   let component

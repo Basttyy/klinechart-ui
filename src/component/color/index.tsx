@@ -13,6 +13,7 @@
  */
 
 import { createSignal, Component, JSX } from 'solid-js'
+import chroma from "chroma-js";
 
 
 
@@ -26,16 +27,17 @@ export interface ColorProps {
 
 const Color: Component<ColorProps> = props => {
   const [open, setOpen] = createSignal(false)
+	const [opacity, setOpacity] = createSignal(100)
+	const [selectedColor, setSelectedColor] = createSignal(props.value)
+	const [finalColor, setFinalColor] = createSignal(props.value)
+	const [rangeFocused, setRangeFocused] = createSignal(false)
 	const colors = [
 		['rgb(255, 255, 255)',
-		// 'rgb(209, 212, 220)',
 		'rgb(178, 181, 190)',
 		'rgb(149, 152, 161)',
 		'rgb(120, 123, 134)',
 		'rgb(93, 96, 107)',
-		// 'rgb(67, 70, 81)',
 		'rgb(42, 46, 57)',
-		// 'rgb(19, 23, 34)',
 		'rgb(0, 0, 0)'],
 
 		['rgb(242, 54, 69)',
@@ -122,21 +124,44 @@ const Color: Component<ColorProps> = props => {
 		'#fb7b50']
 	]
 
+	const closeColorPallete = () => {
+		setSelectedColor('')
+		setFinalColor('')
+		setOpen(false)
+	}
+	const addOpacity = () => {
+		const op = opacity()/100
+		const x = chroma(selectedColor() as any).alpha(op).css();
+		setFinalColor(x)
+	}
+
+	const handleRangeChange = (event:any) => {
+		setOpacity(event.target.value);
+		addOpacity()
+	}
+
   return (
     <div
-      // style={props.style}
-			style={`width: 120px; background-color: ${props.value}`}
+			style={`width: 120px; background-color: ${finalColor() || props.value}`}
       class={`klinecharts-pro-color ${props.class ?? ''} ${open() ? 'klinecharts-pro-color-show' : ''}`}
       tabIndex="0"
-      onClick={_ => { setOpen(o => !o) }}
-      onBlur={_ => { setOpen(false) }}>
-      <div
-        class="selector-container">
+      // onClick={_ => { setOpen(o => !o) }}
+      // onBlur={_ => { 
+			// 	if (!rangeFocused()) {
+			// 		closeColorPallete();
+			// 	}
+			// }}
+		>
+      <div class="selector-container"
+				onClick={(e) => {
+					setOpen(true)
+				}}
+			>
         {/* <span class="value">{props.value}</span> */}
         <i class="arrow"/>
       </div>
       
-			<div class="drop-down-container">
+			<div class="drop-down-container" style={`left: 50%; top: 20%`}>
 					{
 						colors.map((data:any) => {
 							return (
@@ -144,26 +169,47 @@ const Color: Component<ColorProps> = props => {
 									{
 										data.map((d:any) => {
 											return (
-												<div class={`each_color ${d == props.value ? 'selected' : ''}`} style={`background-color: ${d}`}
+												<div class={`each_color ${d == selectedColor() ? 'selected' : ''}`} style={`background-color: ${d}`}
 													onClick={e => {
 														e.stopPropagation()
-														if (props.value !== d) {
-															props.onChange?.(d)
-														}
-														setOpen(false)
+														setSelectedColor(d)
+														addOpacity()
 													}}>
 												</div>
 											)
 										})
 									}
 								</div>
-								
 							)
 						})
 					}
+					<div class="split_line"></div>
+					<div class="range_div">
+						<input class="range" style={`background-color: ${finalColor()}; border: 1px solid ${selectedColor()}`}
+							type="range" min="1" max="100" value={opacity()} 
+							onInput={handleRangeChange}
+							onFocus={() => {
+								setRangeFocused(true)
+							}}
+							onBlur={() => {
+								setRangeFocused(false)
+							}}
+						/>
+						<p>{opacity()}%</p>
+					</div>
+					<div class="split_line"></div>
+					<div class="submit">
+						<span class="cancel" onClick={closeColorPallete}>Cancel</span>
+						<span onclick={
+							() => {
+								props.onChange?.(finalColor() as string)
+							}
+						}>Ok</span>
+					</div>
 			</div>
     </div>
   )
 }
+// style={`background-color: ${finalColor()}; border: 1px solid ${selectedColor()}`} 
 
 export default Color
