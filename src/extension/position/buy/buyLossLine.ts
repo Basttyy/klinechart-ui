@@ -18,6 +18,8 @@ import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
+import { buyStyle, stopLossStyle } from '../../../store/overlayStyleStore'
+import { useOverlaySetting } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -73,7 +75,7 @@ const buyLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#00698b'
+          color: buyStyle().backgroundColor
         },
         ignoreEvent: true
       },
@@ -84,25 +86,19 @@ const buyLossLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#fb7b50'
+          color: stopLossStyle().backgroundColor
         }
       },
       {
         type: 'rectText',
         attrs: parallel.recttexts[0],
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        },
+        styles: buyStyle(),
         ignoreEvent: true
       },
       {
         type: 'rectText',
         attrs: parallel.recttexts[1],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
+        styles: stopLossStyle()
       }
     ]
   },
@@ -129,13 +125,13 @@ const buyLossLine: OverlayTemplate = {
       {
         type: 'rectText',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' },
+        styles: buyStyle(),
         ignoreEvent: true
       },
       {
         type: 'rectText',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
+        styles: stopLossStyle()
       }
     ]
   },
@@ -176,11 +172,8 @@ const buyLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    if (event.figureIndex == 0)
-      useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    else
-      useOrder().removeStopOrTP(event.overlay, 'sl')
-    return false
+    useOverlaySetting().lossPopup(event, 'buy')
+    return true
   }
 }
 

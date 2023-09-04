@@ -45,8 +45,7 @@ const circle: OverlayTemplate = {
     return []
   },
   onRightClick: (event): boolean => {
-    event.preventDefault!()
-    openPopup(event.overlay, event)
+    openPopup(event)
     return true
   }
 }

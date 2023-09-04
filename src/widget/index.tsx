@@ -22,9 +22,11 @@ import IndicatorSettingModal from './indicator-setting-modal'
 import SymbolSearchModal from './symbol-search-modal'
 import OrdersPanel from './orders-pane'
 
+
 export {
   PeriodBar, DrawingBar, IndicatorModal,
   TimezoneModal, SettingModal, ScreenshotModal,
   IndicatorSettingModal, SymbolSearchModal,
   OrdersPanel
 }
+export * from './overlay-setting/index'

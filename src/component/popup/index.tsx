@@ -12,26 +12,45 @@
  * limitations under the License.
  */
 
-
-import { useOverlaySetting, popupLeft, popupTop, popup_overlay_exit_type, popupOverlay } from '../../store/overlaySettingStore'
+import { Show } from 'solid-js'
+import { useOverlaySetting, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
+	setShowBuySetting,
+	getOverlayType
+} from '../../store/overlaySettingStore'
 import { useOrder } from '../../store/positionStore'
 import { ExitType } from '../../types'
 
 
-const { closePopup } = useOverlaySetting()
 
-const closeOrder = () => {
-	useOrder().closeOrder(popupOverlay()!, popup_overlay_exit_type()!)
+const triggerAction = () => {
+	if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
+		useOrder().closeOrder(popupOverlay()!, 'manualclose')
+	} else {
+		useOrder().removeStopOrTP(popupOverlay()!, popupOtherInfo()?.overlayType as 'tp'|'sl')
+	}
+}
+
+const ifBuyOrSell = () => {
+	if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
+		return true
+	} else {
+		return false
+	}
+}
+
+const setStyle = () => {
+	
+	setShowBuySetting(true)
 }
 
  
 const Action_popup = () => {
   return (
-    <div class="klinecharts-pro-popup_background" onclick={() => closePopup()}>
+    <div class="klinecharts-pro-popup_background" onclick={() => useOverlaySetting().closePopup()}>
       <div class="popup"  style={{  top: `${popupTop()}px`, left: `${popupLeft()}px` }}>
-				<button onclick={closeOrder}>Close order</button>
-				{/* <button onclick={removeOverlay}>Remove overlay</button> */}
-				<button>Others</button>
+				<button onclick={triggerAction}>{ifBuyOrSell() ? 'Close order' : `Remove ${getOverlayType()}`}</button>
+				<button onClick={setStyle}>Settings</button>
+				{/* <button>Others</button> */}
 			</div>
     </div>
   )

@@ -17,6 +17,8 @@ import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
+import { buyStyle } from '../../../store/overlayStyleStore'
+import { useOverlaySetting } from '../../../store/overlaySettingStore'
 
 const buystopLine: OverlayTemplate = {
   name: 'buystopLine',
@@ -45,16 +47,13 @@ const buystopLine: OverlayTemplate = {
           style: 'dashed',
           dashedValue: [4, 4],
           size: 1,
-          color: '#00698b'
+          color: buyStyle().backgroundColor
         }
       },
       {
         type: 'rectText',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        }
+        styles: buyStyle()
       }
     ]
   },
@@ -80,7 +79,7 @@ const buystopLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
+    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: buyStyle() }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -116,8 +115,9 @@ const buystopLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-      useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    return false
+      // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
+    useOverlaySetting().singlePopup(event, 'buy')
+    return true
   }
 }
 
