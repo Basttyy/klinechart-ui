@@ -46,7 +46,7 @@ const SettingModal: Component<SettingModalProps> = props => {
   })
 
   const update = (option: SelectDataSourceItem, newValue: any) => {
-    const chartStateObj = localStorage.getItem('chartstatedata')
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
     let chartObj: ChartObjType
     if (chartStateObj) {
       chartObj = (JSON.parse(chartStateObj) as ChartObjType)
@@ -58,7 +58,7 @@ const SettingModal: Component<SettingModalProps> = props => {
     }
     
     lodashSet(chartObj.styleObj!, option.key, newValue)
-    localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+    localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
     setChartModified(true)
     const style = {}
     lodashSet(style, option.key, newValue)
@@ -71,14 +71,14 @@ const SettingModal: Component<SettingModalProps> = props => {
   }
 
   const restoreDefault = () => {
-    const chartStateObj = localStorage.getItem('chartstatedata')
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
     let chartObj: ChartObjType
     if (chartStateObj) {
       chartObj = (JSON.parse(chartStateObj) as ChartObjType)
       if (chartObj.styleObj)
         chartObj.styleObj = {}
       
-      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+      localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
     }
     props.onRestoreDefault(options())
     props.onClose()
