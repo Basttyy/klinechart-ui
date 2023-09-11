@@ -96,7 +96,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   let priceUnitDom: HTMLElement
 
   let loading = false
-  let timerId: NodeJS.Timer
+  let timerId: NodeJS.Timeout
 
   const [theme, setTheme] = createSignal(props.theme)
   const [styles, setStyles] = createSignal(props.styles)

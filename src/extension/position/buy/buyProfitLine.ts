@@ -112,7 +112,7 @@ const buyProfitLine: OverlayTemplate = {
       textAlign = 'left'
       x = 0
     } else {
-      textAlign = 'ri ght'
+      textAlign = 'right'
       x = bounding.width
     }
     let text, text2

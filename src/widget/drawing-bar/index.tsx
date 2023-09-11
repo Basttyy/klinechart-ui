@@ -201,7 +201,7 @@ const DrawingBar: Component<DrawingBarProps> = props => {
           }
         </span>
       </div>
-      <div
+      {/* <div
         class="item">
         <span
           style="width:32px;height:32px"
@@ -210,7 +210,7 @@ const DrawingBar: Component<DrawingBarProps> = props => {
           }}>
           box
         </span>
-      </div>
+      </div> */}
       <span class="split-line"/>
       <div
         class="item">
