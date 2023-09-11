@@ -96,7 +96,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   let priceUnitDom: HTMLElement
 
   let loading = false
-  let timerId: NodeJS.Timer
+  let timerId: NodeJS.Timeout
 
   const [theme, setTheme] = createSignal(props.theme)
   const [styles, setStyles] = createSignal(props.styles)
@@ -231,7 +231,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             current_bal: _session.current_bal,
             equity: pl,
             chart_timestamp: tickTimestamp(),
-            chart: localStorage.getItem('chartstatedata') != null && chartModified() ? btoa(localStorage.getItem('chartstatedata')!) : undefined
+            chart: localStorage.getItem(`chartstatedata_${chartsession()?.id}`) != null && chartModified() ? btoa(localStorage.getItem(`chartstatedata_${chartsession()?.id}`)!) : undefined
           })
         }
       }
@@ -549,6 +549,21 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   createEffect( () => {
     timerId = setInterval(() => {
+      const closeRunningOrders = async () => {
+        const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+        let i = 0
+        if (orders && symbol() !== undefined) {
+          while(i < orders.length) {
+            await ordercontr()?.modifyOrder({
+              id: orders[i].orderId, //in a real application this should be calculated on backend
+              exitpoint: currenttick()?.close,
+              exittype: 'cancel',
+            })
+            await new Promise(resolve => setTimeout(resolve, 400));
+            i++
+          }
+        }
+      }
       const updateRunningOrders = async () => {
         const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
         let i = 0, pl = 0
@@ -572,9 +587,13 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         let pl = await updateRunningOrders ()
         
         let session = chartsession()
-        const chart = localStorage.getItem('chartstatedata')
+        const chart = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
         if (session) {
           pl += + +session.current_bal
+          if (pl <= 0) {
+            pl = 0
+            await closeRunningOrders()
+          }
           if (session.chart_timestamp !== tickTimestamp() || chart != null)
             if (await chartsessionCtr()?.updateSession({
               id: session.id,
@@ -591,7 +610,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         }
       }
       updateChartSession ()
-    }, 1 * 30 * 1000)     // Run this job every 2min
+    }, 2 * 60 * 1000)     // Run this job every 2min
   })
 
   return (

@@ -23,7 +23,7 @@ type IndicatorSettingsType = {
 }
 
 const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: PaneOptions): boolean => {
-  const chartStateObj = localStorage.getItem('chartstatedata')
+  const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
   let chartObj: ChartObjType
   
   const indi = refineIndiObj(_.cloneDeep(indicator))
@@ -66,13 +66,13 @@ const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: P
       }]
     }
   }
-  localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+  localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
   setChartModified(true)
   return false
 }
 
 const syncObject = (event: OverlayEvent): boolean => {
-  const chartStateObj = localStorage.getItem('chartstatedata')
+  const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
   let chartObj: ChartObjType
   
   const overly = refineOverlayObj(_.cloneDeep(event.overlay))
@@ -110,7 +110,7 @@ const syncObject = (event: OverlayEvent): boolean => {
       }]
     }
   }
-  localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+  localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
   setChartModified(true)
   return false
 }
@@ -153,12 +153,12 @@ const refineOverlayObj = (overlay: Overlay): OverlayCreate => {
 }
 
 const popOverlay = (id: string) => {
-  const chartStateObj = localStorage.getItem('chartstatedata')
+  const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
   if (chartStateObj) {
     let chartObj: ChartObjType = JSON.parse(chartStateObj)
 
     chartObj.overlays = chartObj.overlays?.filter(overlay => overlay.value?.id !== id)
-    localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+    localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
     setChartModified(true)
   }
   instanceapi()?.removeOverlay(id)
@@ -248,7 +248,7 @@ export const useChartState = () => {
   }
 
   const modifyIndicator = (modalParams: IndicatorSettingsType, params: any) => {
-    const chartStateObj = localStorage.getItem('chartstatedata')
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
     if (chartStateObj) {
       let chartObj: ChartObjType = JSON.parse(chartStateObj)
 
@@ -260,20 +260,20 @@ export const useChartState = () => {
         }
         return indi
       })
-      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+      localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
       setChartModified(true)
       instanceapi()?.overrideIndicator({ name: modalParams.indicatorName, calcParams: params }, modalParams.paneId)
     }
   }
   const popIndicator = (name: string, paneId: string) => {
-    const chartStateObj = localStorage.getItem('chartstatedata')
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
     instanceapi()?.removeIndicator(paneId, name)
   
     if (chartStateObj) {
       let chartObj: ChartObjType = JSON.parse(chartStateObj)
   
       chartObj.indicators = chartObj.indicators?.filter(indi => indi.paneOptions?.id !== paneId && indi.value?.name !== name)
-      localStorage.setItem('chartstatedata', JSON.stringify(chartObj))
+      localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
       setChartModified(true)
     }
     return
@@ -350,14 +350,14 @@ export const useChartState = () => {
       let chartStateObj = atob(chartsession()?.chart!)
 
       if (chartStateObj) {
-        if (chartStateObj !== localStorage.getItem('chartstatedata'))
-          localStorage.setItem('chartstatedata', chartStateObj)
+        if (chartStateObj !== localStorage.getItem(`chartstatedata_${chartsession()?.id}`))
+          localStorage.setItem(`chartstatedata_${chartsession()?.id}`, chartStateObj)
 
         return redraw(chartStateObj)
       }
     }
 
-    const chartStateObj = localStorage.getItem('chartstatedata')!
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)!
     if (chartStateObj)
       redraw(chartStateObj)
   }
