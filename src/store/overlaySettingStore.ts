@@ -2,6 +2,7 @@ import { Overlay, OverlayEvent } from 'klinecharts';
 import { createSignal } from 'solid-js';
 import { ExitType } from '../types';
 import { useOrder } from './positionStore';
+import { ctrlKeyedDown, setCtrlKeyedDown } from './keyEventStore';
 
 export interface OtherTypes {
   exitType?: string
@@ -18,8 +19,6 @@ export const [showBuySetting, setShowBuySetting] = createSignal(false)
 export const [showSellSetting, setShowSellSetting] = createSignal(false)
 export const [showTpSetting, setShowTpSetting] = createSignal(false)
 export const [showSlSetting, setShowSlSetting] = createSignal(false)
-
-export const [ctrlKeyedDown, setCtrlKeyedDown] = createSignal(false)
 
 const getScreenSize = () => {
 	return {x: window.innerWidth, y: window.innerHeight}

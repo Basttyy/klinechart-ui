@@ -23,7 +23,7 @@ import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
 
 import { SelectDataSourceItem, Loading, Popup } from './component'
-import { showPopup, showBuySetting, setCtrlKeyedDown } from './store/overlaySettingStore'
+import { showPopup, showBuySetting } from './store/overlaySettingStore'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
@@ -36,6 +36,7 @@ import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, 
 import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
 import { drawOrder, orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
 import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified } from './store/chartStateStore'
+import { useKeyEvents } from './store/keyEventStore'
 
 const { createIndicator, modifyIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs } = useChartState()
 
@@ -70,18 +71,6 @@ interface PrevSymbolPeriod {
 //     }
 //   }, isStack, paneOptions) ?? null
 // }
-
-const handleKeyDown = (event:KeyboardEvent) => {
-  if (event.ctrlKey) {
-    setCtrlKeyedDown(true)
-  }
-}
-
-const handleKeyUp = (event:KeyboardEvent) => {
-  if (!event.ctrlKey) {
-    setCtrlKeyedDown(false)
-  }
-}
 
 export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 export const [symbol, setSymbol] = createSignal<SymbolInfo>()
@@ -249,10 +238,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   onMount(() => {
     document.addEventListener('contextmenu', function(event) {
-      event.preventDefault();
-    });
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
+      event.preventDefault()
+    })
+    document.addEventListener("keydown", useKeyEvents().handleKeyDown)
+    document.addEventListener("keyup", useKeyEvents().handleKeyUp)
+    document.addEventListener('keypress', useKeyEvents().handleKeyPress)
     setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
@@ -379,8 +369,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     document.removeEventListener('contextmenu', function(event) {
       event.preventDefault();
     });
-    document.removeEventListener("keydown", handleKeyDown);
-    document.removeEventListener("keyup", handleKeyUp);
+    document.removeEventListener("keydown", useKeyEvents().handleKeyDown)
+    document.removeEventListener("keyup", useKeyEvents().handleKeyUp)
+    document.removeEventListener('keypress', useKeyEvents().handleKeyPress)
     window.removeEventListener('resize', documentResize)
     clearInterval(timerId)
     dispose(widgetRef!)
