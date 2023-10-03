@@ -23,7 +23,7 @@ import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
 
 import { SelectDataSourceItem, Loading, Popup } from './component'
-import { showPopup, showBuySetting, setCtrlKeyedDown } from './store/overlaySettingStore'
+import { showPopup, showBuySetting } from './store/overlaySettingStore'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
@@ -34,8 +34,9 @@ import { translateTimezone } from './widget/timezone-modal/data'
 
 import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
 import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
-import { drawOrder, orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
-import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified } from './store/chartStateStore'
+import { orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
+import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified, documentResize, setTheme, theme, setDatafeed } from './store/chartStateStore'
+import { setTimerid, setWidgetref, useKeyEvents } from './store/keyEventStore'
 
 const { createIndicator, modifyIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs } = useChartState()
 
@@ -71,23 +72,18 @@ interface PrevSymbolPeriod {
 //   }, isStack, paneOptions) ?? null
 // }
 
-const handleKeyDown = (event:KeyboardEvent) => {
-  if (event.ctrlKey) {
-    setCtrlKeyedDown(true)
-  }
-}
-
-const handleKeyUp = (event:KeyboardEvent) => {
-  if (!event.ctrlKey) {
-    setCtrlKeyedDown(false)
-  }
-}
-
 export const [instanceapi, setInstanceapi] = createSignal<Nullable<Chart>>(null)
 export const [symbol, setSymbol] = createSignal<SymbolInfo>()
 export const [chartsession, setChartsession] = createSignal<sessionType|null>(null)
 export const [chartsessionCtr, setChartsessionCtr] = createSignal<ChartSessionResource|null>(null)
 export const [pausedStatus, setPausedStatus] = createSignal(false)
+export const [screenshotUrl, setScreenshotUrl] = createSignal('')
+export const [rootlelID, setRooltelId] = createSignal('')
+
+export const [drawingBarVisible, setDrawingBarVisible] = createSignal(false)
+export const [orderPanelVisible, setOrderPanelVisible] = createSignal(false)
+export const [settingModalVisible, setSettingModalVisible] = createSignal(false)
+export const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -98,24 +94,15 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   let loading = false
   let timerId: NodeJS.Timeout
 
-  const [theme, setTheme] = createSignal(props.theme)
   const [styles, setStyles] = createSignal(props.styles)
   const [locale, setLocale] = createSignal(props.locale)
 
   const [period, setPeriod] = createSignal(props.period)
-  const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
 
   const [timezoneModalVisible, setTimezoneModalVisible] = createSignal(false)
   const [timezone, setTimezone] = createSignal<SelectDataSourceItem>({ key: props.timezone, text: translateTimezone(props.timezone, props.locale) })
 
-  const [settingModalVisible, setSettingModalVisible] = createSignal(false)
   const [widgetDefaultStyles, setWidgetDefaultStyles] = createSignal<Styles>()
-
-  const [screenshotUrl, setScreenshotUrl] = createSignal('')
-
-  const [drawingBarVisible, setDrawingBarVisible] = createSignal(props.drawingBarVisible)
-  
-  const [orderPanelVisible, setOrderPanelVisible] = createSignal(props.orderPanelVisible)
 
   const [symbolSearchModalVisible, setSymbolSearchModalVisible] = createSignal(false)
 
@@ -125,9 +112,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     visible: false, indicatorName: '', paneId: '', calcParams: [] as Array<any>
   })
   setSymbol(props.symbol)
+  setTheme(props.theme)
   setChartsession(props.chartSession)
   setChartsessionCtr(props.chartSessionController)
   setMainIndicators([...(props.mainIndicators!)])
+  setRooltelId(props.rootElementId)
+  setDrawingBarVisible(props.drawingBarVisible)
+  setOrderPanelVisible(props.orderPanelVisible)
+  setDatafeed(props.datafeed)
 
   props.ref({
     setTheme,
@@ -143,10 +135,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     setPeriod,
     getPeriod: () => period()
   })
-
-  const documentResize = () => {
-    widget?.resize()
-  }
 
   const adjustFromTo = (period: Period, toTimestamp: number, count: number) => {
     let to = toTimestamp
@@ -249,10 +237,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   onMount(() => {
     document.addEventListener('contextmenu', function(event) {
-      event.preventDefault();
-    });
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
+      event.preventDefault()
+    })
+    document.addEventListener("keydown", useKeyEvents().handleKeyDown)
+    document.addEventListener("keyup", useKeyEvents().handleKeyUp)
+    document.addEventListener('keypress', useKeyEvents().handleKeyPress)
     setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
@@ -294,6 +283,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
     if (widget) {
       setInstanceapi(widget)
+      setWidgetref(widgetRef!)
       const watermarkContainer = widget.getDom('candle_pane', DomPosition.Main)
       if (watermarkContainer) {
         let watermark = document.createElement('div')
@@ -379,8 +369,9 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     document.removeEventListener('contextmenu', function(event) {
       event.preventDefault();
     });
-    document.removeEventListener("keydown", handleKeyDown);
-    document.removeEventListener("keyup", handleKeyUp);
+    document.removeEventListener("keydown", useKeyEvents().handleKeyDown)
+    document.removeEventListener("keyup", useKeyEvents().handleKeyUp)
+    document.removeEventListener('keypress', useKeyEvents().handleKeyPress)
     window.removeEventListener('resize', documentResize)
     clearInterval(timerId)
     dispose(widgetRef!)
@@ -611,6 +602,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       }
       updateChartSession ()
     }, 2 * 60 * 1000)     // Run this job every 2min
+    setTimerid(timerId)
   })
 
   return (
@@ -714,7 +706,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
             setScreenshotUrl(url)
           }
         }}
-        freeResources={cleanup}
         orderController={props.orderController}
         datafeed={props.datafeed}
         rootEl={props.rootElementId}
