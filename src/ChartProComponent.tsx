@@ -77,6 +77,8 @@ export const [symbol, setSymbol] = createSignal<SymbolInfo>()
 export const [chartsession, setChartsession] = createSignal<sessionType|null>(null)
 export const [chartsessionCtr, setChartsessionCtr] = createSignal<ChartSessionResource|null>(null)
 export const [pausedStatus, setPausedStatus] = createSignal(false)
+export const [screenshotUrl, setScreenshotUrl] = createSignal('')
+export const [rootlelID, setRooltelId] = createSignal('')
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -100,8 +102,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   const [settingModalVisible, setSettingModalVisible] = createSignal(false)
   const [widgetDefaultStyles, setWidgetDefaultStyles] = createSignal<Styles>()
 
-  const [screenshotUrl, setScreenshotUrl] = createSignal('')
-
   const [drawingBarVisible, setDrawingBarVisible] = createSignal(props.drawingBarVisible)
   
   const [orderPanelVisible, setOrderPanelVisible] = createSignal(props.orderPanelVisible)
@@ -117,6 +117,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   setChartsession(props.chartSession)
   setChartsessionCtr(props.chartSessionController)
   setMainIndicators([...(props.mainIndicators!)])
+  setRooltelId(props.rootElementId)
 
   props.ref({
     setTheme,
@@ -284,6 +285,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
     if (widget) {
       setInstanceapi(widget)
+      setTheme(props.theme)
       const watermarkContainer = widget.getDom('candle_pane', DomPosition.Main)
       if (watermarkContainer) {
         let watermark = document.createElement('div')

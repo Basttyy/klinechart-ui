@@ -1,4 +1,6 @@
 import { createSignal } from "solid-js";
+import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setScreenshotUrl } from "../ChartProComponent";
+import { datafeed, fullScreen, range, setRange, theme } from "./chartStateStore";
 
 export const [ctrlKeyedDown, setCtrlKeyedDown] = createSignal(false)
 
@@ -40,13 +42,13 @@ export const useKeyEvents = () => {
           //TODO: we should copy any selected overlay to clipboard
           break;
         case 'v':
-          //TODO: we should pase the copied overlay from clipboard
+          //TODO: we should paste the copied overlay from clipboard
           break;
         case 'p':
-          //TODO: we should take a screenshot
+          takeScreenshot()
           break;
         case 'f':
-          //TODO: we should activate/deactivate fullscreen
+          toggleFullscreen()
           break;
       }
 
@@ -55,13 +57,54 @@ export const useKeyEvents = () => {
     if (['1','2','3','4','5','6','7','8','9'].includes(event.key)) {
       //TODO: we should show a popup for timeframe changing
     } else if (event.key === ' ') {
-      //TODO: we should pause or play the chart accordingly
+      pausePlay()
     } else if (event.key === 'ArrowDown') {
-      //TODO: we should decrease the speed if its not yet slowest
+      handleRangeChange(-1)
     } else if (event.key === 'ArrowUp') {
-      //TODO: we should increase the speed if its not yet fastest
+      handleRangeChange(1)
     }
   }
 
   return { handleKeyDown, handleKeyUp, handleKeyPress }
+}
+
+const takeScreenshot = () => {
+  const url = instanceapi()!.getConvertPictureUrl(true, 'jpeg', theme() === 'dark' ? '#151517' : '#ffffff')
+  setScreenshotUrl(url)
+}
+
+const toggleFullscreen = () => {
+  if (!fullScreen()) {
+    // const el = ref?.parentElement
+    const el = document.querySelector(`#${rootlelID()}`)
+    if (el) {
+      // @ts-expect-error
+      const enterFullScreen = el.requestFullscreen ?? el.webkitRequestFullscreen ?? el.mozRequestFullScreen ?? el.msRequestFullscreen
+      enterFullScreen.call(el)
+      // setFullScreen(true)
+    } else {
+      console.log('Unable to get the app root element')
+    }
+  } else {
+    // @ts-expect-error
+    const exitFullscreen = document.exitFullscreen ?? document.msExitFullscreen ?? document.mozCancelFullScreen ?? document.webkitExitFullscreen
+    exitFullscreen.call(document)
+    // setFullScreen(false)
+  }
+}
+
+const pausePlay = () => {
+  setPausedStatus(!pausedStatus());
+  (datafeed() as any).setIsPaused = pausedStatus()
+}
+
+const handleRangeChange = (value: number) => {
+  if (value > 0 && range() < 10) {
+    setRange(+range() + +value);
+    (datafeed() as any).setInterval = range() * 100
+  }
+  else if (value < 0 && range() > 1) {
+    setRange(+range() + value);
+    (datafeed() as any).setInterval = range() * 100
+  }
 }

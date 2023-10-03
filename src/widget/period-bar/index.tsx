@@ -19,6 +19,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../ty
 import i18n from '../../i18n'
 import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
 import { pausedStatus, setPausedStatus } from '../../ChartProComponent'
+import { fullScreen, range, setFullScreen, setRange } from '../../store/chartStateStore'
 
 export interface PeriodBarProps {
   locale: string
@@ -44,10 +45,8 @@ export interface PeriodBarProps {
 const PeriodBar: Component<PeriodBarProps> = props => {
   let ref: Node
 
-  const [fullScreen, setFullScreen] = createSignal(false)
   const [showPeriodList, setShowPeriodList] = createSignal(false);
   const [showSpeed, setShowSpeed] = createSignal(false)
-  const [range, setRange] = createSignal(1);
   const [overflow, setOverflow] = createSignal(true)
 
   const offAllPeriodOverlay = () => {
@@ -237,7 +236,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
               enterFullScreen.call(el)
               // setFullScreen(true)
             } else {
-              alert('Unable to get the app root element')
+              console.log('Unable to get the app root element')
             }
           } else {
             // @ts-expect-error

@@ -4,10 +4,15 @@ import { ChartObjType } from "../types"
 import { createSignal } from "solid-js"
 import { drawOrder, ordercontr, setOrderList } from "./positionStore"
 import _ from "lodash"
+import { Datafeed } from "../types"
 
 export const [mainIndicators, setMainIndicators] = createSignal([''])
 export const [subIndicators, setSubIndicators] = createSignal({})
 export const [chartModified, setChartModified] = createSignal(false)
+export const [theme, setTheme] = createSignal('')
+export const [fullScreen, setFullScreen] = createSignal(false)
+export const [range, setRange] = createSignal(1)
+export const [datafeed, setDatafeed] = createSignal<Datafeed>()
 
 type IndicatorChageType = {
   name: string
