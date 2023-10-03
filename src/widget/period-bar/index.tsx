@@ -14,12 +14,12 @@
 
 import { Component, Show, createSignal, onMount, onCleanup } from 'solid-js'
 
-import { SymbolInfo, Period, OrderResource, Datafeed, OrderInfo } from '../../types'
+import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
-import { drawOrder, orderList, setOrderList } from '../../store/positionStore'
-import { pausedStatus, setPausedStatus } from '../../ChartProComponent'
-import { fullScreen, range, setFullScreen, setRange } from '../../store/chartStateStore'
+import { useOrder } from '../../store/positionStore'
+import { pausedStatus, rootlelID, setPausedStatus } from '../../ChartProComponent'
+import { cleanup, fullScreen, range, setFullScreen, setRange } from '../../store/chartStateStore'
 
 export interface PeriodBarProps {
   locale: string
@@ -37,7 +37,6 @@ export interface PeriodBarProps {
   onScreenshotClick: () => void
   onOrderMenuClick: () => void
   orderController: OrderResource
-  freeResources: () => void
   datafeed: Datafeed
   rootEl: string
 }
@@ -68,21 +67,10 @@ const PeriodBar: Component<PeriodBarProps> = props => {
     console.log("symbol tool was clicked")
   }
 
-  const onOrderPlaced = (order: OrderInfo|null) => {
-    if (order) {
-      drawOrder(order)
-      let orderlist = orderList()
-      if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
-        orderlist.push(order)
-        setOrderList(orderlist)
-      }
-    }
-  }
-
   const onExitClicked = () => {
     setPausedStatus(!pausedStatus());
     (props.datafeed as any).setIsPaused = pausedStatus()
-    props.freeResources()
+    cleanup()
     //TODO: Other tasks to be carried out here before exiting chart
   }
 
@@ -123,7 +111,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
       </Show>
-      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', onOrderPlaced)}}>Place order</button>
+      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
       <div class="item tools period_home">
         <button class="item period"
           onclick={() => {
@@ -229,7 +217,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         onClick={() => {
           if (!fullScreen()) {
             // const el = ref?.parentElement
-            const el = document.querySelector(`#${props.rootEl}`)
+            const el = document.querySelector(`#${rootlelID()}`)
             if (el) {
               // @ts-expect-error
               const enterFullScreen = el.requestFullscreen ?? el.webkitRequestFullscreen ?? el.mozRequestFullScreen ?? el.msRequestFullscreen

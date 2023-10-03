@@ -10,6 +10,17 @@ export const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
 export const [currentequity, setCurrentequity] = createSignal<number>(0)
 
 export const useOrder = () => {
+  const onOrderPlaced = (order: OrderInfo|null) => {
+    if (order) {
+      drawOrder(order)
+      let orderlist = orderList()
+      if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
+        orderlist.push(order)
+        setOrderList(orderlist)
+      }
+    }
+  }
+
   /**
    * This method may be used interchangeably with calcStopOrTarget
    * 
@@ -215,7 +226,7 @@ export const useOrder = () => {
     }
   }
 
-  return { calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder, removeStopOrTP,
+  return { onOrderPlaced, calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder, removeStopOrTP,
     updatePipsAndPL, updateStopLossAndReturnValue, updateEntryPointAndReturnValue, updateTakeProfitAndReturnValue,
     updatePositionOrder
   }

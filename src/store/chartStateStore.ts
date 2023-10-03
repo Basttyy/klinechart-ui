@@ -1,10 +1,12 @@
-import { Chart, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, PaneOptions } from "klinecharts"
-import { chartsession, instanceapi } from "../ChartProComponent"
-import { ChartObjType } from "../types"
+import { Chart, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, PaneOptions, dispose } from "klinecharts"
+import { chartsession, chartsessionCtr, instanceapi, setInstanceapi, symbol } from "../ChartProComponent"
+import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, SymbolInfo, sessionType } from "../types"
 import { createSignal } from "solid-js"
-import { drawOrder, ordercontr, setOrderList } from "./positionStore"
+import { drawOrder, orderList, ordercontr, setOrderList } from "./positionStore"
 import _ from "lodash"
 import { Datafeed } from "../types"
+import { tickTimestamp } from "./tickStore"
+import { timerid, widgetref } from "./keyEventStore"
 
 export const [mainIndicators, setMainIndicators] = createSignal([''])
 export const [subIndicators, setSubIndicators] = createSignal({})
@@ -13,6 +15,57 @@ export const [theme, setTheme] = createSignal('')
 export const [fullScreen, setFullScreen] = createSignal(false)
 export const [range, setRange] = createSignal(1)
 export const [datafeed, setDatafeed] = createSignal<Datafeed>()
+
+export const documentResize = () => {
+  instanceapi()?.resize()
+}
+
+export const cleanup = () => {   //Cleanup objects when leaving chart page
+  const doJob = async () => {
+    clearInterval(timerid())
+    datafeed()!.unsubscribe()
+
+    const updateRunningOrders = async (orders: OrderInfo[], symbol: SymbolInfo, orderctr: OrderResource) => {
+      let i = 0, pL = 0
+      if (orders && symbol !== undefined) {
+        while(i < orders.length) {
+          if (orders[i].pl !== null && orders[i].pips !== null) {
+            pL = +pL + +orders[i].pl!
+            await orderctr.modifyOrder({
+              id: orders[i].orderId, //in a real application this should be calculated on backend
+              pips: orders[i].pips, //in a real application this should be calculated on backend
+              pl: orders[i].pips! * orders[i].lotSize * symbol!.dollarPerPip!
+            })
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          i++
+        }
+      }
+      return pL
+    }
+    const updateChartSession = async (_session: sessionType, _pl: number, _sessionctr: ChartSessionResource) => {
+      const pl = +_session.current_bal + +_pl
+      if (_session) {
+        await _sessionctr?.updateSession({
+          id: _session.id,
+          current_bal: _session.current_bal,
+          equity: pl,
+          chart_timestamp: tickTimestamp(),
+          chart: localStorage.getItem(`chartstatedata_${chartsession()?.id}`) != null && chartModified() ? btoa(localStorage.getItem(`chartstatedata_${chartsession()?.id}`)!) : undefined
+        })
+      }
+    }
+    const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
+
+    let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
+    await updateChartSession (chartsession()!, pl, chartsessionCtr()!)
+    setInstanceapi(null)
+    dispose(widgetref()!)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    window.location.href = '/dashboard'
+  }
+  doJob()
+}
 
 type IndicatorChageType = {
   name: string

@@ -1,36 +1,32 @@
-import { createSignal } from "solid-js";
-import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setScreenshotUrl } from "../ChartProComponent";
-import { datafeed, fullScreen, range, setRange, theme } from "./chartStateStore";
+import { createSignal, startTransition } from "solid-js";
+import { instanceapi, orderPanelVisible, pausedStatus, rootlelID, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setScreenshotUrl, setSettingModalVisible } from "../ChartProComponent";
+import { cleanup, datafeed, documentResize, fullScreen, range, setRange, theme } from "./chartStateStore";
+import { ordercontr, useOrder } from "./positionStore";
+import { Chart } from "klinecharts";
 
 export const [ctrlKeyedDown, setCtrlKeyedDown] = createSignal(false)
+export const [widgetref, setWidgetref] = createSignal<string | Chart | HTMLElement>('')
+export const [timerid, setTimerid] = createSignal<NodeJS.Timeout>()
 
 export const useKeyEvents = () => {
   const handleKeyDown = (event:KeyboardEvent) => {
-    if (event.ctrlKey) {
+    event.preventDefault()
+    if (event.ctrlKey || event.metaKey) {
       setCtrlKeyedDown(true)
     }
-  }
-
-  const handleKeyUp = (event:KeyboardEvent) => {
-    if (!event.ctrlKey) {
-      setCtrlKeyedDown(false)
-    }
-  }
-
-  const handleKeyPress = (event:KeyboardEvent) => {
     if (ctrlKeyedDown()) {
       switch (event.key) {
         case 'o':
-          //TODO: we should show order opening popup
+          showOrderPopup()
           break;
         case 'l':
-          //TODO: we should show or hide the list of running orders
+          showOrderlist()
           break;
         case 'i':
-          //TODO: we should show the indicators pane
+          setIndicatorModalVisible(visible => !visible)
           break;
         case 's':
-          //TODO: we should show the settings pane
+          setSettingModalVisible(visible => !visible)
           break;
         case 'z':
           //TODO: we should undo one step
@@ -50,6 +46,9 @@ export const useKeyEvents = () => {
         case 'f':
           toggleFullscreen()
           break;
+        case 'Backspace':
+          cleanup()
+          break;
       }
 
       return
@@ -65,7 +64,78 @@ export const useKeyEvents = () => {
     }
   }
 
+  const handleKeyUp = (event:KeyboardEvent) => {
+    event.preventDefault()
+    if (!event.ctrlKey || !event.metaKey) {
+      setCtrlKeyedDown(false)
+    }
+  }
+
+  const handleKeyPress = (event:KeyboardEvent) => {
+    event.preventDefault()
+    handleEvent(event)
+  }
+
   return { handleKeyDown, handleKeyUp, handleKeyPress }
+}
+
+const handleEvent = (event: KeyboardEvent) => {
+  if (ctrlKeyedDown()) {
+    switch (event.key) {
+      case 'o':
+        showOrderPopup()
+        break;
+      case 'l':
+        showOrderlist()
+        break;
+      case 'i':
+        setIndicatorModalVisible(visible => !visible)
+        break;
+      case 's':
+        setSettingModalVisible(visible => !visible)
+        break;
+      case 'z':
+        //TODO: we should undo one step
+        break;
+      case 'y':
+        //TODO: we should redo one step
+        break;
+      case 'c':
+        //TODO: we should copy any selected overlay to clipboard
+        break;
+      case 'v':
+        //TODO: we should paste the copied overlay from clipboard
+        break;
+      case 'p':
+        takeScreenshot()
+        break;
+      case 'f':
+        toggleFullscreen()
+        break;
+    }
+
+    return
+  }
+  if (['1','2','3','4','5','6','7','8','9'].includes(event.key)) {
+    //TODO: we should show a popup for timeframe changing
+  } else if (event.key === ' ') {
+    pausePlay()
+  } else if (event.key === 'ArrowDown') {
+    handleRangeChange(-1)
+  } else if (event.key === 'ArrowUp') {
+    handleRangeChange(1)
+  }
+}
+
+const showOrderPopup = () => {
+  ordercontr()!.launchOrderModal('placeorder', useOrder().onOrderPlaced)
+}
+
+const showOrderlist = async () => {
+  try {
+    await startTransition(() => setOrderPanelVisible(!orderPanelVisible()))
+    documentResize()
+  } catch (e) {}
 }
 
 const takeScreenshot = () => {
