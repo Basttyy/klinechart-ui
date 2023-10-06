@@ -14,7 +14,7 @@
 
 import { Component, createSignal } from 'solid-js'
 
-import { utils } from 'klinecharts'
+import { utils } from '@basttyy/klinecharts'
 
 import { Modal, Input } from '../../component'
 

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { registerOverlay } from 'klinecharts'
+import { registerOverlay } from '@basttyy/klinecharts'
 
 import overlays from './extension'
 

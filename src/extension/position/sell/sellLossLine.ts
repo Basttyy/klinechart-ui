@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
+import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
 
 import { currenttick } from '../../../store/tickStore'
 import { orderList, useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 import { sellStyle, stopLossStyle } from '../../../store/overlayStyleStore'
-import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { userOrderSettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -78,34 +78,24 @@ const sellLossLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines[0],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: sellStyle().backgroundColor
-        },
+        styles: sellStyle().lineStyle,
         ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: stopLossStyle().backgroundColor
-        }
+        styles: stopLossStyle().lineStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts[0],
-        styles: sellStyle(),
+        styles: sellStyle().labelStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts[1],
-        styles: stopLossStyle()
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -130,15 +120,15 @@ const sellLossLine: OverlayTemplate = {
     }
     return [
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: sellStyle(),
+        styles: sellStyle().labelStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: stopLossStyle()
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -168,7 +158,7 @@ const sellLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    useOverlaySetting().lossPopup(event, 'sell')
+    userOrderSettings().lossPopup(event, 'sell')
     return true
   }
 }

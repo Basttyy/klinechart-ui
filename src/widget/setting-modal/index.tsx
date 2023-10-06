@@ -13,7 +13,7 @@
  */
 
 import { Component, createEffect, For, createSignal } from 'solid-js'
-import { Styles, utils, DeepPartial } from 'klinecharts'
+import { Styles, utils, DeepPartial } from '@basttyy/klinecharts'
 
 import lodashSet from 'lodash/set'
 

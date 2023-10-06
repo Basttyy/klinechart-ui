@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { KLineData, Styles, DeepPartial, OverlayCreate, FigureCreate, IndicatorCreate, PaneOptions } from 'klinecharts'
+import { KLineData, Styles, DeepPartial, OverlayCreate, FigureCreate, IndicatorCreate, PaneOptions } from '@basttyy/klinecharts'
 
 export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
 export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'

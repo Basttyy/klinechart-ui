@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
+import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
 
 import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { buyStyle, stopLossStyle } from '../../../store/overlayStyleStore'
-import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { userOrderSettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -79,26 +79,16 @@ const buystopLossLine: OverlayTemplate = {
         type: 'line',
         attrs: parallel.lines,
         styles: [
-          {
-            style: 'dashed',
-            dashedValue: [4, 4],
-            size: 1,
-            color: buyStyle().backgroundColor
-          },
-          {
-            style: 'dashed',
-            dashedValue: [4, 4],
-            size: 1,
-            color: stopLossStyle().backgroundColor
-          }
+          buyStyle().lineStyle,
+          stopLossStyle().lineStyle
         ]
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts,
         styles: [
-          buyStyle(),
-          stopLossStyle()
+          buyStyle().labelStyle,
+          stopLossStyle().labelStyle
         ]
       }
     ]
@@ -124,14 +114,14 @@ const buystopLossLine: OverlayTemplate = {
     }
     return [
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: buyStyle()
+        styles: buyStyle().labelStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: stopLossStyle()
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -186,7 +176,7 @@ const buystopLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    useOverlaySetting().lossPopup(event, 'buy')
+    userOrderSettings().lossPopup(event, 'buy')
     return true
   }
 }

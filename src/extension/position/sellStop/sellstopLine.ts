@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-import { Coordinate, OverlayTemplate, Point, utils } from 'klinecharts'
+import { Coordinate, OverlayTemplate, Point, utils } from '@basttyy/klinecharts'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { sellStyle } from '../../../store/overlayStyleStore'
-import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { userOrderSettings } from '../../../store/overlaySettingStore'
 
 const sellstopLine: OverlayTemplate = {
   name: 'sellstopLine',
@@ -35,17 +35,12 @@ const sellstopLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: sellStyle().backgroundColor
-        }
+        styles: sellStyle().lineStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: sellStyle()
+        styles: sellStyle().labelStyle
       }
     ]
   },
@@ -71,7 +66,7 @@ const sellstopLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle() }
+    return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -108,7 +103,7 @@ const sellstopLine: OverlayTemplate = {
   },
   onRightClick: (event): boolean => {
       // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    useOverlaySetting().singlePopup(event, 'sell')
+    userOrderSettings().singlePopup(event, 'sell')
     return true
   }
 }

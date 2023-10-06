@@ -14,7 +14,7 @@
 
 import { render } from 'solid-js/web'
 
-import { utils, Nullable, DeepPartial, Styles } from 'klinecharts'
+import { utils, Nullable, DeepPartial, Styles } from '@basttyy/klinecharts'
 
 import ChartProComponent from './ChartProComponent'
 

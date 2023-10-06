@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { KLineData } from 'klinecharts'
+import { KLineData } from '@basttyy/klinecharts'
 
 import { Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback } from './types'
 

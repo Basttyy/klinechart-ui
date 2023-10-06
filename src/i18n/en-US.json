@@ -116,5 +116,7 @@
   "restore_default": "Restore Defaults",
   "none": "None",
   "always": "Always",
-  "follow_cross": "Follow Cross"
+  "follow_cross": "Follow Cross",
+  "period_change": "Change Period",
+  "period_code": "Enter Period Key"
 }
