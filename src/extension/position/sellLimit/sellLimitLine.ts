@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay, Point } from 'klinecharts'
+import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay, Point } from '@basttyy/klinecharts'
 import { useOrder, setOrderList, orderList } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 import { sellStyle } from '../../../store/overlayStyleStore'
-import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { userOrderSettings } from '../../../store/overlaySettingStore'
 
 const sellLimitLine: OverlayTemplate = {
   name: 'sellLimitLine',
@@ -35,18 +35,13 @@ const sellLimitLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: sellStyle().backgroundColor
-        },
+        styles: sellStyle().lineStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `sellLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: sellStyle(),
+        styles: sellStyle().labelStyle,
         ignoreEvent: true
       }
     ]
@@ -73,7 +68,7 @@ const sellLimitLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle()}
+    return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -97,7 +92,7 @@ const sellLimitLine: OverlayTemplate = {
   onRightClick: (event): boolean => {
     // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
     //the overlay represented an order that does not exist on our pool, it should be handled here
-    useOverlaySetting().singlePopup(event, 'sell')
+    userOrderSettings().singlePopup(event, 'sell')
     return true
   }
 }

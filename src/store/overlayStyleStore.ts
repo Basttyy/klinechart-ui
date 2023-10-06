@@ -1,51 +1,97 @@
 import { createSignal } from 'solid-js';
 
-
-
 export const [buyStyle, setBuyStyle] = createSignal({
-	style: 'fill',
-	size: 12,
-	family:'Helvetica Neue',
-	weight: 'normal',
-	borderStyle: 'solid',
-	borderSize: 1,
-	color: '#FFFFFF',
-	borderColor: '#00698b',
-	backgroundColor: '#00698b'
+	lineStyle: {
+		style: 'dashed',
+		size: 1,
+		color: '#00698b',
+		dashedValue: [4, 4]
+	},
+	labelStyle: {
+		style: 'fill',
+		size: 12,
+		family:'Helvetica Neue',
+		weight: 'normal',
+		paddingLeft: 5,
+		paddingRight: 5,
+		paddingBottom: 5,
+		paddingTop: 5,
+		borderStyle: 'solid',
+		borderSize: 1,
+		color: '#FFFFFF',
+		borderColor: '#00698b',
+		backgroundColor: '#00698b'
+	}
 })
 
 export const [sellStyle, setSellStyle] = createSignal({
-	style: 'fill',
-	size: 12,
-	family:'Helvetica Neue',
-	weight: 'normal',
-	borderStyle: 'solid',
-	borderSize: 1,
-	color: '#FFFFFF',
-	borderColor: '#00698b',
-	backgroundColor: '#fb7b50'
+	lineStyle: {
+		style: 'dashed',
+		size: 1,
+		color: '#fb7b50',
+		dashedValue: [4, 4]
+	},
+	labelStyle: {
+		style: 'fill',
+		size: 12,
+		family:'Helvetica Neue',
+		weight: 'normal',
+		paddingLeft: 5,
+		paddingRight: 5,
+		paddingBottom: 5,
+		paddingTop: 5,
+		borderStyle: 'solid',
+		borderSize: 1,
+		color: '#FFFFFF',
+		borderColor: '#00698b',
+		backgroundColor: '#fb7b50'
+	}
 })
 
 export const [takeProfitStyle, setTakeProfitStyle] = createSignal({
-	style: 'fill',
-	size: 12,
-	family:'Helvetica Neue',
-	weight: 'normal',
-	borderStyle: 'solid',
-	borderSize: 1,
-	color: '#FFFFFF',
-	borderColor: '#00698b',
-	backgroundColor: '#00698b'
+	lineStyle: {
+		style: 'dashed',
+		size: 1,
+		color: '#00698b',
+		dashedValue: [4, 4]
+	},
+	labelStyle: {
+		style: 'fill',
+		size: 12,
+		family:'Helvetica Neue',
+		weight: 'normal',
+		paddingLeft: 5,
+		paddingRight: 5,
+		paddingBottom: 5,
+		paddingTop: 5,
+		borderStyle: 'solid',
+		borderSize: 1,
+		color: '#FFFFFF',
+		borderColor: '#00698b',
+		backgroundColor: '#00698b'
+	}
 })
 
 export const [stopLossStyle, setStopLossStyle] = createSignal({
-	style: 'fill',
-	size: 12,
-	family:'Helvetica Neue',
-	weight: 'normal',
-	borderStyle: 'solid',
-	borderSize: 1,
-	color: '#FFFFFF',
-	borderColor: '#00698b',
-	backgroundColor: '#fb7b50'
+	lineStyle: {
+		style: 'dashed',
+		size: 1,
+		color: '#fb7b50',
+		dashedValue: [4, 4]
+	},
+	labelStyle: {
+		style: 'fill',
+		size: 12,
+		family:'Helvetica Neue',
+		weight: 'normal',
+		paddingLeft: 5,
+		paddingRight: 5,
+		paddingBottom: 5,
+		paddingTop: 5,
+		borderStyle: 'solid',
+		borderSize: 1,
+		color: '#FFFFFF',
+		borderColor: '#00698b',
+		backgroundColor: '#fb7b50'
+	}
 })

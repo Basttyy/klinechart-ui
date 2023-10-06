@@ -508,6 +508,11 @@
     "@babel/helper-validator-identifier" "^7.22.15"
     to-fast-properties "^2.0.0"
 
+"@basttyy/klinecharts@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@basttyy/klinecharts/-/klinecharts-1.0.4.tgz#7cd246ac4dc8ce57b3743bd1b698664b7660d5fe"
+  integrity sha512-YTVig3O9xxS1Y3upsJEeLM/cpGKSuIpRIeWsf5DpbL6JGIqbZVRsv2nj1EC5wLxd9Z3th3DczW5xrnNLAva38Q==
+
 "@docsearch/css@3.5.1", "@docsearch/css@^3.5.1":
   version "3.5.1"
   resolved "https://registry.npmjs.org/@docsearch/css/-/css-3.5.1.tgz"
@@ -2799,11 +2804,6 @@ jsonfile@^4.0.0:
   integrity sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==
   optionalDependencies:
     graceful-fs "^4.1.6"
-
-klinecharts@^9.5.0:
-  version "9.5.0"
-  resolved "https://registry.npmjs.org/klinecharts/-/klinecharts-9.5.0.tgz"
-  integrity sha512-yAzkq7qoZcCiHOyQDrsBAsQT5osBGskg7yhrWoz97ty1dC8gckrlfQmSaX0S7r2nCTTmfHjeXJwY5G3Qh5e8EA==
 
 less-loader@^11.1.0:
   version "11.1.3"

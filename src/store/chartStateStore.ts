@@ -1,4 +1,4 @@
-import { Chart, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, PaneOptions, dispose } from "klinecharts"
+import { Chart, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, PaneOptions, dispose } from "@basttyy/klinecharts"
 import { chartsession, chartsessionCtr, instanceapi, setInstanceapi, symbol } from "../ChartProComponent"
 import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, SymbolInfo, sessionType } from "../types"
 import { createSignal } from "solid-js"

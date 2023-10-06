@@ -13,7 +13,7 @@
  */
 
 import { Component, createResource, createMemo, createSignal, createEffect, Show, For, onMount } from 'solid-js'
-import { OverlayCreate, OverlayMode } from 'klinecharts'
+import { OverlayCreate, OverlayMode } from '@basttyy/klinecharts'
 import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
 import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'

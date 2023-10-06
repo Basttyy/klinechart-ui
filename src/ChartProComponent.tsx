@@ -17,7 +17,7 @@ import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, 
 import {
   init, dispose, utils, Nullable, Chart, OverlayMode, Styles,
   TooltipIconPosition, ActionType, Indicator, DomPosition, FormatDateType
-} from 'klinecharts'
+} from '@basttyy/klinecharts'
 
 import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
@@ -26,7 +26,7 @@ import { SelectDataSourceItem, Loading, Popup } from './component'
 import { showPopup, showBuySetting } from './store/overlaySettingStore'
 
 import {
-  PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal,
+  PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal, TimeframeModal,
   ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel, BuySettingModal
 } from './widget'
 
@@ -84,6 +84,7 @@ export const [drawingBarVisible, setDrawingBarVisible] = createSignal(false)
 export const [orderPanelVisible, setOrderPanelVisible] = createSignal(false)
 export const [settingModalVisible, setSettingModalVisible] = createSignal(false)
 export const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
+export const [periodModalVisible, setPeriodModalVisible] = createSignal(false)
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -241,7 +242,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
     document.addEventListener("keydown", useKeyEvents().handleKeyDown)
     document.addEventListener("keyup", useKeyEvents().handleKeyUp)
-    document.addEventListener('keypress', useKeyEvents().handleKeyPress)
+    // document.addEventListener('keypress', useKeyEvents().handleKeyPress)
     setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
@@ -371,7 +372,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     });
     document.removeEventListener("keydown", useKeyEvents().handleKeyDown)
     document.removeEventListener("keyup", useKeyEvents().handleKeyUp)
-    document.removeEventListener('keypress', useKeyEvents().handleKeyPress)
+    // document.removeEventListener('keypress', useKeyEvents().handleKeyPress)
     window.removeEventListener('resize', documentResize)
     clearInterval(timerId)
     dispose(widgetRef!)
@@ -615,6 +616,13 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         <BuySettingModal
           locale={props.locale}
         />
+      </Show>
+      <Show when={periodModalVisible()}>
+        <TimeframeModal
+          locale={props.locale}
+          periods={props.periods}
+          onTimeframeSelected={setPeriod}
+          onClose={() => { setPeriodModalVisible(false) }}/>
       </Show>
       <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal

@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
+import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
 
 import { currenttick } from '../../../store/tickStore'
 import { orderList, useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 import { sellStyle, takeProfitStyle } from '../../../store/overlayStyleStore'
-import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { userOrderSettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -78,34 +78,24 @@ const sellProfitLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines[0],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: sellStyle().backgroundColor
-        },
+        styles: sellStyle().lineStyle,
         ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: takeProfitStyle().backgroundColor
-        }
+        styles: takeProfitStyle().lineStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts[0],
-        styles: sellStyle(),
+        styles: sellStyle().labelStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts[1],
-        styles: takeProfitStyle()
+        styles: takeProfitStyle().labelStyle
       }
     ]
   },
@@ -130,15 +120,15 @@ const sellProfitLine: OverlayTemplate = {
     }
     return [
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: sellStyle(),
+        styles: sellStyle().labelStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: takeProfitStyle(),
+        styles: takeProfitStyle().labelStyle,
       }
     ]
   },
@@ -171,7 +161,7 @@ const sellProfitLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    useOverlaySetting().profitPopup(event, 'sell')
+    userOrderSettings().profitPopup(event, 'sell')
     return true
   }
 }

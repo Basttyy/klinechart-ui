@@ -12,9 +12,10 @@
  * limitations under the License.
  */
 
-import { Coordinate, OverlayTemplate, Point } from 'klinecharts'
+import { Coordinate, OverlayTemplate, Point } from '@basttyy/klinecharts'
 import { instanceapi } from '../ChartProComponent'
 import { currenttick } from '../store/tickStore'
+import { userOrderSettings } from '../store/overlaySettingStore'
 
 const rect: OverlayTemplate = {
   name: 'rect',
@@ -29,23 +30,6 @@ const rect: OverlayTemplate = {
   },
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     if (coordinates.length > 1) {
-      for (let i = 0; i < coordinates.length; i++) {
-        let coordinate: Partial<Coordinate>[] = [
-          {x: coordinates[i].x, y: coordinates[i].y}
-        ]
-        const points = instanceapi()?.convertFromPixel(coordinate, {
-          paneId: overlay.paneId
-        })
-        console.log(`${(points as Partial<Point>[])[0].timestamp!}    ${overlay.points[i].timestamp}    ${currenttick()?.timestamp}`)
-        if ((points as Partial<Point>[])[0].timestamp === undefined && overlay.points[i].timestamp === undefined) {
-            let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
-            let overlayxy = instanceapi()?.convertToPixel(point, {
-              paneId: overlay.paneId
-            })
-            let x = (overlayxy as Partial<Coordinate>).x!
-            coordinates[i].x = x
-        }
-      }
       // for (let i = 0; i < coordinates.length; i++) {
       //   let coordinate: Partial<Coordinate>[] = [
       //     {x: coordinates[i].x, y: coordinates[i].y}
@@ -53,21 +37,14 @@ const rect: OverlayTemplate = {
       //   const points = instanceapi()?.convertFromPixel(coordinate, {
       //     paneId: overlay.paneId
       //   })
-        
-      //   // console.log(`${(points as Partial<Point>[])[0].timestamp!}    ${overlay.points[i].timestamp}    ${currenttick()?.timestamp}`)
-      //   let datalist = instanceapi()?.getDataList()
-      //   if ((points as Partial<Point>[])[0].timestamp! === datalist![datalist?.length! - 2].timestamp) {
-      //     console.log('drawing is crossing current timestamp')
-      //     let point: Partial<Point> = {value: currenttick()?.close, timestamp: datalist![datalist?.length! - 5].timestamp}
-      //     let overlayxy = instanceapi()?.convertToPixel(point, {
-      //       paneId: overlay.paneId
-      //     })
-      //     let x = (overlayxy as Partial<Coordinate>).x!
-      //     console.log(`${(points as Partial<Point>[])[0].timestamp!}    ${datalist![datalist?.length! - 5].timestamp}`)
-      //     console.log(`${coordinates[i].x}   ${x}`)
-      //     coordinates[i].x = x
-      //     console.log(`${coordinates[i].x}   ${x}`)
-      //     break
+      //   console.log(`${(points as Partial<Point>[])[0].timestamp!}    ${overlay.points[i].timestamp}    ${currenttick()?.timestamp}`)
+      //   if ((points as Partial<Point>[])[0].timestamp === undefined && overlay.points[i].timestamp === undefined) {
+      //       let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
+      //       let overlayxy = instanceapi()?.convertToPixel(point, {
+      //         paneId: overlay.paneId
+      //       })
+      //       let x = (overlayxy as Partial<Coordinate>).x!
+      //       coordinates[i].x = x
       //   }
       // }
       return [
@@ -87,54 +64,21 @@ const rect: OverlayTemplate = {
     }
     return []
   },
-  // onPressedMoving(event): boolean {
-  //   console.log('pressed moving')
-  //   let coordinate: Partial<Coordinate>[] = [
-  //     {x: event.x, y: event.y}
-  //   ]
-  //   const points = instanceapi()?.convertFromPixel(coordinate, {
-  //     paneId: event.overlay.paneId
-  //   })
-
-  //   let overlaypoints = event.overlay.points
-
-  //   for (let i = 0; i < overlaypoints.length; i++) {
-  //     if ((points as Partial<Point>[])[0].timestamp! >= currenttick()?.timestamp!) {
-  //       console.log('moving is crossing current timestamp')
-  //       let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
-  //       let overlayxy = instanceapi()?.convertToPixel(point, {
-  //         paneId: event.overlay.paneId
-  //       })
-  //       event.x = (overlayxy as Partial<Coordinate>).x
-  //     }
-  //   }
-
-  //   return false
-  // },
-  // onDrawing(event): boolean {
-  //   console.log('drawing')
-  //   let coordinate: Partial<Coordinate>[] = [
-  //     {x: event.x, y: event.y}
-  //   ]
-  //   const points = instanceapi()?.convertFromPixel(coordinate, {
-  //     paneId: event.overlay.paneId
-  //   })
-
-  //   let overlaypoints = event.overlay.points
-
-  //   for (let i = 0; i < overlaypoints.length; i++) {
-  //     if ((points as Partial<Point>[])[0].timestamp! >= currenttick()?.timestamp!) {
-  //       console.log('drawing is crossing current timestamp')
-  //       let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
-  //       let overlayxy = instanceapi()?.convertToPixel(point, {
-  //         paneId: event.overlay.paneId
-  //       })
-  //       event.x = (overlayxy as Partial<Coordinate>).x
-  //     }
-  //   }
-
-  //   return false
-  // }
+  onRightClick: (event): boolean => {
+    console.log('onrightclick handled')
+    userOrderSettings().openPopup(event)
+    return true
+  },
+  onDoubleClick: (event): boolean => {
+    console.log('on double click handled')
+    userOrderSettings().openPopup(event)
+    return true
+  },
+  onClick: (event): boolean => {
+    console.log('on click handled')
+    userOrderSettings().openPopup(event)
+    return true
+  }
 }
 
 export default rect

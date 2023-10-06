@@ -12,14 +12,14 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
+import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
 
 import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { sellStyle, stopLossStyle, takeProfitStyle } from '../../../store/overlayStyleStore'
-import { useOverlaySetting } from '../../../store/overlaySettingStore'
+import { userOrderSettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -77,33 +77,18 @@ const sellstopProfitLossLine: OverlayTemplate = {
         type: 'line',
         attrs: parallel.lines,
         styles: [
-          {
-            style: 'dashed',
-            dashedValue: [4, 4],
-            size: 1,
-            color: sellStyle().backgroundColor
-          },
-          {
-            style: 'dashed',
-            dashedValue: [4, 4],
-            size: 1,
-            color: takeProfitStyle().backgroundColor
-          },
-          {
-            style: 'dashed',
-            dashedValue: [4, 4],
-            size: 1,
-            color: stopLossStyle().backgroundColor
-          }
+          sellStyle().lineStyle,
+          takeProfitStyle().lineStyle,
+          stopLossStyle().lineStyle
         ],
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts,
         styles: [
-          sellStyle(),
-          takeProfitStyle(),
-          stopLossStyle()
+          sellStyle().labelStyle,
+          takeProfitStyle().labelStyle,
+          stopLossStyle().labelStyle
         ]
       }
     ]
@@ -132,19 +117,19 @@ const sellstopProfitLossLine: OverlayTemplate = {
     }
     return [
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: sellStyle()
+        styles: sellStyle().labelStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: takeProfitStyle()
+        styles: takeProfitStyle().labelStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[2].y, text: text3 ?? '', align: textAlign, baseline: 'middle' },
-        styles: stopLossStyle()
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -212,7 +197,7 @@ const sellstopProfitLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    useOverlaySetting().profitLossPopup(event, 'sell')
+    userOrderSettings().profitLossPopup(event, 'sell')
     return true;
   }
 }

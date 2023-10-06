@@ -129,9 +129,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
               props.periods.map(p => (
                 <li 
                   onClick={() => {
-                    // setPausedStatus(!pausedStatus());
-                    // (props.datafeed as any).setIsPaused = pausedStatus()
-
                     props.onPeriodChange(p)
                     setOverflow(!overflow())
                     setShowPeriodList(false)

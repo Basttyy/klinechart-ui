@@ -1,4 +1,4 @@
-import { Chart, Nullable, Overlay, OverlayEvent, Point } from 'klinecharts';
+import { Chart, Nullable, Overlay, OverlayEvent, Point } from '@basttyy/klinecharts';
 import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType, sessionType } from '../types';
 import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';

@@ -14,7 +14,7 @@
 
 import { Component, createMemo, createSignal } from 'solid-js'
 
-import { OverlayCreate, OverlayMode } from 'klinecharts'
+import { OverlayCreate, OverlayMode } from '@basttyy/klinecharts'
 
 import { List } from '../../component'
 import {

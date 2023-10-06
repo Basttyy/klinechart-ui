@@ -13,7 +13,7 @@
  */
 
 import { Show } from 'solid-js'
-import { useOverlaySetting, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
+import { userOrderSettings, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
 	setShowBuySetting,
 	getOverlayType
 } from '../../store/overlaySettingStore'
@@ -46,7 +46,7 @@ const setStyle = () => {
  
 const Action_popup = () => {
   return (
-    <div class="klinecharts-pro-popup_background" onclick={() => useOverlaySetting().closePopup()}>
+    <div class="klinecharts-pro-popup_background" onclick={() => userOrderSettings().closePopup()}>
       <div class="popup"  style={{  top: `${popupTop()}px`, left: `${popupLeft()}px` }}>
 				<button onclick={triggerAction}>{ifBuyOrSell() ? 'Close order' : `Remove ${getOverlayType()}`}</button>
 				<button onClick={setStyle}>Settings</button>
