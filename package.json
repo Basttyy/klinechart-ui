@@ -39,7 +39,6 @@
     "docs:deploy": "yarn run docs:build && gh-pages -d website"
   },
   "devDependencies": {
-    "@basttyy/klinecharts": "^1.0.4",
     "@solidjs/testing-library": "^0.6.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@types/lodash": "^4.14.191",
@@ -62,12 +61,11 @@
     "vitest": "^0.28.4"
   },
   "dependencies": {
+    "@basttyy/klinecharts": "../klinechart",
     "@types/chroma-js": "^2.4.0",
     "chroma-js": "^2.4.2",
     "lodash": "^4.17.21",
     "solid-js": "^1.6.11"
   },
-  "peerDependencies": {
-    "@basttyy/klinecharts": "^1.0.4"
-  }
+  "peerDependencies": {}
 }

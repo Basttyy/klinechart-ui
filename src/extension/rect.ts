@@ -63,21 +63,6 @@ const rect: OverlayTemplate = {
       ]
     }
     return []
-  },
-  onRightClick: (event): boolean => {
-    console.log('onrightclick handled')
-    userOrderSettings().openPopup(event)
-    return true
-  },
-  onDoubleClick: (event): boolean => {
-    console.log('on double click handled')
-    userOrderSettings().openPopup(event)
-    return true
-  },
-  onClick: (event): boolean => {
-    console.log('on click handled')
-    userOrderSettings().openPopup(event)
-    return true
   }
 }
 

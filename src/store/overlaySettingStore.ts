@@ -5,7 +5,7 @@ import { useOrder } from './positionStore';
 import { ctrlKeyedDown, setCtrlKeyedDown } from './keyEventStore';
 
 export interface OtherTypes {
-  exitType?: string
+  exitType?: ExitType
   overlayType?: 'buy'|'sell'|'tp'|'sl'
 }
 
@@ -35,7 +35,7 @@ export const getOverlayType = () => {
 	} else if(popupOtherInfo()?.overlayType == 'tp') {
 		return 'Take profit'
 	} else {
-		return 'N/A'
+		return popupOverlay()?.name ?? 'Object'
 	}
 }
 

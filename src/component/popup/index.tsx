@@ -15,15 +15,20 @@
 import { Show } from 'solid-js'
 import { userOrderSettings, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
 	setShowBuySetting,
-	getOverlayType
+	getOverlayType,
+	setPopupOverlay
 } from '../../store/overlaySettingStore'
 import { useOrder } from '../../store/positionStore'
 import { ExitType } from '../../types'
+import { instanceapi } from '../../ChartProComponent'
+import { useChartState } from '../../store/chartStateStore'
 
 
 
 const triggerAction = () => {
-	if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
+	if (!popupOtherInfo()?.overlayType) {
+    useChartState().popOverlay(popupOverlay()!.id)
+	} else if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
 		useOrder().closeOrder(popupOverlay()!, 'manualclose')
 	} else {
 		useOrder().removeStopOrTP(popupOverlay()!, popupOtherInfo()?.overlayType as 'tp'|'sl')
@@ -39,8 +44,31 @@ const ifBuyOrSell = () => {
 }
 
 const setStyle = () => {
-	
 	setShowBuySetting(true)
+}
+
+const sendBack = () => {
+	const overlay = popupOverlay()
+	instanceapi()?.overrideOverlay({id: overlay?.id, zLevel: +overlay!.zLevel+1})
+
+	setPopupOverlay(instanceapi()?.getOverlayById(popupOverlay()!.id)?? popupOverlay())
+}
+
+const sendFront = () => {
+	const overlay = popupOverlay()
+	instanceapi()?.overrideOverlay({id: overlay?.id, zLevel: +overlay!.zLevel-1})
+
+	setPopupOverlay(instanceapi()?.getOverlayById(popupOverlay()!.id)?? popupOverlay())
+}
+
+const lockUnlock = () => {
+	instanceapi()?.overrideOverlay({id: popupOverlay()?.id, lock: !popupOverlay()?.lock})
+	setPopupOverlay(instanceapi()?.getOverlayById(popupOverlay()!.id)?? popupOverlay())
+}
+
+const hideUnhide = () => {
+	instanceapi()?.overrideOverlay({id: popupOverlay()?.id, visible: !popupOverlay()?.visible})
+	setPopupOverlay(instanceapi()?.getOverlayById(popupOverlay()!.id)?? popupOverlay())
 }
 
  
@@ -50,6 +78,12 @@ const Action_popup = () => {
       <div class="popup"  style={{  top: `${popupTop()}px`, left: `${popupLeft()}px` }}>
 				<button onclick={triggerAction}>{ifBuyOrSell() ? 'Close order' : `Remove ${getOverlayType()}`}</button>
 				<button onClick={setStyle}>Settings</button>
+				<Show when={!ifBuyOrSell()}>
+					<button onclick={sendBack}>Send Back</button>
+					<button onclick={sendFront}>Send Front</button>
+					<button onclick={lockUnlock}>{popupOverlay()?.lock ? 'Unlock' : 'Lock'}</button>
+					<button onclick={hideUnhide}>{popupOverlay()?.visible ? 'Hide' : 'Unhide'}</button>
+				</Show>
 				{/* <button>Others</button> */}
 			</div>
     </div>

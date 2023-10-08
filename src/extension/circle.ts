@@ -19,8 +19,6 @@ import { getDistance } from './utils'
 import { instanceapi } from '../ChartProComponent'
 import { currenttick } from '../store/tickStore'
 
-const { openPopup } = userOrderSettings()
-
 const circle: OverlayTemplate = {
   name: 'circle',
   totalStep: 3,
@@ -62,21 +60,6 @@ const circle: OverlayTemplate = {
       }
     }
     return []
-  },
-  onRightClick: (event): boolean => {
-    console.log('onrightclick handled')
-    openPopup(event)
-    return true
-  },
-  onDoubleClick: (event): boolean => {
-    console.log('on double click handled')
-    userOrderSettings().openPopup(event)
-    return true
-  },
-  onClick: (event): boolean => {
-    console.log('on click handled')
-    userOrderSettings().openPopup(event)
-    return true
   }
 }
 
