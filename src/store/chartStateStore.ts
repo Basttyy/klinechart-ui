@@ -14,6 +14,7 @@ export const [subIndicators, setSubIndicators] = createSignal({})
 export const [chartModified, setChartModified] = createSignal(false)
 export const [theme, setTheme] = createSignal('')
 export const [fullScreen, setFullScreen] = createSignal(false)
+export const [orderModalVisible, setOrderModalVisible] = createSignal(false)
 export const [range, setRange] = createSignal(1)
 export const [datafeed, setDatafeed] = createSignal<Datafeed>()
 

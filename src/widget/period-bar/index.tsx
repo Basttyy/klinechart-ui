@@ -19,7 +19,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
 import { pausedStatus, rootlelID, setPausedStatus } from '../../ChartProComponent'
-import { cleanup, fullScreen, range, setFullScreen, setRange } from '../../store/chartStateStore'
+import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible, setRange } from '../../store/chartStateStore'
 
 export interface PeriodBarProps {
   locale: string
@@ -111,7 +111,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
       </Show>
-      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
+      <button class="item tools" onClick={() => {setOrderModalVisible(true); props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
       <div class="item tools period_home">
         <button class="item period"
           onclick={() => {

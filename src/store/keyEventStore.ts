@@ -1,6 +1,6 @@
 import { createSignal, startTransition } from "solid-js";
 import { instanceapi, orderPanelVisible, pausedStatus, periodModalVisible, rootlelID, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setPeriodModalVisible, setScreenshotUrl, setSettingModalVisible, settingModalVisible } from "../ChartProComponent";
-import { cleanup, datafeed, documentResize, fullScreen, range, setRange, theme } from "./chartStateStore";
+import { cleanup, datafeed, documentResize, fullScreen, orderModalVisible, range, setOrderModalVisible, setRange, theme } from "./chartStateStore";
 import { ordercontr, useOrder } from "./positionStore";
 import { Chart } from "@basttyy/klinecharts";
 import { periodInputValue, setPeriodInputValue } from "../widget/timeframe-modal";
@@ -55,7 +55,8 @@ export const useKeyEvents = () => {
 
       return
     }
-    if (['1','2','3','4','5','6','7','8','9'].includes(event.key)) {
+    if (['1','2','3','4','5','6','7','8','9'].includes(event.key) && !orderModalVisible()) {
+      setPausedStatus(true)
       if (periodInputValue().length < 1)
         setPeriodInputValue(event.key)
       if (!periodModalVisible()) {
@@ -90,6 +91,7 @@ export const useKeyEvents = () => {
 }
 
 const showOrderPopup = () => {
+  setOrderModalVisible(true)
   ordercontr()!.launchOrderModal('placeorder', useOrder().onOrderPlaced)
 }
 

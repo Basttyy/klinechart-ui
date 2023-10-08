@@ -3,6 +3,7 @@ import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType, session
 import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';
 import { chartsession, instanceapi, setChartsession, symbol } from '../ChartProComponent';
+import { setOrderModalVisible } from './chartStateStore';
 
 export const [chartapi, setChartapi] = createSignal<Nullable<Chart>>(null);
 export const [ordercontr, setOrderContr] = createSignal<Nullable<OrderResource>>(null)
@@ -11,6 +12,7 @@ export const [currentequity, setCurrentequity] = createSignal<number>(0)
 
 export const useOrder = () => {
   const onOrderPlaced = (order: OrderInfo|null) => {
+    setOrderModalVisible(false)
     if (order) {
       drawOrder(order)
       let orderlist = orderList()
