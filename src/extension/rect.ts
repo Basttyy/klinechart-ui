@@ -37,7 +37,6 @@ const rect: OverlayTemplate = {
       //   const points = instanceapi()?.convertFromPixel(coordinate, {
       //     paneId: overlay.paneId
       //   })
-      //   console.log(`${(points as Partial<Point>[])[0].timestamp!}    ${overlay.points[i].timestamp}    ${currenttick()?.timestamp}`)
       //   if ((points as Partial<Point>[])[0].timestamp === undefined && overlay.points[i].timestamp === undefined) {
       //       let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
       //       let overlayxy = instanceapi()?.convertToPixel(point, {

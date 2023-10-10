@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-import { Show, createSignal } from 'solid-js'
+import { createSignal } from 'solid-js'
 import { datafeed, range, setRange, useChartState } from '../../../store/chartStateStore'
+import { setShowSpeed, showSpeed } from '../../../ChartProComponent'
 
-export const [showSpeed, setShowSpeed] = createSignal(false)
 export const [speedPopupTop, setSpeedPopupTop] = createSignal(0)
 export const [speedPopupLeft, setSpeedPopupLeft] = createSignal(0)
 
@@ -29,14 +29,9 @@ const handleRangeChange = (event:any) => {
 const SpeedPopup = () => {
   return (
     <div class="klinecharts-pro-popup_background" onclick={() => setShowSpeed(false)}>
-			<div class="popup"  style={{  top: `${speedPopupTop()}px`, left: `${speedPopupLeft()}px` }}>
-				{
-					showSpeed() &&
-					// <div class="period_list">
-						<input class="period_range" type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
-					// </div>
-				}
-			</div>
+			{/* <div class="popup"  style={{  top: `${speedPopupTop()}px`, left: `${speedPopupLeft()}px` }}> */}
+				<input class="period_range" style={{ left: `${speedPopupLeft()}px` }} type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
+			{/* </div> */}
     </div>
   )
 }

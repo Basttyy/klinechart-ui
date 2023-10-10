@@ -18,7 +18,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
-import { pausedStatus, rootlelID, setPausedStatus } from '../../ChartProComponent'
+import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
 import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible, setRange } from '../../store/chartStateStore'
 import { setSpeedPopupLeft, setSpeedPopupTop } from '../../component/popup/timeframe'
 import { getScreenSize } from '../../helpers'
@@ -47,7 +47,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   let ref: Node
 
   const [showPeriodList, setShowPeriodList] = createSignal(false);
-  const [showSpeed, setShowSpeed] = createSignal(false)
   const [overflow, setOverflow] = createSignal(true)
 
   const offAllPeriodOverlay = () => {
@@ -61,7 +60,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onSymbolClickLog = () => {
-    console.log("symbol tool was clicked")
   }
 
   const onExitClicked = () => {
@@ -72,8 +70,8 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const showSpeedPopup = (event: MouseEvent) => {
-    setSpeedPopupTop(getScreenSize().y - event.pageY! > 200 ? event.pageY! : getScreenSize().y-200)
     setSpeedPopupLeft(getScreenSize().x - event.pageX! > 200 ? event.pageX! : getScreenSize().x-200)
+    offAllPeriodOverlay()
     setShowSpeed(true)
   }
 
@@ -214,7 +212,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
               enterFullScreen.call(el)
               // setFullScreen(true)
             } else {
-              console.log('Unable to get the app root element')
             }
           } else {
             // @ts-expect-error

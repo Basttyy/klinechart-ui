@@ -8,6 +8,42 @@
   left: 0;
   top: 0;
   z-index: 99;
+
+	.period_range {
+		position: absolute;
+		top: @period-bar-height + 15px;
+		// left: 0px;
+		z-index: 99;
+		-webkit-appearance: none;
+		appearance: none;
+		height: 3px;
+		outline: none;
+		background-color: #76808F;
+		margin: 5px;
+	}
+	
+	.period_range::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 16px;
+		height: 16px;
+		background-color: #76808F;
+		border-radius: 50%;
+	}
+	.period_range::-moz-range-thumb {
+		width: 16px;
+		height: 16px;
+		background-color: #76808F;
+		border-radius: 50%;
+	}
+	
+	/* For IE and Edge */
+	.period_range::-ms-thumb {
+		width: 16px;
+		height: 16px;
+		background-color: #76808F;
+		border-radius: 50%;
+	}
 	
   .popup {
     position: absolute;
@@ -21,29 +57,5 @@
 		overflow: hidden;
 		box-shadow:  0px 2px 4px 0px var(--klinecharts-pro-popup-shadow-color);
 
-		button{
-			padding: 8px;
-			color: var(--klinecharts-pro-primary-color);
-			text-align: left;
-
-			
-			&:hover{
-				background: var(--klinecharts-pro-primary-color);
-				color: white;
-			}
-		}
-  }
- 
-  .period_range {
-    position: absolute;
-    top: 40px;
-    left: 0px;
-    z-index: 99;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 3px;
-    outline: none;
-    background-color: #76808F;
-    margin: 5px;
   }
 }

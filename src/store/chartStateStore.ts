@@ -238,7 +238,6 @@ export const useChartState = () => {
 
     if (paneId && docallback) {
       const indi = widget?.getIndicatorByPaneId(paneId, indicatorName)
-      console.log(indi)
       if (indi)
         syncIndiObject(indi as Indicator, isStack, { id: paneId })
     }
@@ -258,7 +257,6 @@ export const useChartState = () => {
           return syncObject(event)
         },
         onRightClick: (event) => {
-          console.log('on rightclick handled')
           userOrderSettings().openPopup(event)
           // popOverlay(event.overlay.id)
           return true
@@ -364,26 +362,6 @@ export const useChartState = () => {
       if (chartObj.overlays) {
         chartObj.overlays.forEach(overlay => {
           pushOverlay(overlay.value!, overlay.paneId)
-          // if (overlay.value) {
-          //   const id = instanceapi()?.createOverlay(overlay.value, overlay.paneId)
-          //   const ovrly = instanceapi()?.getOverlayById((id as string))
-          //   if (ovrly) {
-          //     instanceapi()?.overrideOverlay({
-          //       onDrawEnd: (event) => {
-          //         return syncObject(event)
-          //       },
-          //       onPressedMoveEnd: (event) => {
-          //         return syncObject(event)
-          //       },
-          //       onRightClick: (event) => {
-          //         console.log('on rightclick handled')
-          //         userOrderSettings().openPopup(event)
-          //         // popOverlay(event.overlay.id)
-          //         return true
-          //       }
-          //     })
-          //   }
-          // }
         })
       }
       if (chartObj.indicators) {

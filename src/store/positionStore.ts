@@ -4,6 +4,7 @@ import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';
 import { chartsession, instanceapi, setChartsession, symbol } from '../ChartProComponent';
 import { setOrderModalVisible } from './chartStateStore';
+import { syntheticPausePlay } from './keyEventStore';
 
 export const [chartapi, setChartapi] = createSignal<Nullable<Chart>>(null);
 export const [ordercontr, setOrderContr] = createSignal<Nullable<OrderResource>>(null)
@@ -13,6 +14,7 @@ export const [currentequity, setCurrentequity] = createSignal<number>(0)
 export const useOrder = () => {
   const onOrderPlaced = (order: OrderInfo|null) => {
     setOrderModalVisible(false)
+    syntheticPausePlay(false)
     if (order) {
       drawOrder(order)
       let orderlist = orderList()
@@ -27,10 +29,10 @@ export const useOrder = () => {
    * This method may be used interchangeably with calcStopOrTarget
    * 
    * @param top
-   * @param middle 
-   * @param dp 
-   * @param usereal 
-   * @param buysell 
+   * @param middle
+   * @param dp
+   * @param usereal
+   * @param buysell
    * @returns string
    */
   const calcTarget = (top:number, middle:number, dp:number, usereal: boolean = false, buysell: 'buy'|'sell' = 'buy'): string => {
