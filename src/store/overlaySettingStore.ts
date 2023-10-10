@@ -3,6 +3,7 @@ import { createSignal } from 'solid-js';
 import { ExitType } from '../types';
 import { useOrder } from './positionStore';
 import { ctrlKeyedDown, setCtrlKeyedDown } from './keyEventStore';
+import { getScreenSize } from '../helpers';
 
 export interface OtherTypes {
   exitType?: ExitType
@@ -19,10 +20,6 @@ export const [showBuySetting, setShowBuySetting] = createSignal(false)
 export const [showSellSetting, setShowSellSetting] = createSignal(false)
 export const [showTpSetting, setShowTpSetting] = createSignal(false)
 export const [showSlSetting, setShowSlSetting] = createSignal(false)
-
-const getScreenSize = () => {
-	return {x: window.innerWidth, y: window.innerHeight}
-}
 
 export const getOverlayType = () => {
 	// console.log(popupOtherInfo()?.overlayType)
@@ -49,7 +46,6 @@ const ctrl_rightClick = (event:OverlayEvent, type:'buy'|'sell'|'tp'|'sl') => {
 
 export const userOrderSettings = () => {
 	const openPopup = (event: OverlayEvent, others?: OtherTypes) => {
-		console.log(getScreenSize().x, event.pageX!)
 		setPopupTop(getScreenSize().y - event.pageY! > 200 ? event.pageY! : getScreenSize().y-200)
 		setPopupLeft(getScreenSize().x - event.pageX! > 200 ? event.pageX! : getScreenSize().x-200)
 		setPopupOverlay(event.overlay)

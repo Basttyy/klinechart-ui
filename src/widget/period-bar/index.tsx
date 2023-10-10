@@ -20,6 +20,8 @@ import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
 import { pausedStatus, rootlelID, setPausedStatus } from '../../ChartProComponent'
 import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible, setRange } from '../../store/chartStateStore'
+import { setSpeedPopupLeft, setSpeedPopupTop } from '../../component/popup/timeframe'
+import { getScreenSize } from '../../helpers'
 
 export interface PeriodBarProps {
   locale: string
@@ -48,8 +50,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const [showSpeed, setShowSpeed] = createSignal(false)
   const [overflow, setOverflow] = createSignal(true)
 
-  const maxRange = 10
-
   const offAllPeriodOverlay = () => {
     setShowPeriodList(false)
     setShowSpeed(false)
@@ -58,11 +58,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const fullScreenChange = () => {
     setFullScreen(full => !full)
-  }
-
-  const handleRangeChange = (event:any) => {
-    setRange(event.target.value);
-    (props.datafeed as any).setInterval = (maxRange + 1 - range()) * 100
   }
 
   const onSymbolClickLog = () => {
@@ -74,6 +69,12 @@ const PeriodBar: Component<PeriodBarProps> = props => {
     (props.datafeed as any).setIsPaused = pausedStatus()
     cleanup()
     //TODO: Other tasks to be carried out here before exiting chart
+  }
+
+  const showSpeedPopup = (event: MouseEvent) => {
+    setSpeedPopupTop(getScreenSize().y - event.pageY! > 200 ? event.pageY! : getScreenSize().y-200)
+    setSpeedPopupLeft(getScreenSize().x - event.pageX! > 200 ? event.pageX! : getScreenSize().x-200)
+    setShowSpeed(true)
   }
 
   onMount(() => {
@@ -153,20 +154,10 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       </button>
       <div class="item tools period_home">
         <button class="item period"
-          onclick={() => {
-            if(!showSpeed()) offAllPeriodOverlay()
-            setOverflow(!overflow())
-            setShowSpeed(!showSpeed())
-          }}
+          onclick={showSpeedPopup}
         >
           Speed {range()}
         </button>
-        {
-          showSpeed() &&
-          // <div class="period_list">
-            <input class="period_range" type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
-          // </div>
-        }
       </div>
       {/* {
         props.periods.map(p => (

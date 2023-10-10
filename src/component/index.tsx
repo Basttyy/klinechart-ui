@@ -20,7 +20,7 @@ import Select, { SelectDataSourceItem } from './select'
 import Input from './input'
 import Loading from './loading'
 import Switch from './switch'
-import Popup from './popup'
+import Popup from './popup/overlay'
 import Color from './color'
 
 export {

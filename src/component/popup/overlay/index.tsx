@@ -17,11 +17,11 @@ import { userOrderSettings, popupLeft, popupTop, popupOtherInfo, popupOverlay,
 	setShowBuySetting,
 	getOverlayType,
 	setPopupOverlay
-} from '../../store/overlaySettingStore'
-import { useOrder } from '../../store/positionStore'
-import { ExitType } from '../../types'
-import { instanceapi } from '../../ChartProComponent'
-import { useChartState } from '../../store/chartStateStore'
+} from '../../../store/overlaySettingStore'
+import { useOrder } from '../../../store/positionStore'
+import { ExitType } from '../../../types'
+import { instanceapi } from '../../../ChartProComponent'
+import { useChartState } from '../../../store/chartStateStore'
 
 
 
@@ -72,7 +72,7 @@ const hideUnhide = () => {
 }
 
  
-const Action_popup = () => {
+const OverlayOptionsPopup = () => {
   return (
     <div class="klinecharts-pro-popup_background" onclick={() => userOrderSettings().closePopup()}>
       <div class="popup"  style={{  top: `${popupTop()}px`, left: `${popupLeft()}px` }}>
@@ -90,4 +90,4 @@ const Action_popup = () => {
   )
 }
 
-export default Action_popup
+export default OverlayOptionsPopup
