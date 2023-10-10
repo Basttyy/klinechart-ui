@@ -48,6 +48,8 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   const [showSpeed, setShowSpeed] = createSignal(false)
   const [overflow, setOverflow] = createSignal(true)
 
+  const maxRange = 10
+
   const offAllPeriodOverlay = () => {
     setShowPeriodList(false)
     setShowSpeed(false)
@@ -60,7 +62,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const handleRangeChange = (event:any) => {
     setRange(event.target.value);
-    (props.datafeed as any).setInterval = range() * 100
+    (props.datafeed as any).setInterval = (maxRange + 1 - range()) * 100
   }
 
   const onSymbolClickLog = () => {
@@ -162,7 +164,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
         {
           showSpeed() &&
           // <div class="period_list">
-            <input class="period_range" type="range" min="1" max="10" value={range()} onInput={handleRangeChange} />
+            <input class="period_range" type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
           // </div>
         }
       </div>

@@ -1,5 +1,5 @@
 import { createSignal, startTransition } from "solid-js";
-import { instanceapi, orderPanelVisible, pausedStatus, periodModalVisible, rootlelID, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setPeriodModalVisible, setScreenshotUrl, setSettingModalVisible, settingModalVisible } from "../ChartProComponent";
+import { indicatorModalVisible, instanceapi, orderPanelVisible, pausedStatus, periodModalVisible, rootlelID, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setPeriodModalVisible, setScreenshotUrl, setSettingModalVisible, setSyntheticPauseStatus, settingModalVisible, syntheticPauseStatus } from "../ChartProComponent";
 import { cleanup, datafeed, documentResize, fullScreen, orderModalVisible, range, setOrderModalVisible, setRange, theme } from "./chartStateStore";
 import { ordercontr, useOrder } from "./positionStore";
 import { Chart } from "@basttyy/klinecharts";
@@ -26,9 +26,11 @@ export const useKeyEvents = () => {
           break;
         case 'i':
           setIndicatorModalVisible(visible => !visible)
+          syntheticPausePlay()
           break;
         case 's':
           setSettingModalVisible(visible => !visible)
+          syntheticPausePlay()
           break;
         case 'z':
           //TODO: we should undo one step
@@ -56,7 +58,7 @@ export const useKeyEvents = () => {
       return
     }
     if (['1','2','3','4','5','6','7','8','9'].includes(event.key) && !orderModalVisible()) {
-      setPausedStatus(true)
+      syntheticPausePlay()
       if (periodInputValue().length < 1)
         setPeriodInputValue(event.key)
       if (!periodModalVisible()) {
@@ -77,6 +79,8 @@ export const useKeyEvents = () => {
       setSettingModalVisible(false)
       setOrderPanelVisible(false)
       setIndicatorModalVisible(false)
+      setScreenshotUrl('')
+      syntheticPausePlay()
     }
   }
 
@@ -104,6 +108,7 @@ const showOrderlist = async () => {
 
 const takeScreenshot = () => {
   const url = instanceapi()!.getConvertPictureUrl(true, 'jpeg', theme() === 'dark' ? '#151517' : '#ffffff')
+  syntheticPausePlay()
   setScreenshotUrl(url)
 }
 
@@ -130,6 +135,11 @@ const toggleFullscreen = () => {
 const pausePlay = () => {
   setPausedStatus(!pausedStatus());
   (datafeed() as any).setIsPaused = pausedStatus()
+}
+
+export const syntheticPausePlay = (state?: boolean) => {
+  setSyntheticPauseStatus(state ?? !syntheticPauseStatus());
+  (datafeed() as any).setIsPaused = syntheticPauseStatus()
 }
 
 const handleRangeChange = (value: number) => {
