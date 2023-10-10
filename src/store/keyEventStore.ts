@@ -171,12 +171,14 @@ export const syntheticPausePlay = (ispaused?: boolean) => {
 }
 
 const handleRangeChange = (value: number) => {
+  const maxRange = 10
+  
   if (value > 0 && range() < 10) {
     setRange(+range() + +value);
-    (datafeed() as any).setInterval = range() * 100
+    (datafeed() as any).setInterval = (maxRange + 1 - range()) * 100
   }
   else if (value < 0 && range() > 1) {
     setRange(+range() + value);
-    (datafeed() as any).setInterval = range() * 100
+    (datafeed() as any).setInterval = (maxRange + 1 - range()) * 100
   }
 }
