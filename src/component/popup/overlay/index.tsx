@@ -19,11 +19,8 @@ import { userOrderSettings, popupLeft, popupTop, popupOtherInfo, popupOverlay,
 	setPopupOverlay
 } from '../../../store/overlaySettingStore'
 import { useOrder } from '../../../store/positionStore'
-import { ExitType } from '../../../types'
 import { instanceapi } from '../../../ChartProComponent'
 import { useChartState } from '../../../store/chartStateStore'
-
-
 
 const triggerAction = () => {
 	if (!popupOtherInfo()?.overlayType) {
@@ -84,7 +81,6 @@ const OverlayOptionsPopup = () => {
 					<button onclick={lockUnlock}>{popupOverlay()?.lock ? 'Unlock' : 'Lock'}</button>
 					<button onclick={hideUnhide}>{popupOverlay()?.visible ? 'Hide' : 'Unhide'}</button>
 				</Show>
-				{/* <button>Others</button> */}
 			</div>
     </div>
   )
