@@ -22,8 +22,8 @@ import {
 import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
 
-import { SelectDataSourceItem, Loading, Popup } from './component'
-import { showPopup, showBuySetting } from './store/overlaySettingStore'
+import { SelectDataSourceItem, Loading, OverlayOptionsPopup } from './component'
+import { showOverlayPopup, showBuySetting } from './store/overlaySettingStore'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal, TimeframeModal,
@@ -36,7 +36,8 @@ import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, 
 import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
 import { orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
 import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified, documentResize, setTheme, theme, setDatafeed } from './store/chartStateStore'
-import { setTimerid, setWidgetref, useKeyEvents } from './store/keyEventStore'
+import { setTimerid, setWidgetref, syntheticPausePlay, useKeyEvents } from './store/keyEventStore'
+import SpeedPopup from './component/popup/timeframe'
 
 const { createIndicator, modifyIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs } = useChartState()
 
@@ -77,6 +78,7 @@ export const [symbol, setSymbol] = createSignal<SymbolInfo>()
 export const [chartsession, setChartsession] = createSignal<sessionType|null>(null)
 export const [chartsessionCtr, setChartsessionCtr] = createSignal<ChartSessionResource|null>(null)
 export const [pausedStatus, setPausedStatus] = createSignal(false)
+export const [syntheticPauseStatus, setSyntheticPauseStatus] = createSignal(false)
 export const [screenshotUrl, setScreenshotUrl] = createSignal('')
 export const [rootlelID, setRooltelId] = createSignal('')
 
@@ -85,6 +87,7 @@ export const [orderPanelVisible, setOrderPanelVisible] = createSignal(false)
 export const [settingModalVisible, setSettingModalVisible] = createSignal(false)
 export const [indicatorModalVisible, setIndicatorModalVisible] = createSignal(false)
 export const [periodModalVisible, setPeriodModalVisible] = createSignal(false)
+export const [showSpeed, setShowSpeed] = createSignal(false)
 
 const ChartProComponent: Component<ChartProComponentProps> = props => {
   let widgetRef: HTMLDivElement | undefined = undefined
@@ -609,8 +612,11 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
   return (
     <>
       <i class="icon-close klinecharts-pro-load-icon"/>
-      <Show when={showPopup()}>
-        <Popup/>
+      <Show when={showOverlayPopup()}>
+        <OverlayOptionsPopup/>
+      </Show>
+      <Show when={showSpeed()}>
+        <SpeedPopup/>
       </Show>
       <Show when={showBuySetting()}>
         <BuySettingModal
@@ -636,7 +642,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           locale={props.locale}
           mainIndicators={mainIndicators()}
           subIndicators={subIndicators()}
-          onClose={() => { setIndicatorModalVisible(false) }}
+          onClose={() => { syntheticPausePlay(false); setIndicatorModalVisible(false) }}
           onMainIndicatorChange={data => { pushMainIndicator(data)}}
           onSubIndicatorChange={data => { pushSubIndicator(data) }}/>
       </Show>
@@ -644,7 +650,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         <TimezoneModal
           locale={props.locale}
           timezone={timezone()}
-          onClose={() => { setTimezoneModalVisible(false) }}
+          onClose={() => { syntheticPausePlay(false); setTimezoneModalVisible(false) }}
           onConfirm={setTimezone}
         />
       </Show>
@@ -652,7 +658,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         <SettingModal
           locale={props.locale}
           currentStyles={utils.clone(widget!.getStyles())}
-          onClose={() => { setSettingModalVisible(false) }}
+          onClose={() => { syntheticPausePlay(false); setSettingModalVisible(false) }}
           onChange={style => {
             widget?.setStyles(style)
           }}
@@ -670,14 +676,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         <ScreenshotModal
           locale={props.locale}
           url={screenshotUrl()}
-          onClose={() => { setScreenshotUrl('') }}
+          onClose={() => {syntheticPausePlay(false); setScreenshotUrl('') }}
         />
       </Show>
       <Show when={indicatorSettingModalParams().visible}>
         <IndicatorSettingModal
           locale={props.locale}
           params={indicatorSettingModalParams()}
-          onClose={() => { setIndicatorSettingModalParams({ visible: false, indicatorName: '', paneId: '', calcParams: [] }) }}
+          onClose={() => {syntheticPausePlay(false); setIndicatorSettingModalParams({ visible: false, indicatorName: '', paneId: '', calcParams: [] }) }}
           onConfirm={(params)=> {
             const modalParams = indicatorSettingModalParams()
             modifyIndicator(modalParams, params)
@@ -695,7 +701,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
           try {
             await startTransition(() => setDrawingBarVisible(!drawingBarVisible()))
             documentResize()
-          } catch (e) {}    
+          } catch (e) {}
         }}
         onOrderMenuClick={async () => {
           try {
@@ -711,6 +717,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         onScreenshotClick={() => {
           if (widget) {
             const url = widget.getConvertPictureUrl(true, 'jpeg', props.theme === 'dark' ? '#151517' : '#ffffff')
+            syntheticPausePlay(false)
             setScreenshotUrl(url)
           }
         }}

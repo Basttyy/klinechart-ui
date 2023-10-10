@@ -1,6 +1,6 @@
 import { createSignal, startTransition } from "solid-js";
-import { instanceapi, orderPanelVisible, pausedStatus, periodModalVisible, rootlelID, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setPeriodModalVisible, setScreenshotUrl, setSettingModalVisible, settingModalVisible } from "../ChartProComponent";
-import { cleanup, datafeed, documentResize, fullScreen, range, setRange, theme } from "./chartStateStore";
+import { indicatorModalVisible, instanceapi, orderPanelVisible, pausedStatus, periodModalVisible, rootlelID, screenshotUrl, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setPeriodModalVisible, setScreenshotUrl, setSettingModalVisible, setSyntheticPauseStatus, settingModalVisible, syntheticPauseStatus } from "../ChartProComponent";
+import { cleanup, datafeed, documentResize, fullScreen, orderModalVisible, range, setOrderModalVisible, setRange, theme } from "./chartStateStore";
 import { ordercontr, useOrder } from "./positionStore";
 import { Chart } from "@basttyy/klinecharts";
 import { periodInputValue, setPeriodInputValue } from "../widget/timeframe-modal";
@@ -19,16 +19,23 @@ export const useKeyEvents = () => {
     if (ctrlKeyedDown()) {
       switch (event.key) {
         case 'o':
-          showOrderPopup()
+          if (allModalHidden('order'))
+            showOrderPopup()
           break;
         case 'l':
           showOrderlist()
           break;
         case 'i':
-          setIndicatorModalVisible(visible => !visible)
+          if (allModalHidden('indi')) {
+            setIndicatorModalVisible(visible => !visible)
+            syntheticPausePlay(true)
+          }
           break;
         case 's':
-          setSettingModalVisible(visible => !visible)
+          if (allModalHidden('settings')) {
+            setSettingModalVisible(visible => !visible)
+            syntheticPausePlay(true)
+          }
           break;
         case 'z':
           //TODO: we should undo one step
@@ -43,7 +50,8 @@ export const useKeyEvents = () => {
           //TODO: we should paste the copied overlay from clipboard
           break;
         case 'p':
-          takeScreenshot()
+          if (allModalHidden('screenshot'))
+            takeScreenshot()
           break;
         case 'f':
           toggleFullscreen()
@@ -55,10 +63,11 @@ export const useKeyEvents = () => {
 
       return
     }
-    if (['1','2','3','4','5','6','7','8','9'].includes(event.key)) {
+    if (['1','2','3','4','5','6','7','8','9'].includes(event.key) && allModalHidden('period')) {
       if (periodInputValue().length < 1)
         setPeriodInputValue(event.key)
       if (!periodModalVisible()) {
+        syntheticPausePlay(true)
         setPeriodModalVisible(true)
         setInputClass('klinecharts-pro-input klinecharts-pro-timeframe-modal-input input-error')
       }
@@ -76,20 +85,45 @@ export const useKeyEvents = () => {
       setSettingModalVisible(false)
       setOrderPanelVisible(false)
       setIndicatorModalVisible(false)
+      setScreenshotUrl('')
+      syntheticPausePlay(false)
     }
   }
 
   const handleKeyUp = (event:KeyboardEvent) => {
     if (!event.ctrlKey || !event.metaKey) {
       setCtrlKeyedDown(false)
-      event.preventDefault() 
+      event.preventDefault()
     }
   }
 
   return { handleKeyDown, handleKeyUp }
 }
 
+const allModalHidden = (except: 'settings'|'indi'|'screenshot'|'order'|'period') => {
+  let value = false
+  switch (except) {
+    case 'settings':
+      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible()
+    case 'indi':
+      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible()
+      break
+    case 'screenshot':
+      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible()
+      break
+    case 'order':
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible()
+      break
+    case 'period':
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible()
+      break
+  }
+  return value
+}
+
 const showOrderPopup = () => {
+  syntheticPausePlay(true)
+  setOrderModalVisible(true)
   ordercontr()!.launchOrderModal('placeorder', useOrder().onOrderPlaced)
 }
 
@@ -102,6 +136,7 @@ const showOrderlist = async () => {
 
 const takeScreenshot = () => {
   const url = instanceapi()!.getConvertPictureUrl(true, 'jpeg', theme() === 'dark' ? '#151517' : '#ffffff')
+  syntheticPausePlay(true)
   setScreenshotUrl(url)
 }
 
@@ -115,7 +150,6 @@ const toggleFullscreen = () => {
       enterFullScreen.call(el)
       // setFullScreen(true)
     } else {
-      console.log('Unable to get the app root element')
     }
   } else {
     // @ts-expect-error
@@ -128,6 +162,12 @@ const toggleFullscreen = () => {
 const pausePlay = () => {
   setPausedStatus(!pausedStatus());
   (datafeed() as any).setIsPaused = pausedStatus()
+}
+
+export const syntheticPausePlay = (ispaused?: boolean) => {
+  setSyntheticPauseStatus(ispaused ?? !syntheticPauseStatus());
+  if ((!ispaused && !pausedStatus()) || ispaused) 
+    (datafeed() as any).setIsPaused = syntheticPauseStatus()
 }
 
 const handleRangeChange = (value: number) => {

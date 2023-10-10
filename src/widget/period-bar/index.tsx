@@ -18,8 +18,10 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
-import { pausedStatus, rootlelID, setPausedStatus } from '../../ChartProComponent'
-import { cleanup, fullScreen, range, setFullScreen, setRange } from '../../store/chartStateStore'
+import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
+import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible, setRange } from '../../store/chartStateStore'
+import { setSpeedPopupLeft, setSpeedPopupTop } from '../../component/popup/timeframe'
+import { getScreenSize } from '../../helpers'
 
 export interface PeriodBarProps {
   locale: string
@@ -45,7 +47,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   let ref: Node
 
   const [showPeriodList, setShowPeriodList] = createSignal(false);
-  const [showSpeed, setShowSpeed] = createSignal(false)
   const [overflow, setOverflow] = createSignal(true)
 
   const offAllPeriodOverlay = () => {
@@ -58,13 +59,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
     setFullScreen(full => !full)
   }
 
-  const handleRangeChange = (event:any) => {
-    setRange(event.target.value);
-    (props.datafeed as any).setInterval = range() * 100
-  }
-
   const onSymbolClickLog = () => {
-    console.log("symbol tool was clicked")
   }
 
   const onExitClicked = () => {
@@ -72,6 +67,12 @@ const PeriodBar: Component<PeriodBarProps> = props => {
     (props.datafeed as any).setIsPaused = pausedStatus()
     cleanup()
     //TODO: Other tasks to be carried out here before exiting chart
+  }
+
+  const showSpeedPopup = (event: MouseEvent) => {
+    setSpeedPopupLeft(getScreenSize().x - event.pageX! > 200 ? event.pageX! : getScreenSize().x-200)
+    offAllPeriodOverlay()
+    setShowSpeed(true)
   }
 
   onMount(() => {
@@ -111,7 +112,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
       </Show>
-      <button class="item tools" onClick={() => {props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
+      <button class="item tools" onClick={() => {setOrderModalVisible(true); props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
       <div class="item tools period_home">
         <button class="item period"
           onclick={() => {
@@ -151,20 +152,10 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       </button>
       <div class="item tools period_home">
         <button class="item period"
-          onclick={() => {
-            if(!showSpeed()) offAllPeriodOverlay()
-            setOverflow(!overflow())
-            setShowSpeed(!showSpeed())
-          }}
+          onclick={showSpeedPopup}
         >
           Speed {range()}
         </button>
-        {
-          showSpeed() &&
-          // <div class="period_list">
-            <input class="period_range" type="range" min="1" max="10" value={range()} onInput={handleRangeChange} />
-          // </div>
-        }
       </div>
       {/* {
         props.periods.map(p => (
@@ -221,7 +212,6 @@ const PeriodBar: Component<PeriodBarProps> = props => {
               enterFullScreen.call(el)
               // setFullScreen(true)
             } else {
-              console.log('Unable to get the app root element')
             }
           } else {
             // @ts-expect-error

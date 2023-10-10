@@ -7,12 +7,14 @@ import _ from "lodash"
 import { Datafeed } from "../types"
 import { tickTimestamp } from "./tickStore"
 import { timerid, widgetref } from "./keyEventStore"
+import { userOrderSettings } from "./overlaySettingStore"
 
 export const [mainIndicators, setMainIndicators] = createSignal([''])
 export const [subIndicators, setSubIndicators] = createSignal({})
 export const [chartModified, setChartModified] = createSignal(false)
 export const [theme, setTheme] = createSignal('')
 export const [fullScreen, setFullScreen] = createSignal(false)
+export const [orderModalVisible, setOrderModalVisible] = createSignal(false)
 export const [range, setRange] = createSignal(1)
 export const [datafeed, setDatafeed] = createSignal<Datafeed>()
 
@@ -210,18 +212,6 @@ const refineOverlayObj = (overlay: Overlay): OverlayCreate => {
   return cleanOverlay
 }
 
-const popOverlay = (id: string) => {
-  const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
-  if (chartStateObj) {
-    let chartObj: ChartObjType = JSON.parse(chartStateObj)
-
-    chartObj.overlays = chartObj.overlays?.filter(overlay => overlay.value?.id !== id)
-    localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
-    setChartModified(true)
-  }
-  instanceapi()?.removeOverlay(id)
-}
-
 export const useChartState = () => {
 
   function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStack?: boolean, paneOptions?: PaneOptions, docallback = false): Nullable<string> {
@@ -248,31 +238,43 @@ export const useChartState = () => {
 
     if (paneId && docallback) {
       const indi = widget?.getIndicatorByPaneId(paneId, indicatorName)
-      console.log(indi)
       if (indi)
         syncIndiObject(indi as Indicator, isStack, { id: paneId })
     }
     return paneId
   }
 
-  const pushOverlay = (overlay: OverlayCreate) => {
-    const id = instanceapi()?.createOverlay(overlay)
+  const pushOverlay = (overlay: OverlayCreate, paneId?: string) => {
+    const id = instanceapi()?.createOverlay(overlay, paneId)
 
     const ovrly = instanceapi()?.getOverlayById((id as string))
     if (ovrly) {
       instanceapi()?.overrideOverlay({
-        onDrawEnd: (event): boolean => {
+        onDrawEnd: (event) => {
           return syncObject(event)
         },
-        onPressedMoveEnd: (event): boolean => {
+        onPressedMoveEnd: (event) => {
           return syncObject(event)
         },
-        onRightClick: (event): boolean => {
-          popOverlay(event.overlay.id)
-          return false
+        onRightClick: (event) => {
+          userOrderSettings().openPopup(event)
+          // popOverlay(event.overlay.id)
+          return true
         }
       })
     }
+  }
+
+  const popOverlay = (id: string) => {
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
+    if (chartStateObj) {
+      let chartObj: ChartObjType = JSON.parse(chartStateObj)
+  
+      chartObj.overlays = chartObj.overlays?.filter(overlay => overlay.value?.id !== id)
+      localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
+      setChartModified(true)
+    }
+    instanceapi()?.removeOverlay(id)
   }
 
   const pushMainIndicator = (data: IndicatorChageType) => {
@@ -359,24 +361,7 @@ export const useChartState = () => {
       }
       if (chartObj.overlays) {
         chartObj.overlays.forEach(overlay => {
-          if (overlay.value) {
-            const id = instanceapi()?.createOverlay(overlay.value, overlay.paneId)
-            const ovrly = instanceapi()?.getOverlayById((id as string))
-            if (ovrly) {
-              instanceapi()?.overrideOverlay({
-                onDrawEnd: (event): boolean => {
-                  return syncObject(event)
-                },
-                onPressedMoveEnd: (event): boolean => {
-                  return syncObject(event)
-                },
-                onRightClick: (event): boolean => {
-                  popOverlay(event.overlay.id)
-                  return false
-                }
-              })
-            }
-          }
+          pushOverlay(overlay.value!, overlay.paneId)
         })
       }
       if (chartObj.indicators) {
@@ -420,5 +405,5 @@ export const useChartState = () => {
       redraw(chartStateObj)
   }
 
-  return { createIndicator, modifyIndicator, popIndicator, pushOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
+  return { createIndicator, modifyIndicator, popIndicator, pushOverlay, popOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
 }

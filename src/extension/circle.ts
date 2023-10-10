@@ -19,8 +19,6 @@ import { getDistance } from './utils'
 import { instanceapi } from '../ChartProComponent'
 import { currenttick } from '../store/tickStore'
 
-const { openPopup } = userOrderSettings()
-
 const circle: OverlayTemplate = {
   name: 'circle',
   totalStep: 3,
@@ -41,7 +39,6 @@ const circle: OverlayTemplate = {
       //   const points = instanceapi()?.convertFromPixel(coordinate, {
       //     paneId: overlay.paneId
       //   })
-      //   console.log(`${(points as Partial<Point>[])[0].timestamp!}    ${overlay.points[i].timestamp}    ${currenttick()?.timestamp}`)
       //   if ((points as Partial<Point>[])[0].timestamp === undefined && overlay.points[i].timestamp === undefined) {
       //       let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
       //       let overlayxy = instanceapi()?.convertToPixel(point, {
@@ -62,21 +59,6 @@ const circle: OverlayTemplate = {
       }
     }
     return []
-  },
-  onRightClick: (event): boolean => {
-    console.log('onrightclick handled')
-    openPopup(event)
-    return true
-  },
-  onDoubleClick: (event): boolean => {
-    console.log('on double click handled')
-    userOrderSettings().openPopup(event)
-    return true
-  },
-  onClick: (event): boolean => {
-    console.log('on click handled')
-    userOrderSettings().openPopup(event)
-    return true
   }
 }
 
