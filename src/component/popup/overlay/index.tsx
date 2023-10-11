@@ -16,7 +16,8 @@ import { Show } from 'solid-js'
 import { userOrderSettings, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
 	setShowBuySetting,
 	getOverlayType,
-	setPopupOverlay
+	setPopupOverlay,
+	setShowOverlaySetting
 } from '../../../store/overlaySettingStore'
 import { useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
@@ -40,8 +41,11 @@ const ifBuyOrSell = () => {
 	}
 }
 
-const setStyle = () => {
-	setShowBuySetting(true)
+const setStyle = (type: 'position'|'overlay') => {
+	if (type === 'position')
+		setShowBuySetting(true)
+	else if (type === 'overlay')
+		setShowOverlaySetting(true)
 }
 
 const sendBack = () => {
@@ -74,7 +78,7 @@ const OverlayOptionsPopup = () => {
     <div class="klinecharts-pro-popup_background" onclick={() => userOrderSettings().closePopup()}>
       <div class="popup"  style={{  top: `${popupTop()}px`, left: `${popupLeft()}px` }}>
 				<button onclick={triggerAction}>{ifBuyOrSell() ? 'Close order' : `Remove ${getOverlayType()}`}</button>
-				<button onClick={setStyle}>Settings</button>
+				<button onClick={ () => setStyle(ifBuyOrSell() ? 'position' : 'overlay')}>Settings</button>
 				<Show when={!ifBuyOrSell()}>
 					<button onclick={sendBack}>Send Back</button>
 					<button onclick={sendFront}>Send Front</button>

@@ -17,6 +17,7 @@ export const [popupOverlay, setPopupOverlay] = createSignal<Overlay>()
 export const [popupOtherInfo, setPopupOtherInfo] = createSignal<OtherTypes>()
 
 export const [showBuySetting, setShowBuySetting] = createSignal(false)
+export const [showOverlaySetting, setShowOverlaySetting] = createSignal(false)
 export const [showSellSetting, setShowSellSetting] = createSignal(false)
 export const [showTpSetting, setShowTpSetting] = createSignal(false)
 export const [showSlSetting, setShowSlSetting] = createSignal(false)
