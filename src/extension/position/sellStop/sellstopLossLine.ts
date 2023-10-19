@@ -18,8 +18,8 @@ import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
-import { sellStyle, stopLossStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { sellStopStyle, stopLossStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -69,19 +69,23 @@ const sellstopLossLine: OverlayTemplate = {
     return [
       {
         type: 'line',
-        attrs: parallel.lines,
-        styles: [
-          sellStyle().lineStyle,
-          stopLossStyle().lineStyle
-        ]
+        attrs: parallel.lines[0],
+        styles: sellStopStyle().lineStyle,
+      },
+      {
+        type: 'line',
+        attrs: parallel.lines[1],
+        styles: stopLossStyle().lineStyle
       },
       {
         type: 'text',
-        attrs: parallel.recttexts,
-        styles: [
-          sellStyle().labelStyle,
-          stopLossStyle().labelStyle
-        ]
+        attrs: parallel.recttexts[0],
+        styles: sellStopStyle().labelStyle
+      },
+      {
+        type: 'text',
+        attrs: parallel.recttexts[1],
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -108,7 +112,7 @@ const sellstopLossLine: OverlayTemplate = {
       {
         type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: sellStyle().labelStyle
+        styles: sellStopStyle().labelStyle
       },
       {
         type: 'text',
@@ -168,7 +172,7 @@ const sellstopLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    userOrderSettings().lossPopup(event, 'sell')
+    useOverlaySettings().lossPopup(event, 'sell')
     return true
   }
 }

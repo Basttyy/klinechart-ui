@@ -19,21 +19,20 @@ import type { SelectDataSourceItem } from '../../../component'
 import useDataSource from '../../setting-modal/settings/dataSource'
 
 import i18n from '../../../i18n'
-import { setShowBuySetting, popupOtherInfo, getOverlayType } from '../../../store/overlaySettingStore'
+import { popupOtherInfo, getOverlayType, setShowOverlaySetting } from '../../../store/overlaySettingStore'
 import { 
   buyStyle, setBuyStyle,
   sellStyle, setSellStyle,
   takeProfitStyle, setTakeProfitStyle,
   stopLossStyle, setStopLossStyle
-} from '../../../store/overlayStyleStore'
+} from '../../../store/overlaystyle/positionStyleStore'
 
-export interface BuySettingModalProps {
+export interface OverlaySettingModalProps {
   locale: string
 }
-
-
   
-const BuySettingModal: Component<BuySettingModalProps> = props => {
+const OverlaySettingModal: Component<OverlaySettingModalProps> = props => {
+  console.log('overlay settings activated')
 	const { font_size, font_family, font_weight, fill_stroke, solid_dashed, size } = useDataSource(props.locale)
 	const Options = [
     {
@@ -118,9 +117,9 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
   return (
     <Modal
       title={`Style ${getOverlayType()}`}
-      onClose={() =>  setShowBuySetting(false)}
+      onClose={() =>  setShowOverlaySetting(false)}
     >
-      <div class="klinecharts-pro-buy-setting-modal-content">
+      <div class="klinecharts-pro-overlay-setting-modal-content">
 				<div class="content">
 						<For each={options()}>
               {
@@ -185,4 +184,4 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
   )
 }
 
-export default BuySettingModal
+export default OverlaySettingModal

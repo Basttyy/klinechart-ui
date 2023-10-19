@@ -4,10 +4,11 @@ import { ExitType } from '../types';
 import { useOrder } from './positionStore';
 import { ctrlKeyedDown, setCtrlKeyedDown } from './keyEventStore';
 import { getScreenSize } from '../helpers';
+import { useChartState } from './chartStateStore';
 
 export interface OtherTypes {
   exitType?: ExitType
-  overlayType?: 'buy'|'sell'|'tp'|'sl'
+  overlayType?: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit'|'tp'|'sl'
 }
 
 export const [showOverlayPopup, setShowOverlayPopup] = createSignal(false)
@@ -16,7 +17,7 @@ export const [popupLeft, setPopupLeft] = createSignal(0)
 export const [popupOverlay, setPopupOverlay] = createSignal<Overlay>()
 export const [popupOtherInfo, setPopupOtherInfo] = createSignal<OtherTypes>()
 
-export const [showBuySetting, setShowBuySetting] = createSignal(false)
+export const [showPositionSetting, setShowPositionSetting] = createSignal(false)
 export const [showOverlaySetting, setShowOverlaySetting] = createSignal(false)
 export const [showSellSetting, setShowSellSetting] = createSignal(false)
 export const [showTpSetting, setShowTpSetting] = createSignal(false)
@@ -25,8 +26,16 @@ export const [showSlSetting, setShowSlSetting] = createSignal(false)
 export const getOverlayType = () => {
 	if(popupOtherInfo()?.overlayType == 'buy'){
 		return 'Buy'
+	} else if (popupOtherInfo()?.overlayType == 'buylimit') {
+		return 'Buy Limit'
+	} else if (popupOtherInfo()?.overlayType == 'buystop') {
+		return 'Buy Stop'
 	} else if(popupOtherInfo()?.overlayType == 'sell') {
 		return 'Sell'
+	} else if (popupOtherInfo()?.overlayType == 'selllimit') {
+		return 'Sell Limit'
+	} else if (popupOtherInfo()?.overlayType == 'sellstop') {
+		return 'Sell Stop'
 	} else if(popupOtherInfo()?.overlayType == 'sl') {
 		return 'Stop loss'
 	} else if(popupOtherInfo()?.overlayType == 'tp') {
@@ -36,15 +45,19 @@ export const getOverlayType = () => {
 	}
 }
 
-const ctrl_rightClick = (event:OverlayEvent, type:'buy'|'sell'|'tp'|'sl') => {
+const ctrl_rightClick = (event: OverlayEvent, type: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit'|'tp'|'sl') => {
 	if(type == 'buy' || type == 'sell') {
 		useOrder().closeOrder(event.overlay, 'manualclose')
-	} else {
+	} else if (type == 'tp' || type == 'sl') {
 		useOrder().removeStopOrTP(event.overlay, type as 'tp'|'sl')
+	} else if (['buystop', 'buylimit', 'sellstop', 'selllimit'].includes(type)) {
+		useOrder().closeOrder(event.overlay, 'cancel')
+ 	} else {
+		useChartState().popOverlay(event.overlay.id)
 	}
 }
 
-export const userOrderSettings = () => {
+export const useOverlaySettings = () => {
 	const openPopup = (event: OverlayEvent, others?: OtherTypes) => {
 		setPopupTop(getScreenSize().y - event.pageY! > 200 ? event.pageY! : getScreenSize().y-200)
 		setPopupLeft(getScreenSize().x - event.pageX! > 200 ? event.pageX! : getScreenSize().x-200)
@@ -58,7 +71,7 @@ export const userOrderSettings = () => {
 		// setPopupOtherInfo({})
 	}
 
-	const profitLossPopup = (event:OverlayEvent, type: 'buy'|'sell') => {
+	const profitLossPopup = (event:OverlayEvent, type: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit') => {
 		if(ctrlKeyedDown()) {
 			if (event.figureIndex == 0 || event.figureIndex == 3){
 				ctrl_rightClick(event, type)
@@ -78,7 +91,7 @@ export const userOrderSettings = () => {
     }
 	}
 
-	const profitPopup = (event:OverlayEvent, type: 'buy'|'sell') => {
+	const profitPopup = (event:OverlayEvent, type: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit') => {
 		if(ctrlKeyedDown()) {
 			if (event.figureIndex == 0 || event.figureIndex == 2){
 				ctrl_rightClick(event, type)
@@ -94,7 +107,7 @@ export const userOrderSettings = () => {
     } 
 	}
 
-	const lossPopup = (event:OverlayEvent, type: 'buy'|'sell') => {
+	const lossPopup = (event:OverlayEvent, type: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit') => {
 		if(ctrlKeyedDown()) {
 			if (event.figureIndex == 0 || event.figureIndex == 2){
 				ctrl_rightClick(event, type)
@@ -110,7 +123,7 @@ export const userOrderSettings = () => {
     } 
 	}
 
-	const singlePopup = (event:OverlayEvent, type: 'buy'|'sell') => {
+	const singlePopup = (event:OverlayEvent, type: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit') => {
 		if(ctrlKeyedDown()) {
 			ctrl_rightClick(event, type)
 			return

@@ -22,6 +22,7 @@ export interface ColorProps {
   style?: JSX.CSSProperties | string
   value?: JSX.Element
   valueKey?: string
+	reactiveChange?: boolean
   onChange?: (data: string) => void
 }
 
@@ -125,14 +126,20 @@ const Color: Component<ColorProps> = props => {
 	]
 
 	const closeColorPallete = () => {
-		setSelectedColor('')
-		setFinalColor('')
 		setOpen(false)
+	}
+	const cancelColorChange = () => {
+		setSelectedColor(props.value)
+		setFinalColor(props.value)
+		props.onChange?.((props.value as string))
+		closeColorPallete()
 	}
 	const addOpacity = () => {
 		const op = opacity()/100
 		const x = chroma(selectedColor() as any).alpha(op).css();
 		setFinalColor(x)
+		if (props.reactiveChange ?? true)
+			props.onChange?.((finalColor() as string))
 	}
 
 	const handleRangeChange = (event:any) => {
@@ -142,7 +149,7 @@ const Color: Component<ColorProps> = props => {
 
   return (
     <div
-			style={`width: 120px; background-color: ${finalColor() || props.value}`}
+			style={`width: 120px; background-color: ${finalColor()}`}
       class={`klinecharts-pro-color ${props.class ?? ''} ${open() ? 'klinecharts-pro-color-show' : ''}`}
       tabIndex="0"
       // onClick={_ => { setOpen(o => !o) }}
@@ -154,6 +161,7 @@ const Color: Component<ColorProps> = props => {
 		>
       <div class="selector-container"
 				onClick={(e) => {
+					console.log(`initial color is:  ${finalColor()}`)
 					setOpen(true)
 				}}
 			>
@@ -199,10 +207,12 @@ const Color: Component<ColorProps> = props => {
 					</div>
 					<div class="split_line"></div>
 					<div class="submit">
-						<span class="cancel" onClick={closeColorPallete}>Cancel</span>
+						<span class="cancel" onClick={cancelColorChange}>Cancel</span>
 						<span onclick={
 							() => {
+								console.log(`current color is:  ${finalColor()}`)
 								props.onChange?.(finalColor() as string)
+								closeColorPallete()
 							}
 						}>Ok</span>
 					</div>

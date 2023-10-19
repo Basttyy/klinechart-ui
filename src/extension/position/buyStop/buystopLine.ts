@@ -17,8 +17,8 @@ import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
-import { buyStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { buyStopStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 const buystopLine: OverlayTemplate = {
   name: 'buystopLine',
@@ -43,12 +43,12 @@ const buystopLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: buyStyle().lineStyle
+        styles: buyStopStyle().lineStyle
       },
       {
         type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: buyStyle().labelStyle
+        styles: buyStopStyle().labelStyle
       }
     ]
   },
@@ -74,7 +74,7 @@ const buystopLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: buyStyle().labelStyle }
+    return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: buyStopStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
     let coordinate: Partial<Coordinate>[] = [
@@ -111,7 +111,7 @@ const buystopLine: OverlayTemplate = {
   },
   onRightClick: (event): boolean => {
       // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    userOrderSettings().singlePopup(event, 'buy')
+    useOverlaySettings().singlePopup(event, 'buy')
     return true
   }
 }

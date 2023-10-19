@@ -14,8 +14,8 @@
 
 import { OverlayTemplate,utils} from '@basttyy/klinecharts'
 import { useOrder } from '../../../store/positionStore'
-import { buyStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { buyStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 const buyLine: OverlayTemplate = {
   name: 'buyLine',
@@ -30,12 +30,7 @@ const buyLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: buyStyle().lineStyle
-        },
+        styles: buyStyle().lineStyle,
         ignoreEvent: true
       },
       {
@@ -76,7 +71,7 @@ const buyLine: OverlayTemplate = {
   onRightClick: (event): boolean => {
     // useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
     //the overlay represented an order that does not exist on our pool, it should be handled here
-    userOrderSettings().singlePopup(event, 'buy')
+    useOverlaySettings().singlePopup(event, 'buy')
     return true
   }
 }

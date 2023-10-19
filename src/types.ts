@@ -113,11 +113,47 @@ type FiguresType = {
   ctx: CanvasRenderingContext2D
 }
 
+type OrderStyleType = {
+  lineStyle?: {
+		style?: string,
+		size?: number,
+		color?: string,
+		dashedValue?: number[]
+	},
+	labelStyle?: {
+		style?: string,
+		size?: number,
+		family?: string,
+		weight?: string,
+		paddingLeft?: number,
+		paddingRight?: number,
+		paddingBottom?: number,
+		paddingTop?: number,
+		borderStyle?: string,
+		borderSize?: number,
+		color?: string,
+		borderColor?: string,
+		backgroundColor?: string
+	}
+}
+
+export type OrderStylesType = {
+  buyStyle?: OrderStyleType,
+  buyLimitStyle?: OrderStyleType,
+  buyStopStyle?: OrderStyleType,
+  sellStyle?: OrderStyleType,
+  sellLimitStyle?: OrderStyleType,
+  sellStopStyle?: OrderStyleType,
+  stopLossStyle?: OrderStyleType,
+  takeProfitStyle?: OrderStyleType
+}
+
 export interface ChartObjType {
   styleObj?: DeepPartial<Styles>
   overlays?: OverlaysType[]
   figures?: FiguresType[]
   indicators?: IndicatorsType[]
+  orderStyles?: OrderStylesType
 }
 
 export type DatafeedSubscribeCallback = (data: KLineData, timestamp?: number) => void

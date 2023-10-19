@@ -17,8 +17,8 @@ import { useOrder, setOrderList, orderList } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
-import { sellStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { sellStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 const sellLimitLine: OverlayTemplate = {
   name: 'sellLimitLine',
@@ -90,9 +90,7 @@ const sellLimitLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    //the overlay represented an order that does not exist on our pool, it should be handled here
-    userOrderSettings().singlePopup(event, 'sell')
+    useOverlaySettings().singlePopup(event, 'sell')
     return true
   }
 }

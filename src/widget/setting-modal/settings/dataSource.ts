@@ -5,6 +5,9 @@ const useDataSource = (locale:string) => {
     { key: 'solid', text: i18n('solid', locale) },
     { key: 'dashed', text: i18n('dashed', locale) }
   ]
+  const dashed_value = [
+    { key: [4, 4]}
+  ]
   const size = [
     { key: 1, text: 1 },
     { key: 2, text: 2 },

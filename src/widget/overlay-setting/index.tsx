@@ -1,5 +1,6 @@
-import BuySettingModal from "./positions";
+import OverlaySettingModal from "./overlay";
+import PositionSettingModal from "./positions";
 
 export {
-  BuySettingModal
+  PositionSettingModal, OverlaySettingModal
 }

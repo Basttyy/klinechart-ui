@@ -13,8 +13,8 @@
  */
 
 import { Show } from 'solid-js'
-import { userOrderSettings, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
-	setShowBuySetting,
+import { useOverlaySettings, popupLeft, popupTop, popupOtherInfo, popupOverlay, 
+	setShowPositionSetting,
 	getOverlayType,
 	setPopupOverlay,
 	setShowOverlaySetting
@@ -24,17 +24,27 @@ import { instanceapi } from '../../../ChartProComponent'
 import { useChartState } from '../../../store/chartStateStore'
 
 const triggerAction = () => {
-	if (!popupOtherInfo()?.overlayType) {
-    useChartState().popOverlay(popupOverlay()!.id)
-	} else if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
+	if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
 		useOrder().closeOrder(popupOverlay()!, 'manualclose')
-	} else {
+	} else if (popupOtherInfo()?.overlayType == 'tp' || popupOtherInfo()?.overlayType == 'sl') {
 		useOrder().removeStopOrTP(popupOverlay()!, popupOtherInfo()?.overlayType as 'tp'|'sl')
+	} else if (popupOtherInfo()?.overlayType && ['buystop', 'buylimit', 'sellstop', 'selllimit'].includes(popupOtherInfo()?.overlayType!)) {
+		useOrder().closeOrder(popupOverlay()!, 'cancel')
+	} else {
+    useChartState().popOverlay(popupOverlay()!.id)
 	}
 }
 
 const ifBuyOrSell = () => {
-	if(popupOtherInfo()?.overlayType == 'buy' || popupOtherInfo()?.overlayType == 'sell') {
+	if(popupOtherInfo()?.overlayType?.includes('buy') || popupOtherInfo()?.overlayType?.includes('sell')) {
+		return true
+	} else {
+		return false
+	}
+}
+
+const ifTpOrSl = () => {
+	if(popupOtherInfo()?.overlayType == 'tp' || popupOtherInfo()?.overlayType == 'sl') {
 		return true
 	} else {
 		return false
@@ -43,7 +53,7 @@ const ifBuyOrSell = () => {
 
 const setStyle = (type: 'position'|'overlay') => {
 	if (type === 'position')
-		setShowBuySetting(true)
+		setShowPositionSetting(true)
 	else if (type === 'overlay')
 		setShowOverlaySetting(true)
 }
@@ -75,11 +85,11 @@ const hideUnhide = () => {
  
 const OverlayOptionsPopup = () => {
   return (
-    <div class="klinecharts-pro-popup_background" onclick={() => userOrderSettings().closePopup()}>
+    <div class="klinecharts-pro-popup_background" onclick={() => useOverlaySettings().closePopup()}>
       <div class="popup"  style={{  top: `${popupTop()}px`, left: `${popupLeft()}px` }}>
 				<button onclick={triggerAction}>{ifBuyOrSell() ? 'Close order' : `Remove ${getOverlayType()}`}</button>
-				<button onClick={ () => setStyle(ifBuyOrSell() ? 'position' : 'overlay')}>Settings</button>
-				<Show when={!ifBuyOrSell()}>
+				<button onClick={ () => setStyle(ifBuyOrSell() || ifTpOrSl() ? 'position' : 'overlay')}>Settings</button>
+				<Show when={!ifBuyOrSell() && !ifTpOrSl()}>
 					<button onclick={sendBack}>Send Back</button>
 					<button onclick={sendFront}>Send Front</button>
 					<button onclick={lockUnlock}>{popupOverlay()?.lock ? 'Unlock' : 'Lock'}</button>

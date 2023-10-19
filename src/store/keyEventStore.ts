@@ -5,6 +5,7 @@ import { ordercontr, useOrder } from "./positionStore";
 import { Chart } from "@basttyy/klinecharts";
 import { periodInputValue, setPeriodInputValue } from "../widget/timeframe-modal";
 import { setInputClass } from "../component/input";
+import { showPositionSetting } from "./overlaySettingStore";
 
 export const [ctrlKeyedDown, setCtrlKeyedDown] = createSignal(false)
 export const [widgetref, setWidgetref] = createSignal<string | Chart | HTMLElement>('')
@@ -104,18 +105,18 @@ const allModalHidden = (except: 'settings'|'indi'|'screenshot'|'order'|'period')
   let value = false
   switch (except) {
     case 'settings':
-      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible()
+      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting()
     case 'indi':
-      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible()
+      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting()
       break
     case 'screenshot':
-      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible()
+      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible() && !showPositionSetting()
       break
     case 'order':
-      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible()
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible() && !showPositionSetting()
       break
     case 'period':
-      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible()
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !showPositionSetting()
       break
   }
   return value

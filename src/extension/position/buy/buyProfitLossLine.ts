@@ -13,12 +13,12 @@
  */
 
 import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
-import { buyStyle, takeProfitStyle,stopLossStyle } from '../../../store/overlayStyleStore'
+import { buyStyle, takeProfitStyle,stopLossStyle } from '../../../store/overlaystyle/positionStyleStore'
 import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -136,7 +136,6 @@ const buyProfitLossLine: OverlayTemplate = {
         type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
         styles: buyStyle().labelStyle,
-        ignoreEvent: true
       },
       {
         type: 'text',
@@ -187,6 +186,8 @@ const buyProfitLossLine: OverlayTemplate = {
     return true
   },
   onPressedMoveEnd: (event): boolean => {
+    if (event.figureIndex == 0)
+      return true
     let id = event.overlay.id
     let order: OrderInfo|null
     if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
@@ -201,7 +202,7 @@ const buyProfitLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    userOrderSettings().profitLossPopup(event, 'buy')
+    useOverlaySettings().profitLossPopup(event, 'buy')
     return true
   }
 }

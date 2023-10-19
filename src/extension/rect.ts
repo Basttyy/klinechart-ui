@@ -15,7 +15,7 @@
 import { Coordinate, OverlayTemplate, Point } from '@basttyy/klinecharts'
 import { instanceapi } from '../ChartProComponent'
 import { currenttick } from '../store/tickStore'
-import { userOrderSettings } from '../store/overlaySettingStore'
+import { useOverlaySettings } from '../store/overlaySettingStore'
 
 const rect: OverlayTemplate = {
   name: 'rect',

@@ -13,7 +13,7 @@
  */
 
 import { Coordinate, OverlayTemplate, Point } from '@basttyy/klinecharts'
-import { userOrderSettings } from '../store/overlaySettingStore'
+import { useOverlaySettings } from '../store/overlaySettingStore'
 
 import { getDistance } from './utils'
 import { instanceapi } from '../ChartProComponent'

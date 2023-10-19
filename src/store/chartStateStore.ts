@@ -1,13 +1,14 @@
 import { Chart, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, PaneOptions, dispose } from "@basttyy/klinecharts"
 import { chartsession, chartsessionCtr, instanceapi, setInstanceapi, symbol } from "../ChartProComponent"
-import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, SymbolInfo, sessionType } from "../types"
+import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, OrderStylesType, SymbolInfo, sessionType } from "../types"
 import { createSignal } from "solid-js"
 import { drawOrder, orderList, ordercontr, setOrderList } from "./positionStore"
-import _ from "lodash"
+import _, { cloneDeep, keys, set } from "lodash"
 import { Datafeed } from "../types"
 import { tickTimestamp } from "./tickStore"
 import { timerid, widgetref } from "./keyEventStore"
-import { userOrderSettings } from "./overlaySettingStore"
+import { useOverlaySettings } from "./overlaySettingStore"
+import { buyLimitStyle, buyStopStyle, buyStyle, sellLimitStyle, sellStopStyle, sellStyle, setBuyLimitStyle, setBuyStopStyle, setBuyStyle, setSellLimitStyle, setSellStopStyle, setSellStyle, setStopLossStyle, setTakeProfitStyle, stopLossStyle, takeProfitStyle } from "./overlaystyle/positionStyleStore"
 
 export const [mainIndicators, setMainIndicators] = createSignal([''])
 export const [subIndicators, setSubIndicators] = createSignal({})
@@ -257,7 +258,7 @@ export const useChartState = () => {
           return syncObject(event)
         },
         onRightClick: (event) => {
-          userOrderSettings().openPopup(event)
+          useOverlaySettings().openPopup(event)
           // popOverlay(event.overlay.id)
           return true
         }
@@ -387,6 +388,10 @@ export const useChartState = () => {
       if (chartObj.styleObj) {
         instanceapi()?.setStyles(chartObj.styleObj)
       }
+      if (chartObj.orderStyles) {
+        const styles = chartObj.orderStyles
+        syncOrderStyles(styles)
+      }
     }
 
     if (chartsession()?.chart) {
@@ -406,4 +411,185 @@ export const useChartState = () => {
   }
 
   return { createIndicator, modifyIndicator, popIndicator, pushOverlay, popOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
+}
+
+const syncOrderStyles = (styles: OrderStylesType) => {
+  if (styles.buyStyle) {
+    setBuyStyle((prevbuystyle) => {
+      const buystyle = cloneDeep(prevbuystyle)
+      if (styles.buyStyle?.lineStyle) {
+        for (const key in styles.buyStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystyle, `lineStyle.${key}`, styles.buyStyle.lineStyle[key])
+            // buystyle.lineStyle[key] = styles.buyStyle.lineStyle[key]
+          }
+        }
+      }
+      if (styles.buyStyle?.labelStyle) {
+        for (const key in styles.buyStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystyle, `labelStyle.${key}`, styles.buyStyle.labelStyle[key])
+            // buystyle.labelStyle[key] = styles.buyStyle.labelStyle[key]
+          }
+        }
+      }
+      return buystyle
+    })
+  }
+  if (styles.buyLimitStyle) {
+    setBuyLimitStyle((prevBuyLimitStyle) => {
+      const buylimitstyle = cloneDeep(prevBuyLimitStyle)
+      if (styles.buyLimitStyle?.lineStyle) {
+        for (const key in styles.buyLimitStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buylimitstyle, `lineStyle.${key}`, styles.buyLimitStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.buyLimitStyle?.labelStyle) {
+        for (const key in styles.buyLimitStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buylimitstyle, `labelStyle.${key}`, styles.buyLimitStyle.labelStyle[key])
+          }
+        }
+      }
+      return buylimitstyle
+    })
+  }
+  if (styles.buyStopStyle) {
+    setBuyStopStyle((prevbuystopstyle) => {
+      const buystopstyle = cloneDeep(prevbuystopstyle)
+      if (styles.buyStopStyle?.lineStyle) {
+        for (const key in styles.buyStopStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystopstyle, `lineStyle.${key}`, styles.buyStopStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.buyStopStyle?.labelStyle) {
+        for (const key in styles.buyStopStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystopstyle, `labelStyle.${key}`, styles.buyStopStyle.labelStyle[key])
+          }
+        }
+      }
+      return buystopstyle
+    })
+  }
+  if (styles.sellStyle) {
+    setSellStyle((prevsellstyle) => {
+      const sellstyle = cloneDeep(prevsellstyle)
+      if (styles.sellStyle?.lineStyle) {
+        for (const key in styles.sellStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstyle, `lineStyle.${key}`, styles.sellStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.sellStyle?.labelStyle) {
+        for (const key in styles.sellStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstyle, `labelStyle.${key}`, styles.sellStyle.labelStyle[key])
+          }
+        }
+      }
+      return sellstyle
+    })
+  }
+  if (styles.sellLimitStyle) {
+    setSellLimitStyle((prevselllimitstyle) => {
+      const selllimitstyle = cloneDeep(prevselllimitstyle)
+      if (styles.sellLimitStyle?.lineStyle) {
+        for (const key in styles.sellLimitStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(selllimitstyle, `lineStyle.${key}`, styles.sellLimitStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.sellLimitStyle?.labelStyle) {
+        for (const key in styles.sellLimitStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(selllimitstyle, `labelStyle.${key}`, styles.sellLimitStyle.labelStyle[key])
+          }
+        }
+      }
+      return selllimitstyle
+    })
+  }
+  if (styles.sellStopStyle) {
+    setSellStopStyle((prevsellstopstyle) => {
+      const sellstopstyle = cloneDeep(prevsellstopstyle)
+      if (styles.sellStopStyle?.lineStyle) {
+        for (const key in styles.sellStopStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstopstyle, `lineStyle.${key}`, styles.sellStopStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.sellStopStyle?.labelStyle) {
+        for (const key in styles.sellStopStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstopstyle, `labelStyle.${key}`, styles.sellStopStyle.labelStyle[key])
+          }
+        }
+      }
+      return sellstopstyle
+    })
+  }
+  if (styles.stopLossStyle) {
+    setStopLossStyle((prevstoplossstyle) => {
+      const stoplossstyle = cloneDeep(prevstoplossstyle)
+      if (styles.stopLossStyle?.lineStyle) {
+        for (const key in styles.stopLossStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(stoplossstyle, `lineStyle.${key}`, styles.stopLossStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.stopLossStyle?.labelStyle) {
+        for (const key in styles.stopLossStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(stoplossstyle, `labelStyle.${key}`, styles.stopLossStyle.labelStyle[key])
+          }
+        }
+      }
+      return stoplossstyle
+    })
+  }
+  if (styles.takeProfitStyle) {
+    setTakeProfitStyle((prevtakeprofitstyle) => {    
+      const takeprofitstyle = cloneDeep(takeProfitStyle())
+      if (styles.takeProfitStyle?.lineStyle) {
+        for (const key in styles.takeProfitStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(takeprofitstyle, `lineStyle.${key}`, styles.takeProfitStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.takeProfitStyle?.labelStyle) {
+        for (const key in styles.takeProfitStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(takeprofitstyle, `labelStyle.${key}`, styles.takeProfitStyle.labelStyle[key])
+          }
+        }
+      }
+      return takeprofitstyle
+    })
+  }
 }

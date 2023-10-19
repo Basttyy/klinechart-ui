@@ -18,8 +18,8 @@ import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
-import { sellStyle, stopLossStyle, takeProfitStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { sellStopStyle, stopLossStyle, takeProfitStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -53,17 +53,17 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
     data.recttexts.push({ x: endX, y: coordinates[1].y, text: `tp | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 2) {
-    data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
+    data.lines.push({ coordinates: [{ x: startX, y: coordinates[2].y }, { x: endX, y: coordinates[2].y }] })
 
-    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[1].value!, precision.price, true, 'sell')
-    data.recttexts.push({ x: endX, y: coordinates[1].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
+    text = useOrder().calcStopOrTarget(overlay.points[0].value!, overlay.points[2].value!, precision.price, true, 'sell')
+    data.recttexts.push({ x: endX, y: coordinates[2].y, text: `sl | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   return data
 }
 
 const sellstopProfitLossLine: OverlayTemplate = {
   name: 'sellstopProfitLossLine',
-  totalStep: 3,
+  totalStep: 4,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
@@ -75,21 +75,33 @@ const sellstopProfitLossLine: OverlayTemplate = {
     return [
       {
         type: 'line',
-        attrs: parallel.lines,
-        styles: [
-          sellStyle().lineStyle,
-          takeProfitStyle().lineStyle,
-          stopLossStyle().lineStyle
-        ],
+        attrs: parallel.lines[0],
+        styles: sellStopStyle().lineStyle,
+      },
+      {
+        type: 'line',
+        attrs: parallel.lines[1],
+        styles: takeProfitStyle().lineStyle
+      },
+      {
+        type: 'line',
+        attrs: parallel.lines[2],
+        styles: stopLossStyle().lineStyle
       },
       {
         type: 'text',
-        attrs: parallel.recttexts,
-        styles: [
-          sellStyle().labelStyle,
-          takeProfitStyle().labelStyle,
-          stopLossStyle().labelStyle
-        ]
+        attrs: parallel.recttexts[0],
+        styles: sellStopStyle().labelStyle
+      },
+      {
+        type: 'text',
+        attrs: parallel.recttexts[1],
+        styles: takeProfitStyle().labelStyle
+      },
+      {
+        type: 'text',
+        attrs: parallel.recttexts[2],
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -119,7 +131,7 @@ const sellstopProfitLossLine: OverlayTemplate = {
       {
         type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: sellStyle().labelStyle
+        styles: sellStopStyle().labelStyle
       },
       {
         type: 'text',
@@ -197,7 +209,7 @@ const sellstopProfitLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    userOrderSettings().profitLossPopup(event, 'sell')
+    useOverlaySettings().profitLossPopup(event, 'sell')
     return true;
   }
 }
