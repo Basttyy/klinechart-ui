@@ -18,7 +18,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
-import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
+import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setShowSpeed, setSyntheticPauseStatus } from '../../ChartProComponent'
 import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible, setRange } from '../../store/chartStateStore'
 import { setSpeedPopupLeft, setSpeedPopupTop } from '../../component/popup/timeframe'
 import { getScreenSize } from '../../helpers'
@@ -112,7 +112,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
       </Show>
-      <button class="item tools" onClick={() => {setOrderModalVisible(true); props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
+      <button class="item tools" onClick={() => {setOrderModalVisible(true); setSyntheticPauseStatus(true); props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
       <div class="item tools period_home">
         <button class="item period"
           onclick={() => {

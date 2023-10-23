@@ -210,8 +210,8 @@ const Color: Component<ColorProps> = props => {
 						<span class="cancel" onClick={cancelColorChange}>Cancel</span>
 						<span onclick={
 							() => {
-								console.log(`current color is:  ${finalColor()}`)
-								props.onChange?.(finalColor() as string)
+								if (props.reactiveChange === false)
+									props.onChange?.(finalColor() as string)
 								closeColorPallete()
 							}
 						}>Ok</span>

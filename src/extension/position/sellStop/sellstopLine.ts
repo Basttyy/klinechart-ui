@@ -39,7 +39,7 @@ const sellstopLine: OverlayTemplate = {
       },
       {
         type: 'text',
-        attrs: { x: bounding.width, y: coordinates[0].y, text: `buystop | ${text}` ?? '', align: 'right', baseline: 'middle' },
+        attrs: { x: bounding.width, y: coordinates[0].y, text: `sellstop | ${text}` ?? '', align: 'right', baseline: 'middle' },
         styles: sellStopStyle().labelStyle
       }
     ]
