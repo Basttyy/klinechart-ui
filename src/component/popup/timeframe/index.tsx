@@ -37,7 +37,7 @@ const SpeedPopup = () => {
   return (
     <div id='background' class="klinecharts-pro-popup_background" onclick={handleClose}>
 			{/* <div class="popup"  style={{  top: `${speedPopupTop()}px`, left: `${speedPopupLeft()}px` }}> */}
-				<input id='input' class="period_range" style={{ left: `${speedPopupLeft()}px` }} type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
+				<input id='input' class="period_range" style={{ left: `${speedPopupLeft()-45}px` }} type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
 			{/* </div> */}
     </div>
   )

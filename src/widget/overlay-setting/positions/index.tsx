@@ -13,7 +13,7 @@
  */
 
 
-import { Component, createEffect, For, createSignal } from 'solid-js'
+import { Component, For, createSignal } from 'solid-js'
 import { Modal, Select, Switch, Color, Input } from '../../../component'
 import type { SelectDataSourceItem } from '../../../component'
 import useDataSource from '../../setting-modal/settings/dataSource'
@@ -28,7 +28,6 @@ import {
 } from '../../../store/overlaystyle/positionStyleStore'
 import { chartsession, instanceapi } from '../../../ChartProComponent'
 import { ChartObjType } from '../../../types'
-import { utils } from '@basttyy/klinecharts'
 
 import { cloneDeep, set as lodashSet } from 'lodash'
 import { setChartModified } from '../../../store/chartStateStore'
