@@ -64,7 +64,7 @@ const Select: Component<SelectProps> = props => {
                       }
                       setOpen(false)
                     }}>
-                    {v}
+                    {String(v)}
                   </li>
                 )
               })

@@ -6,9 +6,13 @@ import { ctrlKeyedDown, setCtrlKeyedDown } from './keyEventStore';
 import { getScreenSize } from '../helpers';
 import { useChartState } from './chartStateStore';
 
+export type overlayType =
+'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit'|'tp'|'sl'|'point'|'line'|'rect'|'polygon'|'circle'|'arc'|'text'|
+'horizontalStraightLine'|'horizontalRayLine'|'horizontalSegment'|'verticalStraightLine'|'verticalRayLine'|'verticalSegment'|
+'straightLine'|'rayLine'|'segment'|'arrow'|'priceLine'
 export interface OtherTypes {
   exitType?: ExitType
-  overlayType?: 'buy'|'buystop'|'buylimit'|'sell'|'sellstop'|'selllimit'|'tp'|'sl'
+  overlayType?: overlayType
 }
 
 export const [showOverlayPopup, setShowOverlayPopup] = createSignal(false)
@@ -113,7 +117,7 @@ export const useOverlaySettings = () => {
 				ctrl_rightClick(event, type)
 			} else {
 				ctrl_rightClick(event, 'sl')
-			} 
+			}
 			return
 		}
 		if (event.figureIndex == 0 || event.figureIndex == 2) {
@@ -131,5 +135,5 @@ export const useOverlaySettings = () => {
 		openPopup(event, {overlayType: type})
 	}
 
-	return { openPopup, closePopup, profitLossPopup, profitPopup, lossPopup, singlePopup}
+	return { openPopup, closePopup, profitLossPopup, profitPopup, lossPopup, singlePopup }
 }

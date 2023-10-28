@@ -8,6 +8,10 @@ const useDataSource = (locale:string) => {
   const dashed_value = [
     { key: [4, 4]}
   ]
+  const true_false = [
+    { key: 'true', text: true },
+    { key: 'false', text: false }
+  ]
   const size = [
     { key: 1, text: 1 },
     { key: 2, text: 2 },
@@ -44,7 +48,7 @@ const useDataSource = (locale:string) => {
     { key: 'Helvetica Neue', text: i18n('Helvetica Neue', locale) }
   ]
 
-	return {solid_dashed, size, fill_stroke, font_family, font_size, font_weight, none_always_followCross}
+	return {solid_dashed, size, fill_stroke, font_family, font_size, font_weight, none_always_followCross, true_false}
 }
 
 export default useDataSource

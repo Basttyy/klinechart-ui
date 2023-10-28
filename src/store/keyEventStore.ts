@@ -78,6 +78,8 @@ export const useKeyEvents = () => {
       handleRangeChange(-1)
     } else if (event.key === 'ArrowUp') {
       handleRangeChange(1)
+    } else if (event.key === 'Delete') {
+      instanceapi()?.removeOverlay()
     } else if (event.key === 'Escape') {
       //TODO: this should hide all modals
       setPeriodModalVisible(false)
