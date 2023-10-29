@@ -15,8 +15,6 @@
 import { createSignal, Component, JSX } from 'solid-js'
 import chroma from "chroma-js";
 
-
-
 export interface ColorProps {
   class?: string
   style?: JSX.CSSProperties | string
@@ -27,8 +25,9 @@ export interface ColorProps {
 }
 
 const Color: Component<ColorProps> = props => {
+	const op = String(props.value).includes('rgba') ? chroma(String(props.value)).alpha()*100 : 100
   const [open, setOpen] = createSignal(false)
-	const [opacity, setOpacity] = createSignal(100)
+	const [opacity, setOpacity] = createSignal(op)
 	const [selectedColor, setSelectedColor] = createSignal(props.value)
 	const [finalColor, setFinalColor] = createSignal(props.value)
 	const [rangeFocused, setRangeFocused] = createSignal(false)
@@ -161,7 +160,6 @@ const Color: Component<ColorProps> = props => {
 		>
       <div class="selector-container"
 				onClick={(e) => {
-					console.log(`initial color is:  ${finalColor()}`)
 					setOpen(true)
 				}}
 			>

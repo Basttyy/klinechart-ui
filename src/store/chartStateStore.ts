@@ -261,8 +261,6 @@ export const useChartState = () => {
     const ovrly = instanceapi()?.getOverlayById((id as string))
     if (ovrly) {
       const style = !redrawing && useGetOverlayStyle[`${ovrly.name}Style`] ? useGetOverlayStyle[`${ovrly.name}Style`]() : undefined
-      console.log(overlay.name)
-      console.log(style)
       instanceapi()?.overrideOverlay({
         id: ovrly.id,
         styles: overlay.styles ?? style,

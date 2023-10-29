@@ -12,10 +12,7 @@
  * limitations under the License.
  */
 
-import { Coordinate, OverlayTemplate, Point } from '@basttyy/klinecharts'
-import { instanceapi } from '../ChartProComponent'
-import { currenttick } from '../store/tickStore'
-import { useOverlaySettings } from '../store/overlaySettingStore'
+import { OverlayTemplate } from '@basttyy/klinecharts'
 
 const rect: OverlayTemplate = {
   name: 'rect',
@@ -30,22 +27,6 @@ const rect: OverlayTemplate = {
   },
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     if (coordinates.length > 1) {
-      // for (let i = 0; i < coordinates.length; i++) {
-      //   let coordinate: Partial<Coordinate>[] = [
-      //     {x: coordinates[i].x, y: coordinates[i].y}
-      //   ]
-      //   const points = instanceapi()?.convertFromPixel(coordinate, {
-      //     paneId: overlay.paneId
-      //   })
-      //   if ((points as Partial<Point>[])[0].timestamp === undefined && overlay.points[i].timestamp === undefined) {
-      //       let point: Partial<Point> = {value: currenttick()?.close, timestamp: currenttick()?.timestamp}
-      //       let overlayxy = instanceapi()?.convertToPixel(point, {
-      //         paneId: overlay.paneId
-      //       })
-      //       let x = (overlayxy as Partial<Coordinate>).x!
-      //       coordinates[i].x = x
-      //   }
-      // }
       return [
         {
           type: 'polygon',

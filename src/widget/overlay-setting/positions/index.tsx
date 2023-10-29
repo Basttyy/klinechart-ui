@@ -35,11 +35,8 @@ import { setChartModified } from '../../../store/chartStateStore'
 export interface PositionSettingModalProps {
   locale: string
 }
-
-
   
 const PositionSettingModal: Component<PositionSettingModalProps> = props => {
-  console.log('position settings activated')
 	const { font_size, font_family, font_weight, fill_stroke, solid_dashed, size } = useDataSource(props.locale)
 	const label_options = [
     {

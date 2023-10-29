@@ -5,7 +5,7 @@ import { ordercontr, useOrder } from "./positionStore";
 import { Chart } from "@basttyy/klinecharts";
 import { periodInputValue, setPeriodInputValue } from "../widget/timeframe-modal";
 import { setInputClass } from "../component/input";
-import { showPositionSetting } from "./overlaySettingStore";
+import { showOverlaySetting, showPositionSetting } from "./overlaySettingStore";
 
 export const [ctrlKeyedDown, setCtrlKeyedDown] = createSignal(false)
 export const [widgetref, setWidgetref] = createSignal<string | Chart | HTMLElement>('')
@@ -107,18 +107,18 @@ const allModalHidden = (except: 'settings'|'indi'|'screenshot'|'order'|'period')
   let value = false
   switch (except) {
     case 'settings':
-      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting()
+      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
     case 'indi':
-      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting()
+      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
     case 'screenshot':
-      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible() && !showPositionSetting()
+      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
     case 'order':
-      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible() && !showPositionSetting()
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
     case 'period':
-      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !showPositionSetting()
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
   }
   return value
