@@ -508,8 +508,10 @@
     "@babel/helper-validator-identifier" "^7.22.15"
     to-fast-properties "^2.0.0"
 
-"@basttyy/klinecharts@../klinechart":
-  version "1.0.6"
+"@basttyy/klinecharts@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@basttyy/klinecharts/-/klinecharts-1.0.7.tgz#f17a4a8506a8d1212fa60b36633e414ad3f2c3ed"
+  integrity sha512-VbysIXTsqhAx7aZklFluj44Tze6NBGEILkTMYag9TZH/cJav5SNJcd1FV+ir5n2slnLmlNbw+a1rRoNoWZcZHA==
 
 "@docsearch/css@3.5.1", "@docsearch/css@^3.5.1":
   version "3.5.1"
