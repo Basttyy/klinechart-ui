@@ -5,6 +5,7 @@ import { ordercontr, useOrder } from "./positionStore";
 import { Chart } from "@basttyy/klinecharts";
 import { periodInputValue, setPeriodInputValue } from "../widget/timeframe-modal";
 import { setInputClass } from "../component/input";
+import { showOverlaySetting, showPositionSetting } from "./overlaySettingStore";
 
 export const [ctrlKeyedDown, setCtrlKeyedDown] = createSignal(false)
 export const [widgetref, setWidgetref] = createSignal<string | Chart | HTMLElement>('')
@@ -77,6 +78,8 @@ export const useKeyEvents = () => {
       handleRangeChange(-1)
     } else if (event.key === 'ArrowUp') {
       handleRangeChange(1)
+    } else if (event.key === 'Delete') {
+      instanceapi()?.removeOverlay()
     } else if (event.key === 'Escape') {
       //TODO: this should hide all modals
       setPeriodModalVisible(false)
@@ -104,18 +107,18 @@ const allModalHidden = (except: 'settings'|'indi'|'screenshot'|'order'|'period')
   let value = false
   switch (except) {
     case 'settings':
-      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible()
+      value = !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
     case 'indi':
-      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible()
+      value = !settingModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
     case 'screenshot':
-      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible()
+      value = !settingModalVisible() && !indicatorModalVisible() && !orderModalVisible() && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
     case 'order':
-      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible()
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !periodModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
     case 'period':
-      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible()
+      value = !settingModalVisible() && !indicatorModalVisible() && screenshotUrl() === '' && !orderModalVisible() && !showPositionSetting() && !showOverlaySetting()
       break
   }
   return value
@@ -171,12 +174,14 @@ export const syntheticPausePlay = (ispaused?: boolean) => {
 }
 
 const handleRangeChange = (value: number) => {
+  const maxRange = 11
+
   if (value > 0 && range() < 10) {
     setRange(+range() + +value);
-    (datafeed() as any).setInterval = range() * 100
+    (datafeed() as any).setInterval = (maxRange - range()) * 100
   }
   else if (value < 0 && range() > 1) {
     setRange(+range() + value);
-    (datafeed() as any).setInterval = range() * 100
+    (datafeed() as any).setInterval = (maxRange - range()) * 100
   }
 }

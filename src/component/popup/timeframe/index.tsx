@@ -25,12 +25,19 @@ const handleRangeChange = (event:any) => {
 	setRange(event.target.value);
 	(datafeed() as any).setInterval = (maxRange + 1 - range()) * 100
 }
+
+const handleClose = (event: MouseEvent) => {
+	// @ts-expect-error
+	if (event.target && (event.target.classList as DOMTokenList).contains('klinecharts-pro-popup_background')) {
+		setShowSpeed(false)
+	}
+}
  
 const SpeedPopup = () => {
   return (
-    <div class="klinecharts-pro-popup_background" onclick={() => setShowSpeed(false)}>
+    <div id='background' class="klinecharts-pro-popup_background" onclick={handleClose}>
 			{/* <div class="popup"  style={{  top: `${speedPopupTop()}px`, left: `${speedPopupLeft()}px` }}> */}
-				<input class="period_range" style={{ left: `${speedPopupLeft()}px` }} type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
+				<input id='input' class="period_range" style={{ left: `${speedPopupLeft()-45}px` }} type="range" min="1" max={maxRange} value={range()} onInput={handleRangeChange} />
 			{/* </div> */}
     </div>
   )

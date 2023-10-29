@@ -13,29 +13,32 @@
  */
 
 
-import { Component, createEffect, For, createSignal } from 'solid-js'
-import { Modal, Select, Switch, Color } from '../../../component'
+import { Component, For, createSignal } from 'solid-js'
+import { Modal, Select, Switch, Color, Input } from '../../../component'
 import type { SelectDataSourceItem } from '../../../component'
 import useDataSource from '../../setting-modal/settings/dataSource'
 
 import i18n from '../../../i18n'
-import { setShowBuySetting, popupOtherInfo, getOverlayType } from '../../../store/overlaySettingStore'
+import { setShowPositionSetting, popupOtherInfo, getOverlayType } from '../../../store/overlaySettingStore'
 import { 
   buyStyle, setBuyStyle,
   sellStyle, setSellStyle,
   takeProfitStyle, setTakeProfitStyle,
-  stopLossStyle, setStopLossStyle
-} from '../../../store/overlayStyleStore'
+  stopLossStyle, setStopLossStyle, buyLimitStyle, buyStopStyle, sellLimitStyle, sellStopStyle, setBuyLimitStyle, setBuyStopStyle, setSellLimitStyle, setSellStopStyle
+} from '../../../store/overlaystyle/positionStyleStore'
+import { chartsession, instanceapi } from '../../../ChartProComponent'
+import { ChartObjType } from '../../../types'
 
-export interface BuySettingModalProps {
+import { cloneDeep, set as lodashSet } from 'lodash'
+import { setChartModified } from '../../../store/chartStateStore'
+
+export interface PositionSettingModalProps {
   locale: string
 }
-
-
   
-const BuySettingModal: Component<BuySettingModalProps> = props => {
+const PositionSettingModal: Component<PositionSettingModalProps> = props => {
 	const { font_size, font_family, font_weight, fill_stroke, solid_dashed, size } = useDataSource(props.locale)
-	const Options = [
+	const label_options = [
     {
       key: 'style',
       text: i18n('Style', props.locale),
@@ -88,45 +91,120 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
       component: 'color',
     }
 	]
-  const [options, setOptions] = createSignal(Options)
-  
-	const getValue = (key:any) => {
-    if(popupOtherInfo()?.overlayType == 'buy'){
-      return (buyStyle() as any)[key];
-    } else if(popupOtherInfo()?.overlayType == 'sell') {
-      return (sellStyle() as any)[key];
-    } else if(popupOtherInfo()?.overlayType == 'sl') {
-      return (stopLossStyle() as any)[key];
-    } else if(popupOtherInfo()?.overlayType == 'tp') {
-      return (takeProfitStyle() as any)[key];
+
+  const line_options = [
+    {
+      key: 'style',
+      text: i18n('Style', props.locale),
+      component: 'select',
+      dataSource: solid_dashed
+    },
+    {
+      key: 'size',
+      text: i18n('Size', props.locale),
+      component: 'select',
+      dataSource: size
+    },
+    {
+      key: 'color',
+      text: i18n('Color', props.locale),
+      component: 'color',
+    },
+    {
+      key: 'dashedValue',
+      text: i18n('Dashed Value', props.locale),
+      component: 'input',
     }
+  ]
+  const [labelOptions, setLabelOptions] = createSignal(label_options)
+  const [lineOptions, setLineOptions] = createSignal(line_options)
+  
+	const getValue = (key:any, parentKey: any) => {
+    const overlayType = popupOtherInfo()?.overlayType
+    switch (overlayType) {
+      case 'buy':
+        return (buyStyle() as any)[parentKey][key]
+      case 'buylimit':
+        return (buyLimitStyle() as any)[parentKey][key]
+      case 'buystop':
+        return (buyStopStyle() as any)[parentKey][key]
+      case 'sell':
+        return (sellStyle() as any)[parentKey][key]
+      case 'selllimit':
+        return (sellLimitStyle() as any)[parentKey][key]
+      case 'sellstop':
+        return (sellStopStyle() as any)[parentKey][key]
+      case 'sl':
+        return (stopLossStyle() as any)[parentKey][key]
+      case 'tp':
+        return (takeProfitStyle() as any)[parentKey][key]
+    }      
   };
 
-  const update = (option:SelectDataSourceItem, newValue: any) => {
-    if(popupOtherInfo()?.overlayType == 'buy'){
-      setBuyStyle((prevStyle) => ({ ...prevStyle, [option.key]: newValue}));
-    } else if(popupOtherInfo()?.overlayType == 'sell') {
-      setSellStyle((prevStyle) => ({ ...prevStyle, [option.key]: newValue}));
-    } else if(popupOtherInfo()?.overlayType == 'sl') {
-      setStopLossStyle((prevStyle) => ({ ...prevStyle, [option.key]: newValue}));
-    } else if(popupOtherInfo()?.overlayType == 'tp') {
-      setTakeProfitStyle((prevStyle) => ({ ...prevStyle, [option.key]: newValue}));
+  const update = (option: SelectDataSourceItem, newValue: any, parentKey: string) => {
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
+    let chartObj: ChartObjType
+    if (chartStateObj) {
+      chartObj = (JSON.parse(chartStateObj) as ChartObjType)
+      chartObj.orderStyles = chartObj.orderStyles ?? {}
+    } else {
+      chartObj = {
+        orderStyles: {}
+      }
     }
-    setOptions(options().map(op => ({ ...op })))
+
+    const perfomUpdate = (prevStyle: any) => {
+      const updatedStyle = cloneDeep(prevStyle)
+      lodashSet(updatedStyle, `${parentKey}.${option.key}`, newValue)
+      lodashSet(chartObj.orderStyles!, `${popupOtherInfo()?.overlayType}Style.${parentKey}.${option.key}`, newValue)
+      localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
+      setChartModified(true)
+      instanceapi()?.setStyles(chartObj.styleObj ?? {})
+      return updatedStyle
+    }
+
+    switch (popupOtherInfo()?.overlayType) {
+      case 'buy':
+        setBuyStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'buylimit':
+        setBuyLimitStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'buystop':
+        setBuyStopStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'sell':
+        setSellStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'selllimit':
+        setSellLimitStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'sellstop':
+        setSellStopStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'sl':
+        setStopLossStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+      case 'tp':
+        setTakeProfitStyle((prevStyle) => perfomUpdate(prevStyle))
+        break
+    }
+    // setLabelOptions(labelOptions().map(op => ({ ...op })))
+    // setLineOptions(lineOptions().map(op => ({ ...op })))
   }
 
   return (
     <Modal
       title={`Style ${getOverlayType()}`}
-      onClose={() =>  setShowBuySetting(false)}
+      onClose={() =>  setShowPositionSetting(false)}
     >
-      <div class="klinecharts-pro-buy-setting-modal-content">
+      <div class="klinecharts-pro-position-setting-modal-content">
 				<div class="content">
-						<For each={options()}>
+            <For each={lineOptions()}>
               {
                 option => {
                   let component
-                  const value = getValue(option.key)
+                  const value = getValue(option.key, 'lineStyle')
                   switch (option.component) {
                     case 'select': {
                       component = (
@@ -136,7 +214,80 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
                           dataSource={option.dataSource}
                           onSelected={(data) => {
                             const newValue = (data as SelectDataSourceItem).key
-                            update(option, newValue)
+                            update(option, newValue, 'lineStyle')
+                          }}/>
+                      )
+                      break
+                    }
+                    case 'input': {
+                      // if (value && ['string', 'number'].includes(typeof value)) {
+                        component = (
+                          <>
+                            <div style={{ width: '120px', display: 'flex', "flex-direction": 'row', "align-items": 'center', 'vertical-align': 'middle'}}>
+                              <Input
+                                style={{ width: '50px', "margin-right": '10px' }}
+                                value={value[0] ?? '4'}
+                                onChange={(v) => {
+                                  let newValue = getValue(option.key, 'lineStyle')
+                                  newValue[0] = Number(v)
+                                  update(option, newValue, 'lineStyle')
+                                }}/>
+                              <Input
+                                style={{ width: '50px', "margin-left": '10px' }}
+                                value={value[1] ?? '4'}
+                                onChange={(v) => {
+                                  let newValue = getValue(option.key, 'lineStyle')
+                                  newValue[1] = Number(v)
+                                  update(option, newValue, 'lineStyle')
+                                }}/>
+                            </div>
+                          </>
+                        )
+                      // }
+
+                      break
+                    }
+                    case 'color': {
+                      component = (
+                        <Color 
+                        style={{ width: '120px' }}
+                        value={value}
+                        onChange={(el) => {
+                          const newValue = el
+                          update(option, newValue, 'lineStyle')
+                        }}
+                        />
+                      )
+                      break
+                    }
+                  }
+                  return (
+                    <>
+                      <div class="component">
+                        <span>{option.text}</span>
+                        {component}
+                      </div>
+                      
+                    </>
+                  )
+                }
+              }
+            </For>
+						<For each={labelOptions()}>
+              {
+                option => {
+                  let component
+                  const value = getValue(option.key, 'labelStyle')
+                  switch (option.component) {
+                    case 'select': {
+                      component = (
+                        <Select
+                          style={{ width: '120px' }}
+                          value={i18n(value as string, props.locale)}
+                          dataSource={option.dataSource}
+                          onSelected={(data) => {
+                            const newValue = (data as SelectDataSourceItem).key
+                            update(option, newValue, 'labelStyle')
                           }}/>
                       )
                       break
@@ -148,7 +299,7 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
                           open={open}
                           onChange={() => {
                             const newValue = !open
-                            update(option, newValue)
+                            update(option, newValue, 'labelStyle')
                           }}/>
                       )
                       break
@@ -160,7 +311,7 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
                         value={value}
                         onChange={(el) => {
                           const newValue = el
-                          update(option, newValue)
+                          update(option, newValue, 'labelStyle')
                         }}
                         />
                       )
@@ -185,4 +336,4 @@ const BuySettingModal: Component<BuySettingModalProps> = props => {
   )
 }
 
-export default BuySettingModal
+export default PositionSettingModal

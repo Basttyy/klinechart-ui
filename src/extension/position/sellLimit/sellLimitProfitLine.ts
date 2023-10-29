@@ -17,8 +17,8 @@ import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Poi
 import { currenttick } from '../../../store/tickStore'
 import { useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
-import { sellStyle, takeProfitStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { sellLimitStyle, takeProfitStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -70,7 +70,7 @@ const sellLimitProfitLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines[0],
-        styles: sellStyle().lineStyle,
+        styles: sellLimitStyle().lineStyle,
       },
       {
         type: 'line',
@@ -80,7 +80,7 @@ const sellLimitProfitLine: OverlayTemplate = {
       {
         type: 'text',
         attrs: parallel.recttexts[0],
-        styles: sellStyle().labelStyle
+        styles: sellLimitStyle().labelStyle
         // ignoreEvent: true
       },
       {
@@ -113,7 +113,7 @@ const sellLimitProfitLine: OverlayTemplate = {
       {
         type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: sellStyle().labelStyle,
+        styles: sellLimitStyle().labelStyle,
         // ignoreEvent: true
       },
       {
@@ -150,7 +150,7 @@ const sellLimitProfitLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    userOrderSettings().profitPopup(event, 'sell')
+    useOverlaySettings().profitPopup(event, 'sell')
     return true
   }
 }

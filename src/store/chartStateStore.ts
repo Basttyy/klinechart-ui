@@ -1,13 +1,16 @@
-import { Chart, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, PaneOptions, dispose } from "@basttyy/klinecharts"
+import { Chart, DeepPartial, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, OverlayStyle, PaneOptions, SmoothLineStyle, dispose } from "@basttyy/klinecharts"
 import { chartsession, chartsessionCtr, instanceapi, setInstanceapi, symbol } from "../ChartProComponent"
-import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, SymbolInfo, sessionType } from "../types"
+import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, OrderStylesType, SymbolInfo, sessionType } from "../types"
 import { createSignal } from "solid-js"
 import { drawOrder, orderList, ordercontr, setOrderList } from "./positionStore"
-import _ from "lodash"
+import _, { cloneDeep, keys, set } from "lodash"
 import { Datafeed } from "../types"
 import { tickTimestamp } from "./tickStore"
-import { timerid, widgetref } from "./keyEventStore"
-import { userOrderSettings } from "./overlaySettingStore"
+import { ctrlKeyedDown, timerid, widgetref } from "./keyEventStore"
+import { OtherTypes, overlayType, useOverlaySettings } from "./overlaySettingStore"
+import { buyLimitStyle, buyStopStyle, buyStyle, sellLimitStyle, sellStopStyle, sellStyle, setBuyLimitStyle, setBuyStopStyle, setBuyStyle, setSellLimitStyle, setSellStopStyle, setSellStyle, setStopLossStyle, setTakeProfitStyle, stopLossStyle, takeProfitStyle } from "./overlaystyle/positionStyleStore"
+import { straightLineStyle } from "./overlaystyle/inbuiltOverlayStyleStore"
+import { useGetOverlayStyle } from "./overlaystyle/useOverlayStyles"
 
 export const [mainIndicators, setMainIndicators] = createSignal([''])
 export const [subIndicators, setSubIndicators] = createSignal({})
@@ -82,99 +85,6 @@ type IndicatorSettingsType = {
   calcParams: any[];
 }
 
-const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: PaneOptions): boolean => {
-  const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
-  let chartObj: ChartObjType
-  
-  const indi = refineIndiObj(_.cloneDeep(indicator))
-  if (chartStateObj) {
-    chartObj = JSON.parse(chartStateObj!)
-    if (!chartObj.indicators) {
-      chartObj = {
-        styleObj: chartObj.styleObj,
-        overlays: chartObj.overlays,
-        figures: chartObj.figures,
-        indicators: [{
-          value: indi,
-          isStack: isStack,
-          paneOptions
-        }]
-      }
-    } else {
-      if (chartObj.indicators.find(_indi => _indi.value?.name === indi.name && _indi.paneOptions?.id === paneOptions?.id)) {
-        // @ts-expect-error
-        chartObj.indicators = chartObj.indicators.map(_indi => (_indi.value?.id !== indi.id ? _indi : {
-          value: indi,
-          isStack,
-          paneOptions
-        }))
-      } else {
-        chartObj.indicators!.push({
-          value: indi,
-          isStack,
-          paneOptions
-        })
-      }
-    }
-  }
-  else {
-    chartObj = {
-      indicators: [{
-        value: indi,
-        isStack,
-        paneOptions
-      }]
-    }
-  }
-  localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
-  setChartModified(true)
-  return false
-}
-
-const syncObject = (event: OverlayEvent): boolean => {
-  const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
-  let chartObj: ChartObjType
-  
-  const overly = refineOverlayObj(_.cloneDeep(event.overlay))
-  if (chartStateObj) {
-    chartObj = JSON.parse(chartStateObj!)
-    if (!chartObj.overlays) {
-      chartObj = {
-        styleObj: chartObj.styleObj,
-        overlays: [{
-          value: overly,
-          paneId: event.overlay.paneId
-        }],
-        figures: chartObj.figures,
-        indicators: chartObj.indicators
-      }
-    } else {
-      if (chartObj.overlays.find(ovaly => ovaly.value?.id === overly.id)) {
-        chartObj.overlays = chartObj.overlays.map(ovaly => (ovaly.value?.id !== overly.id ? ovaly : {
-          value: overly,
-          paneId: event.overlay.paneId
-        }))
-      } else {
-        chartObj.overlays!.push({
-          value: overly,
-          paneId: event.overlay.paneId
-        })
-      }
-    }
-  }
-  else {
-    chartObj = {
-      overlays: [{
-        value: overly,
-        paneId: event.overlay.paneId
-      }]
-    }
-  }
-  localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
-  setChartModified(true)
-  return false
-}
-
 const refineIndiObj = (indicator: Indicator): IndicatorCreate => {
   const keys = [
     'calc', 'figures', 'regenerateFigures', 'draw', 'createTooltipDataSource'
@@ -213,6 +123,107 @@ const refineOverlayObj = (overlay: Overlay): OverlayCreate => {
 }
 
 export const useChartState = () => {
+  const syncIndiObject = (indicator: Indicator, isStack?: boolean, paneOptions?: PaneOptions): boolean => {
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
+    let chartObj: ChartObjType
+    
+    const indi = refineIndiObj(_.cloneDeep(indicator))
+    if (chartStateObj) {
+      chartObj = JSON.parse(chartStateObj!)
+      if (!chartObj.indicators) {
+        chartObj.indicators = [{
+          value: indi,
+          isStack: isStack,
+          paneOptions
+        }]
+        // chartObj = {
+        //   styleObj: chartObj.styleObj,
+        //   overlays: chartObj.overlays,
+        //   figures: chartObj.figures,
+        //   indicators: [{
+        //     value: indi,
+        //     isStack: isStack,
+        //     paneOptions
+        //   }]
+        // }
+      } else {
+        if (chartObj.indicators.find(_indi => _indi.value?.name === indi.name && _indi.paneOptions?.id === paneOptions?.id)) {
+          // @ts-expect-error
+          chartObj.indicators = chartObj.indicators.map(_indi => (_indi.value?.id !== indi.id ? _indi : {
+            value: indi,
+            isStack,
+            paneOptions
+          }))
+        } else {
+          chartObj.indicators!.push({
+            value: indi,
+            isStack,
+            paneOptions
+          })
+        }
+      }
+    }
+    else {
+      chartObj = {
+        indicators: [{
+          value: indi,
+          isStack,
+          paneOptions
+        }]
+      }
+    }
+    localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
+    setChartModified(true)
+    return false
+  }
+  
+  const syncObject = (overlay: Overlay): boolean => {
+    const chartStateObj = localStorage.getItem(`chartstatedata_${chartsession()?.id}`)
+    let chartObj: ChartObjType
+    
+    const overly = refineOverlayObj(_.cloneDeep(overlay))
+    if (chartStateObj) {
+      chartObj = JSON.parse(chartStateObj!)
+      if (!chartObj.overlays) {
+        chartObj.overlays = [{
+          value: overlay,
+          paneId: overlay.paneId
+        }]
+        // chartObj = {
+        //   styleObj: chartObj.styleObj,
+        //   overlays: [{
+        //     value: overly,
+        //     paneId: overlay.paneId
+        //   }],
+        //   figures: chartObj.figures,
+        //   indicators: chartObj.indicators
+        // }
+      } else {
+        if (chartObj.overlays.find(ovaly => ovaly.value?.id === overly.id)) {
+          chartObj.overlays = chartObj.overlays.map(ovaly => (ovaly.value?.id !== overly.id ? ovaly : {
+            value: overly,
+            paneId: overlay.paneId
+          }))
+        } else {
+          chartObj.overlays!.push({
+            value: overly,
+            paneId: overlay.paneId
+          })
+        }
+      }
+    }
+    else {
+      chartObj = {
+        overlays: [{
+          value: overly,
+          paneId: overlay.paneId
+        }]
+      }
+    }
+    localStorage.setItem(`chartstatedata_${chartsession()?.id}`, JSON.stringify(chartObj))
+    setChartModified(true)
+    return false
+  }
 
   function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStack?: boolean, paneOptions?: PaneOptions, docallback = false): Nullable<string> {
     if (indicatorName === 'VOL') {
@@ -244,24 +255,33 @@ export const useChartState = () => {
     return paneId
   }
 
-  const pushOverlay = (overlay: OverlayCreate, paneId?: string) => {
+  const pushOverlay = (overlay: OverlayCreate, paneId?: string, redrawing = false) => {
     const id = instanceapi()?.createOverlay(overlay, paneId)
 
     const ovrly = instanceapi()?.getOverlayById((id as string))
     if (ovrly) {
+      const style = !redrawing && useGetOverlayStyle[`${ovrly.name}Style`] ? useGetOverlayStyle[`${ovrly.name}Style`]() : undefined
       instanceapi()?.overrideOverlay({
+        id: ovrly.id,
+        styles: overlay.styles ?? style,
         onDrawEnd: (event) => {
-          return syncObject(event)
+          return syncObject(event.overlay)
         },
         onPressedMoveEnd: (event) => {
-          return syncObject(event)
+          return syncObject(event.overlay)
         },
         onRightClick: (event) => {
-          userOrderSettings().openPopup(event)
+          if(ctrlKeyedDown()) {
+            popOverlay(event.overlay.id)
+            return true
+          }
+          useOverlaySettings().openPopup(event, {overlayType: (event.overlay.name as overlayType)})
           // popOverlay(event.overlay.id)
           return true
         }
       })
+      if (!redrawing)
+        syncObject(instanceapi()?.getOverlayById((id as string))!)
     }
   }
 
@@ -361,7 +381,7 @@ export const useChartState = () => {
       }
       if (chartObj.overlays) {
         chartObj.overlays.forEach(overlay => {
-          pushOverlay(overlay.value!, overlay.paneId)
+          pushOverlay(overlay.value!, overlay.paneId, true)
         })
       }
       if (chartObj.indicators) {
@@ -387,6 +407,10 @@ export const useChartState = () => {
       if (chartObj.styleObj) {
         instanceapi()?.setStyles(chartObj.styleObj)
       }
+      if (chartObj.orderStyles) {
+        const styles = chartObj.orderStyles
+        syncOrderStyles(styles)
+      }
     }
 
     if (chartsession()?.chart) {
@@ -405,5 +429,186 @@ export const useChartState = () => {
       redraw(chartStateObj)
   }
 
-  return { createIndicator, modifyIndicator, popIndicator, pushOverlay, popOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
+  return { createIndicator, modifyIndicator, popIndicator, syncIndiObject, syncObject, pushOverlay, popOverlay, pushMainIndicator, pushSubIndicator, redrawOrders, redraOverlaysIndiAndFigs }
+}
+
+const syncOrderStyles = (styles: OrderStylesType) => {
+  if (styles.buyStyle) {
+    setBuyStyle((prevbuystyle) => {
+      const buystyle = cloneDeep(prevbuystyle)
+      if (styles.buyStyle?.lineStyle) {
+        for (const key in styles.buyStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystyle, `lineStyle.${key}`, styles.buyStyle.lineStyle[key])
+            // buystyle.lineStyle[key] = styles.buyStyle.lineStyle[key]
+          }
+        }
+      }
+      if (styles.buyStyle?.labelStyle) {
+        for (const key in styles.buyStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystyle, `labelStyle.${key}`, styles.buyStyle.labelStyle[key])
+            // buystyle.labelStyle[key] = styles.buyStyle.labelStyle[key]
+          }
+        }
+      }
+      return buystyle
+    })
+  }
+  if (styles.buyLimitStyle) {
+    setBuyLimitStyle((prevBuyLimitStyle) => {
+      const buylimitstyle = cloneDeep(prevBuyLimitStyle)
+      if (styles.buyLimitStyle?.lineStyle) {
+        for (const key in styles.buyLimitStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buylimitstyle, `lineStyle.${key}`, styles.buyLimitStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.buyLimitStyle?.labelStyle) {
+        for (const key in styles.buyLimitStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buylimitstyle, `labelStyle.${key}`, styles.buyLimitStyle.labelStyle[key])
+          }
+        }
+      }
+      return buylimitstyle
+    })
+  }
+  if (styles.buyStopStyle) {
+    setBuyStopStyle((prevbuystopstyle) => {
+      const buystopstyle = cloneDeep(prevbuystopstyle)
+      if (styles.buyStopStyle?.lineStyle) {
+        for (const key in styles.buyStopStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystopstyle, `lineStyle.${key}`, styles.buyStopStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.buyStopStyle?.labelStyle) {
+        for (const key in styles.buyStopStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(buystopstyle, `labelStyle.${key}`, styles.buyStopStyle.labelStyle[key])
+          }
+        }
+      }
+      return buystopstyle
+    })
+  }
+  if (styles.sellStyle) {
+    setSellStyle((prevsellstyle) => {
+      const sellstyle = cloneDeep(prevsellstyle)
+      if (styles.sellStyle?.lineStyle) {
+        for (const key in styles.sellStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstyle, `lineStyle.${key}`, styles.sellStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.sellStyle?.labelStyle) {
+        for (const key in styles.sellStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstyle, `labelStyle.${key}`, styles.sellStyle.labelStyle[key])
+          }
+        }
+      }
+      return sellstyle
+    })
+  }
+  if (styles.sellLimitStyle) {
+    setSellLimitStyle((prevselllimitstyle) => {
+      const selllimitstyle = cloneDeep(prevselllimitstyle)
+      if (styles.sellLimitStyle?.lineStyle) {
+        for (const key in styles.sellLimitStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(selllimitstyle, `lineStyle.${key}`, styles.sellLimitStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.sellLimitStyle?.labelStyle) {
+        for (const key in styles.sellLimitStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(selllimitstyle, `labelStyle.${key}`, styles.sellLimitStyle.labelStyle[key])
+          }
+        }
+      }
+      return selllimitstyle
+    })
+  }
+  if (styles.sellStopStyle) {
+    setSellStopStyle((prevsellstopstyle) => {
+      const sellstopstyle = cloneDeep(prevsellstopstyle)
+      if (styles.sellStopStyle?.lineStyle) {
+        for (const key in styles.sellStopStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstopstyle, `lineStyle.${key}`, styles.sellStopStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.sellStopStyle?.labelStyle) {
+        for (const key in styles.sellStopStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(sellstopstyle, `labelStyle.${key}`, styles.sellStopStyle.labelStyle[key])
+          }
+        }
+      }
+      return sellstopstyle
+    })
+  }
+  if (styles.stopLossStyle) {
+    setStopLossStyle((prevstoplossstyle) => {
+      const stoplossstyle = cloneDeep(prevstoplossstyle)
+      if (styles.stopLossStyle?.lineStyle) {
+        for (const key in styles.stopLossStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(stoplossstyle, `lineStyle.${key}`, styles.stopLossStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.stopLossStyle?.labelStyle) {
+        for (const key in styles.stopLossStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(stoplossstyle, `labelStyle.${key}`, styles.stopLossStyle.labelStyle[key])
+          }
+        }
+      }
+      return stoplossstyle
+    })
+  }
+  if (styles.takeProfitStyle) {
+    setTakeProfitStyle((prevtakeprofitstyle) => {    
+      const takeprofitstyle = cloneDeep(takeProfitStyle())
+      if (styles.takeProfitStyle?.lineStyle) {
+        for (const key in styles.takeProfitStyle.lineStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(takeprofitstyle, `lineStyle.${key}`, styles.takeProfitStyle.lineStyle[key])
+          }
+        }
+      }
+      if (styles.takeProfitStyle?.labelStyle) {
+        for (const key in styles.takeProfitStyle.labelStyle) {
+          if (key !== undefined) {
+            //@ts-expect-error
+            set(takeprofitstyle, `labelStyle.${key}`, styles.takeProfitStyle.labelStyle[key])
+          }
+        }
+      }
+      return takeprofitstyle
+    })
+  }
 }

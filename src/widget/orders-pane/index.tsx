@@ -18,7 +18,8 @@ import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
 import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
 import { drawOrder, orderList, useOrder } from '../../store/positionStore'
-import { instanceapi } from '../../ChartProComponent'
+import { instanceapi, setSyntheticPauseStatus } from '../../ChartProComponent'
+import { setOrderModalVisible } from '../../store/chartStateStore'
 
 export interface OrderPanelProps {
   context: string
@@ -36,6 +37,8 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
   
 
   const onOrderEdited = (order: OrderInfo|null) => {
+    setOrderModalVisible(false)
+    setSyntheticPauseStatus(false)
     if (order) {
       drawOrder(order)
       let orderlist = orderList()
@@ -50,6 +53,8 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
       return
     }
     if (action == 'edit') {
+      setOrderModalVisible(true)
+      setSyntheticPauseStatus(true)
       props.orderController.launchOrderModal('modifyorder', onOrderEdited, {
         id: order.orderId,
         stoploss: order.stopLoss,

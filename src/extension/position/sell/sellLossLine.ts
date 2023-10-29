@@ -18,8 +18,8 @@ import { currenttick } from '../../../store/tickStore'
 import { orderList, useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
-import { sellStyle, stopLossStyle } from '../../../store/overlayStyleStore'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
+import { sellStyle, stopLossStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 type lineobj = { 'lines': LineAttrs[], 'texts': TextAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -123,7 +123,6 @@ const sellLossLine: OverlayTemplate = {
         type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
         styles: sellStyle().labelStyle,
-        ignoreEvent: true
       },
       {
         type: 'text',
@@ -158,7 +157,7 @@ const sellLossLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    userOrderSettings().lossPopup(event, 'sell')
+    useOverlaySettings().lossPopup(event, 'sell')
     return true
   }
 }

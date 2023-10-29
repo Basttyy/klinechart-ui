@@ -23,11 +23,11 @@ import lodashSet from 'lodash/set'
 import lodashClone from 'lodash/cloneDeep'
 
 import { SelectDataSourceItem, Loading, OverlayOptionsPopup } from './component'
-import { showOverlayPopup, showBuySetting } from './store/overlaySettingStore'
+import { showOverlayPopup, showOverlaySetting, showPositionSetting } from './store/overlaySettingStore'
 
 import {
   PeriodBar, DrawingBar, IndicatorModal, TimezoneModal, SettingModal, TimeframeModal,
-  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel, BuySettingModal
+  ScreenshotModal, IndicatorSettingModal, SymbolSearchModal, OrdersPanel, PositionSettingModal, OverlaySettingModal
 } from './widget'
 
 import { translateTimezone } from './widget/timezone-modal/data'
@@ -618,8 +618,13 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       <Show when={showSpeed()}>
         <SpeedPopup/>
       </Show>
-      <Show when={showBuySetting()}>
-        <BuySettingModal
+      <Show when={showPositionSetting()}>
+        <PositionSettingModal
+          locale={props.locale}
+        />
+      </Show>
+      <Show when={showOverlaySetting()}>
+        <OverlaySettingModal
           locale={props.locale}
         />
       </Show>

@@ -18,10 +18,11 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
-import { instanceapi, pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
-import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible, setRange } from '../../store/chartStateStore'
-import { setSpeedPopupLeft, setSpeedPopupTop } from '../../component/popup/timeframe'
+import { pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
+import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible } from '../../store/chartStateStore'
+import { setSpeedPopupLeft, speedPopupLeft } from '../../component/popup/timeframe'
 import { getScreenSize } from '../../helpers'
+import { syntheticPausePlay } from '../../store/keyEventStore'
 
 export interface PeriodBarProps {
   locale: string
@@ -112,33 +113,37 @@ const PeriodBar: Component<PeriodBarProps> = props => {
           <span>{props.symbol.shortName ?? props.symbol.name ?? props.symbol.ticker}</span>
         </div>
       </Show>
-      <button class="item tools" onClick={() => {setOrderModalVisible(true); props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
+      <button class="item tools" onClick={() => {setOrderModalVisible(true); syntheticPausePlay(true); props.orderController.launchOrderModal('placeorder', useOrder().onOrderPlaced)}}>Place order</button>
       <div class="item tools period_home">
         <button class="item period"
-          onclick={() => {
-            if(!showPeriodList()) offAllPeriodOverlay()
+          onclick={(event) => {
+            if(!showPeriodList()) { offAllPeriodOverlay(); setSpeedPopupLeft(getScreenSize().x - event.pageX! > 200 ? event.pageX! : getScreenSize().x-200); }
             setOverflow(!overflow())
             setShowPeriodList(!showPeriodList())
+            syntheticPausePlay(true)
           }} 
         >
           {props.period.text}
         </button>
         {
           showPeriodList() &&
-          <div class="period_list">
-            {
-              props.periods.map(p => (
-                <li 
-                  onClick={() => {
-                    props.onPeriodChange(p)
-                    setOverflow(!overflow())
-                    setShowPeriodList(false)
-                  }}
-                >
-                  {p.text}
-                </li>
-              ))
-            }
+          <div class='klinecharts-pro-popup_background' onclick={() => {setOverflow(!overflow); syntheticPausePlay(false); setShowPeriodList(false);}}>
+            <div class="period_list" style={{ left: `${speedPopupLeft()-50}px` }}>
+              {
+                props.periods.map(p => (
+                  <li 
+                    onClick={() => {
+                      props.onPeriodChange(p)
+                      setOverflow(!overflow())
+                      setShowPeriodList(false)
+                      syntheticPausePlay(false)
+                    }}
+                  >
+                    {p.text}
+                  </li>
+                ))
+              }
+            </div>
           </div>
         }
       </div>

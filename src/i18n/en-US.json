@@ -60,7 +60,8 @@
   "vertical_straight_line": "Vertical Line",
   "vertical_ray_line": "Vertical Ray",
   "vertical_segment": "Vertical Segment",
-  "straight_line": "Trend Line",
+  "trend_line": "Trend Line",
+  "extended_line": "Extended Line",
   "ray_line": "Ray",
   "segment": "Segment",
   "arrow": "Arrow",
@@ -118,5 +119,6 @@
   "always": "Always",
   "follow_cross": "Follow Cross",
   "period_change": "Change Period",
-  "period_code": "Enter Period Key"
+  "period_code": "Enter Period Key",
+  "dashed_value": "Dashed Value"
 }

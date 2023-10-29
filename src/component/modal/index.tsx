@@ -24,9 +24,16 @@ export interface ModalProps extends ParentProps {
 }
 
 const Modal: ParentComponent<ModalProps> = (props) => {
+
+  const handleClose = (event: MouseEvent) => {
+    // @ts-expect-error
+    if (event.target && (event.target.classList as DOMTokenList).contains('klinecharts-pro-modal')) {
+      props.onClose?.()
+    }
+  }
   return (
     <div
-      class="klinecharts-pro-modal">
+      class="klinecharts-pro-modal" onclick={handleClose}>
       <div
         // style={{ width: `${props.width ?? 400}px` }}
         class="inner">

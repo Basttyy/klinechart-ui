@@ -50,7 +50,7 @@ const SettingModal: Component<SettingModalProps> = props => {
     let chartObj: ChartObjType
     if (chartStateObj) {
       chartObj = (JSON.parse(chartStateObj) as ChartObjType)
-      chartObj.styleObj = chartObj.styleObj ? chartObj.styleObj : {}
+      chartObj.styleObj = chartObj.styleObj ?? {}
     } else {
       chartObj = {
         styleObj: {}

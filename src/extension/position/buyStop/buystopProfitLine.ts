@@ -18,8 +18,8 @@ import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
-import { userOrderSettings } from '../../../store/overlaySettingStore'
-import { buyStyle, takeProfitStyle } from '../../../store/overlayStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { buyStopStyle, takeProfitStyle } from '../../../store/overlaystyle/positionStyleStore'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
@@ -77,19 +77,23 @@ const buystopProfitLine: OverlayTemplate = {
     return [
       {
         type: 'line',
-        attrs: parallel.lines,
-        styles: [
-          buyStyle().lineStyle,
-          takeProfitStyle().lineStyle
-        ]
+        attrs: parallel.lines[0],
+        styles: buyStopStyle().lineStyle
+      },
+      {
+        type: 'line',
+        attrs: parallel.lines[1],
+        styles: takeProfitStyle().lineStyle
       },
       {
         type: 'text',
-        attrs: parallel.recttexts,
-        styles: [
-          buyStyle().labelStyle,
-          takeProfitStyle().labelStyle
-        ]
+        attrs: parallel.recttexts[0],
+        styles: buyStopStyle().labelStyle
+      },
+      {
+        type: 'text',
+        attrs: parallel.recttexts[1],
+        styles: takeProfitStyle().labelStyle
       }
     ]
   },
@@ -116,7 +120,7 @@ const buystopProfitLine: OverlayTemplate = {
       {
         type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: buyStyle().labelStyle
+        styles: buyStopStyle().labelStyle
       },
       {
         type: 'text',
@@ -177,7 +181,7 @@ const buystopProfitLine: OverlayTemplate = {
     return false
   },
   onRightClick: (event): boolean => {
-    userOrderSettings().profitPopup(event, 'buy')
+    useOverlaySettings().profitPopup(event, 'buy')
     return true
   }
 }
