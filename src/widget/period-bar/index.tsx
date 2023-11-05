@@ -247,7 +247,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       <button class="item tools" 
         onClick={onExitClicked}
       >
-        { chartsessionCtr()?.isNotGuest() ? 'Dashboard' : 'Exit' }
+        { chartsessionCtr()?.isNotGuest() ? 'Dashboard' : 'Exit Test' }
       </button>
       <div class='order-container'>
         <svg
