@@ -70,7 +70,7 @@ export interface Period {
 }
 
 export interface sessionType {
-	id: number;
+	id: number|string;
 	starting_bal: number;
 	current_bal: number;
   equity: number;
@@ -84,7 +84,7 @@ export interface sessionType {
 }
 
 export interface sessionModifyType {
-	id?: number;
+	id?: number|string;
 	starting_bal?: number;
 	current_bal?: number;
   equity?: number;
@@ -168,7 +168,7 @@ export interface Datafeed {
 
 export interface OrderResource {
   retrieveOrder (order_id: number): Promise<OrderInfo|null>
-  retrieveOrders (action?: OrderType, session_id?: number): Promise<OrderInfo[]|null>
+  retrieveOrders (action?: OrderType, session_id?: number|string): Promise<OrderInfo[]|null>
   openOrder (action: OrderType, lot_size: number, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo|null>
   closeOrder (order_id: number, lotsize?: number): Promise<OrderInfo|null>
   modifyOrder (order: OrderModifyInfo): Promise<OrderInfo|null>
@@ -177,8 +177,9 @@ export interface OrderResource {
 }
 
 export interface ChartSessionResource {
-  retrieveSession (id: number): Promise<sessionType|null>
+  retrieveSession (id: number|string): Promise<sessionType|null>
   updateSession (session: sessionModifyType): Promise<sessionType|null>
+  isNotGuest (): boolean
   // retrieveChartState (id: number): Promise<ChartObjType|null>
   // syncState (chart_state: ChartObjType): Promise<boolean>
 }

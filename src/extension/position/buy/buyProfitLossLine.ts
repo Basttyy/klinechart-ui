@@ -19,9 +19,12 @@ import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 /**
  * 获取平行线
@@ -68,9 +71,9 @@ const buyProfitLossLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! <= currenttick()?.close! || overlay.points[1].value! <= currenttick()?.high!) { //TP was hit
+    if (overlay.points[1].value! <= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! <= currenttick()?.high!)) { //TP was hit
       useOrder().closeOrder(overlay, 'takeprofit')
-    } else if (overlay.points[2].value! >= currenttick()?.close! || overlay.points[2].value! >= currenttick()?.high!) {
+    } else if (overlay.points[2].value! >= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! >= currenttick()?.low!)) {
       useOrder().closeOrder(overlay, 'stoploss')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
@@ -84,18 +87,19 @@ const buyProfitLossLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: takeProfitStyle().lineStyle
+        styles: takeProfitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[2],
-        styles: stopLossStyle().lineStyle
+        styles: stopLossStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'text',
         attrs: parallel.recttexts[0],
         styles: buyStyle().labelStyle,
-        ignoreEvent: true
       },
       {
         type: 'text',
@@ -150,55 +154,31 @@ const buyProfitLossLine: OverlayTemplate = {
     ]
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    
-    let id = event.overlay.id
-    let order: OrderInfo|null
 
     if ((points as Partial<Point>[])[0].value! > currenttick()?.close! &&
       (points as Partial<Point>[])[0].value! > event.overlay.points[0].value! &&
       event.figureIndex == 1
     ) {
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order!.takeProfit = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-        event.overlay.points[1].value = order?.takeProfit
-      }
-      //the overlay represented an order that does not exist on our pool, it should be handled here
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if (res) event.overlay.points[1].value = res
     } else if ((points as Partial<Point>[])[0].value! < currenttick()?.close! &&
-      // (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
       event.figureIndex == 2
     ) {
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order!.stopLoss = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-        event.overlay.points[1].value = order?.stopLoss
-      }
-      //the overlay represented an order that does not exist on our pool, it should be handled here
+      const res = useOrder().updateStopLossAndReturnValue(event, points)
+      if (res) event.overlay.points[2].value = res
     }
     return true
   },
   onPressedMoveEnd: (event): boolean => {
-    if (event.figureIndex == 0)
-      return true
-    let id = event.overlay.id
-    let order: OrderInfo|null
-    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-      useOrder().updateOrder({
-        id: order.orderId,
-        stoploss: order.stopLoss,
-        takeprofit: order.takeProfit
-      })
-      return false
-    }
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    useOrder().updatePositionOrder(event)
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {

@@ -192,53 +192,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     return [from, to]
   }
 
-  const cleanup = () => {   //Cleanup objects when leaving chart page
-    const doJob = async () => {
-      clearInterval(timerId)
-      props.datafeed.unsubscribe()
-  
-      const updateRunningOrders = async (orders: OrderInfo[], symbol: SymbolInfo, orderctr: OrderResource) => {
-        let i = 0, pL = 0
-        if (orders && symbol !== undefined) {
-          while(i < orders.length) {
-            if (orders[i].pl !== null && orders[i].pips !== null) {
-              pL = +pL + +orders[i].pl!
-              await orderctr.modifyOrder({
-                id: orders[i].orderId, //in a real application this should be calculated on backend
-                pips: orders[i].pips, //in a real application this should be calculated on backend
-                pl: orders[i].pips! * orders[i].lotSize * symbol!.dollarPerPip!
-              })
-              await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            i++
-          }
-        }
-        return pL
-      }
-      const updateChartSession = async (_session: sessionType, _pl: number, _sessionctr: ChartSessionResource) => {
-        const pl = +_session.current_bal + +_pl
-        if (_session) {
-          await _sessionctr?.updateSession({
-            id: _session.id,
-            current_bal: _session.current_bal,
-            equity: pl,
-            chart_timestamp: tickTimestamp(),
-            chart: localStorage.getItem(`chartstatedata_${chartsession()?.id}`) != null && chartModified() ? btoa(localStorage.getItem(`chartstatedata_${chartsession()?.id}`)!) : undefined
-          })
-        }
-      }
-      const orders = orderList().filter(order => (order.action == 'buy' || order.action == 'sell') && !order.exitType && !order.exitPoint)
-  
-      let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
-      await updateChartSession (chartsession()!, pl, chartsessionCtr()!)
-      setInstanceapi(null)
-      dispose(widgetRef!)
-      await new Promise(resolve => setTimeout(resolve, 500));
-      window.location.href = '/dashboard'
-    }
-    doJob()
-  }
-
   onMount(() => {
     document.addEventListener('contextmenu', function(event) {
       event.preventDefault()
@@ -632,8 +585,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
         <TimeframeModal
           locale={props.locale}
           periods={props.periods}
-          onTimeframeSelected={setPeriod}
-          onClose={() => { setPeriodModalVisible(false) }}/>
+          onTimeframeSelected={setPeriod}/>
       </Show>
       <Show when={symbolSearchModalVisible()}>
         <SymbolSearchModal

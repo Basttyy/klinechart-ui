@@ -19,6 +19,9 @@ import { OrderInfo } from '../../../types'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { sellStopStyle } from '../../../store/overlaystyle/positionStyleStore'
 import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 const sellstopLine: OverlayTemplate = {
   name: 'sellstopLine',
@@ -27,7 +30,7 @@ const sellstopLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! >= currenttick()?.close! || overlay.points[0].value! >= currenttick()?.high!) {
+    if (overlay.points[0].value! >= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! >= currenttick()?.low!)) {
       useOrder().triggerPending(overlay, 'sell')
     }
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true, 'sell')
@@ -35,7 +38,8 @@ const sellstopLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: sellStopStyle().lineStyle
+        styles: sellStopStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'text',
@@ -69,36 +73,23 @@ const sellstopLine: OverlayTemplate = {
     return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStopStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
+    
     if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
-      let id = event.overlay.id
-      let order: OrderInfo|null
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order!.entryPoint = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-        event.overlay.points[1].value = order?.entryPoint
-      }
-      //the overlay represented an order that does not exist on our pool, it should be handled here
+      const res = useOrder().updateEntryPointAndReturnValue(event, points)
+      if(res) event.overlay.points[0].value = res
     }
     return true
   },
   onPressedMoveEnd: (event): boolean => {
-    let id = event.overlay.id
-    let order: OrderInfo|null
-    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-      useOrder().updateOrder({
-        id: order.orderId,
-        entrypoint: order.entryPoint
-      })
-      return false
-    }
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    useOrder().updatePositionOrder(event)
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {

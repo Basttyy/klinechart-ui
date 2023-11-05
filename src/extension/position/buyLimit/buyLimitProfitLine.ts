@@ -19,9 +19,12 @@ import { useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { useOverlaySettings } from '../../../store/overlaySettingStore'
 import { buyLimitStyle, takeProfitStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { createSignal } from 'solid-js'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 /**
  * 获取平行线
@@ -62,7 +65,7 @@ const buyLimitProfitLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! >= currenttick()?.close!) {
+    if (overlay.points[0].value! >= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! >= currenttick()?.low!)) {
       useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
@@ -71,11 +74,13 @@ const buyLimitProfitLine: OverlayTemplate = {
         type: 'line',
         attrs: parallel.lines[0],
         styles: buyLimitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: takeProfitStyle().lineStyle
+        styles: takeProfitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'text',
@@ -122,28 +127,34 @@ const buyLimitProfitLine: OverlayTemplate = {
     ]
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
-      // event.overlay.points[1].value = (points as Partial<Point>[])[0].value
-      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
-      if (res) event.overlay.points[1].value = res
-    }
 
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close! && event.figureIndex == 0) {
-      // event.overlay.points[0].value = (points as Partial<Point>[])[0].value
+    if (
+      (points as Partial<Point>[])[0].value! < currenttick()?.close! &&
+      (points as Partial<Point>[])[0].value! < event.overlay.points[1].value! &&
+      event.figureIndex == 0
+    ) {
       const res = useOrder().updateEntryPointAndReturnValue(event, points)
       if(res) event.overlay.points[0].value = res
+    }
+    else if (
+      (points as Partial<Point>[])[0].value! > event.overlay.points[0].value! &&
+      event.figureIndex == 1
+    ) {
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if (res) event.overlay.points[1].value = res
     }
     return true
   },
   onPressedMoveEnd: (event): boolean => {
     useOrder().updatePositionOrder(event)
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {

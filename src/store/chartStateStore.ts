@@ -67,7 +67,7 @@ export const cleanup = () => {   //Cleanup objects when leaving chart page
     setInstanceapi(null)
     dispose(widgetref()!)
     await new Promise(resolve => setTimeout(resolve, 500));
-    window.location.href = '/dashboard'
+    window.location.href = chartsessionCtr()?.isNotGuest() ? '/dashboard' : '/'
   }
   doJob()
 }
@@ -368,12 +368,11 @@ export const useChartState = () => {
         if (order.exitType)
           return
         drawOrder(order)
-      });
+      })
     }
   }
 
   const redraOverlaysIndiAndFigs = async () => {
-
     const redraw = (chartStateObj: string) => {
       const chartObj = (JSON.parse(chartStateObj) as ChartObjType)
 
@@ -402,7 +401,7 @@ export const useChartState = () => {
           })
           setMainIndicators(newMainIndicators)
           setSubIndicators(newSubIndicators)
-        }, 500);
+        }, 500)
       }
       if (chartObj.styleObj) {
         instanceapi()?.setStyles(chartObj.styleObj)

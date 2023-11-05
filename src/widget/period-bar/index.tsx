@@ -18,7 +18,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
-import { pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
+import { chartsessionCtr, pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
 import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible } from '../../store/chartStateStore'
 import { setSpeedPopupLeft, speedPopupLeft } from '../../component/popup/timeframe'
 import { getScreenSize } from '../../helpers'
@@ -247,7 +247,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
       <button class="item tools" 
         onClick={onExitClicked}
       >
-        Dashboard
+        { chartsessionCtr()?.isNotGuest() ? 'Dashboard' : 'Exit Test' }
       </button>
       <div class='order-container'>
         <svg

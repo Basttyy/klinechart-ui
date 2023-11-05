@@ -28,6 +28,10 @@ export default class DefaultSessionController implements ChartSessionResource {
       end_date: resp.data.end_date
     }
   }
+
+  isNotGuest (): boolean {
+    return false
+  }
   
   async updateSession(session: sessionModifyType): Promise<sessionType | null> {
     const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/test-sessions/${session.id}`, session)

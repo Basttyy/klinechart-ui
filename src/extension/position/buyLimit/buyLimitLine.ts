@@ -19,6 +19,9 @@ import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 import { buyLimitStyle } from '../../../store/overlaystyle/positionStyleStore'
 import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 const buyLimitLine: OverlayTemplate = {
   name: 'buyLimitLine',
@@ -28,7 +31,7 @@ const buyLimitLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-    if (overlay.points[0].value! >= currenttick()?.close! ) {
+    if (overlay.points[0].value! >= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! >= currenttick()?.low!)) {
       useOrder().triggerPending(overlay, 'buy')
     }
     return [
@@ -42,7 +45,6 @@ const buyLimitLine: OverlayTemplate = {
         type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buyLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
         styles: buyLimitStyle().labelStyle,
-        ignoreEvent: true
       }
     ]
   },
@@ -71,6 +73,7 @@ const buyLimitLine: OverlayTemplate = {
     return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: buyLimitStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
@@ -86,12 +89,10 @@ const buyLimitLine: OverlayTemplate = {
   },
   onPressedMoveEnd: (event): boolean => {
     useOrder().updatePositionOrder(event)
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {
-    // useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    //the overlay represented an order that does not exist on our pool, it should be handled here
     useOverlaySettings().singlePopup(event, 'buy')
     return true
   }
