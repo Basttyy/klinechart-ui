@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { Component, JSX } from 'solid-js'
+import { Component, JSX, createSignal } from 'solid-js'
 
 export interface SwitchProps {
   class?: string
@@ -22,10 +22,11 @@ export interface SwitchProps {
 }
 
 const Switch: Component<SwitchProps> = props => {
+  const [state, setState] = createSignal(props.open)
   return (
     <div
       style={props.style}
-      class={`klinecharts-pro-switch ${props.open ? 'turn-on' : 'turn-off'} ${props.class ?? ''}`}
+      class={`klinecharts-pro-switch ${state() ? 'turn-on' : 'turn-off'} ${props.class ?? ''}`}
       onClick={_ => {
         props.onChange && props.onChange()
       }}>

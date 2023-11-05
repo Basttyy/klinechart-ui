@@ -16,6 +16,11 @@
     background-color: var(--klinecharts-pro-popover-background-color);
     box-shadow: 0 6px 12px 0 rgba(0, 0, 0, .3);
     border-radius: 4px;
+    width: 90%;
+    @media only screen and (min-width: 600px) {
+      min-width: 300px;
+      max-width: fit-content;
+    }
     .title-container {
       display: flex;
       flex-direction: row;
@@ -42,6 +47,7 @@
     .content-container {
       padding: 0 26px;
       min-height: 140px;
+      height: fit-content;
     }
     .button-container {
       display: flex;

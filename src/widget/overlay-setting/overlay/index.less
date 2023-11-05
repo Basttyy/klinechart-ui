@@ -1,0 +1,28 @@
+@import (reference) '../../../base.less';
+
+.@{prefix-cls}-overlay-setting-modal-content {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  height: fit-content;
+  min-height: 200px;
+  overflow: auto;
+
+  .content{
+    height: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    overflow: auto;
+
+    .component{
+      display: grid;
+      align-items: center;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+}

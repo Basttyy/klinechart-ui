@@ -1,8 +1,10 @@
-import { Chart, Nullable, Overlay, OverlayEvent, Point } from 'klinecharts';
+import { Chart, Nullable, Overlay, OverlayEvent, Point } from '@basttyy/klinecharts';
 import { ExitType, OrderInfo, OrderModifyInfo, OrderResource, OrderType, sessionType } from '../types';
 import { createSignal } from 'solid-js';
 import { currenttick } from './tickStore';
 import { chartsession, instanceapi, setChartsession, symbol } from '../ChartProComponent';
+import { setOrderModalVisible } from './chartStateStore';
+import { syntheticPausePlay } from './keyEventStore';
 
 export const [chartapi, setChartapi] = createSignal<Nullable<Chart>>(null);
 export const [ordercontr, setOrderContr] = createSignal<Nullable<OrderResource>>(null)
@@ -10,14 +12,27 @@ export const [orderList, setOrderList] = createSignal<OrderInfo[]>([])
 export const [currentequity, setCurrentequity] = createSignal<number>(0)
 
 export const useOrder = () => {
+  const onOrderPlaced = (order: OrderInfo|null) => {
+    setOrderModalVisible(false)
+    syntheticPausePlay(false)
+    if (order) {
+      drawOrder(order)
+      let orderlist = orderList()
+      if (!orderlist.find(orda => orda.orderId === order?.orderId)) {
+        orderlist.push(order)
+        setOrderList(orderlist)
+      }
+    }
+  }
+
   /**
    * This method may be used interchangeably with calcStopOrTarget
    * 
    * @param top
-   * @param middle 
-   * @param dp 
-   * @param usereal 
-   * @param buysell 
+   * @param middle
+   * @param dp
+   * @param usereal
+   * @param buysell
    * @returns string
    */
   const calcTarget = (top:number, middle:number, dp:number, usereal: boolean = false, buysell: 'buy'|'sell' = 'buy'): string => {
@@ -130,6 +145,7 @@ export const useOrder = () => {
     const doJob = async () => {
       let id = overlay.id
       let order: OrderInfo|null
+      console.log(`got to close order: ${id}, exittype: ${type}`)
       if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
         instanceapi()?.removeOverlay({    //remove the overlay first to prevent flooding this backend with api calls
           id: overlay.id,
@@ -143,6 +159,7 @@ export const useOrder = () => {
           pips: type == 'cancel' ? undefined : order.pips,   //in a real application this should be calculated on backend
           pl: type == 'cancel' ? undefined : order.pl    //in a real application this should be calculated on backend
         })!
+        console.log(updatedorder)
         
         if (updatedorder) {
           const session = chartsession()
@@ -215,7 +232,7 @@ export const useOrder = () => {
     }
   }
 
-  return { calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder, removeStopOrTP,
+  return { onOrderPlaced, calcTarget, calcStopOrTarget, calcPL, triggerPending, updateOrder, closeOrder, removeStopOrTP,
     updatePipsAndPL, updateStopLossAndReturnValue, updateEntryPointAndReturnValue, updateTakeProfitAndReturnValue,
     updatePositionOrder
   }
@@ -224,6 +241,14 @@ export const useOrder = () => {
 export const drawOrder = (order: OrderInfo|null) => {
   if (!order)
     return
+  let overlay = instanceapi()?.getOverlayById(`orderline_${order!.orderId}`)
+  if(overlay) {
+    instanceapi()?.removeOverlay({    //remove the overlay first to prevent flooding this backend with api calls
+      id: overlay.id,
+      groupId: overlay.groupId,
+      name: overlay.name
+    })
+  }
   let name = ''
   let lock = false;
   order!.entryPoint = order?.entryPoint! - 0.00001+0.00001   //for some reason adding and subtracting the same value stop the overlay from vanishing when dragged
@@ -333,6 +358,6 @@ export const drawOrder = (order: OrderInfo|null) => {
     id: `orderline_${order?.orderId}`,
     groupId: 'orderLine',
     points,
-    lock
+    lock,
   })
 };

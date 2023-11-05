@@ -30,6 +30,7 @@ export interface SelectProps {
 
 const Select: Component<SelectProps> = props => {
   const [open, setOpen] = createSignal(false)
+  const [content, setContent] = createSignal(props.value)
 
   return (
     <div
@@ -40,7 +41,7 @@ const Select: Component<SelectProps> = props => {
       onBlur={_ => { setOpen(false) }}>
       <div
         class="selector-container">
-        <span class="value">{props.value}</span>
+        <span class="value">{content()}</span>
         <i class="arrow"/>
       </div>
       {
@@ -57,12 +58,13 @@ const Select: Component<SelectProps> = props => {
                   <li
                     onClick={e => {
                       e.stopPropagation()
-                      if (props.value !== v) {
+                      if (content() !== v) {
+                        setContent(v)
                         props.onSelected?.(data)
                       }
                       setOpen(false)
                     }}>
-                    {v}
+                    {String(v)}
                   </li>
                 )
               })

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { KLineData } from 'klinecharts'
+import { KLineData } from '@basttyy/klinecharts'
 
 import { Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback } from './types'
 
@@ -90,7 +90,7 @@ export default class DefaultDatafeed implements Datafeed {
     this._prevSymbolMarket = symbol.market
   }
 
-  unsubscribe(symbol?: SymbolInfo, period?: Period): void {
+  unsubscribe(symbol?: SymbolInfo, period?: Period, currtimestamp?: number): void {
     // do something
   }
 

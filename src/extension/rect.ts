@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate } from 'klinecharts'
+import { OverlayTemplate } from '@basttyy/klinecharts'
 
 const rect: OverlayTemplate = {
   name: 'rect',
@@ -25,7 +25,7 @@ const rect: OverlayTemplate = {
       color: 'rgba(22, 119, 255, 0.15)'
     }
   },
-  createPointFigures: ({ coordinates }) => {
+  createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     if (coordinates.length > 1) {
       return [
         {

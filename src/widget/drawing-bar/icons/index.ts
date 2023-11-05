@@ -112,9 +112,9 @@ export function createSingleLineOptions (locale: string): SelectDataSourceItem[]
     { key: 'verticalStraightLine', text: i18n('vertical_straight_line', locale) },
     { key: 'verticalRayLine', text: i18n('vertical_ray_line', locale) },
     { key: 'verticalSegment', text: i18n('vertical_segment', locale) },
-    { key: 'straightLine', text: i18n('straight_line', locale) },
+    { key: 'straightLine', text: i18n('extended_line', locale) },
     { key: 'rayLine', text: i18n('ray_line', locale) },
-    { key: 'segment', text: i18n('segment', locale) },
+    { key: 'segment', text: i18n('trend_line', locale) },
     { key: 'arrow', text: i18n('arrow', locale) },
     { key: 'priceLine', text: i18n('price_line', locale) }
   ]

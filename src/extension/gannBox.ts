@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate } from 'klinecharts'
+import { OverlayTemplate } from '@basttyy/klinecharts'
 
 const gannBox: OverlayTemplate = {
   name: 'gannBox',

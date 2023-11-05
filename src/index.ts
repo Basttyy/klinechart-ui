@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { registerOverlay } from 'klinecharts'
+import { registerOverlay } from '@basttyy/klinecharts'
 
 import overlays from './extension'
 
@@ -23,7 +23,8 @@ import DefaultSessionController from './DefaultSessionController'
 
 import { load } from './i18n'
 
-import { OrderType, ExitType, OrderModalType, OrderInfo, OrderModifyInfo, sessionType, sessionModifyType, OrderResource, ChartSessionResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro } from './types'
+import { OrderType, ExitType, OrderModalType, OrderInfo, OrderModifyInfo, sessionType, sessionModifyType, OrderResource,
+  ChartSessionResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro, ChartObjType } from './types'
 
 import './index.less'
 
@@ -38,5 +39,7 @@ export {
 }
 
 export type {
-  OrderInfo, OrderModifyInfo, sessionType, sessionModifyType, ChartSessionResource, OrderType, ExitType, OrderModalType, OrderResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro
+  OrderInfo, OrderModifyInfo, sessionType, sessionModifyType, ChartSessionResource, OrderType, ExitType, OrderModalType,
+  OrderResource, Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, OrderPlacedCallback, ChartProOptions, ChartPro,
+  ChartObjType
 }

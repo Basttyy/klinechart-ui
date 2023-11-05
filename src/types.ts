@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { KLineData, Styles, DeepPartial } from 'klinecharts'
+import { KLineData, Styles, DeepPartial, OverlayCreate, FigureCreate, IndicatorCreate, PaneOptions } from '@basttyy/klinecharts'
 
 export type OrderType = 'buy'|'sell'|'buystop'|'buylimit'|'sellstop'|'selllimit'
 export type OrderModalType = 'placeorder'|'modifyorder'|'closepartial'
@@ -70,47 +70,105 @@ export interface Period {
 }
 
 export interface sessionType {
-	id: number;
+	id: number|string;
 	starting_bal: number;
 	current_bal: number;
   equity: number;
 	strategy_id: number;
 	user_id: number;
 	pair: string;
-	chart: null;
+	chart: string;
 	chart_timestamp: number|null;
 	start_date: string;
 	end_date: string;
 }
 
 export interface sessionModifyType {
-	id?: number;
+	id?: number|string;
 	starting_bal?: number;
 	current_bal?: number;
   equity?: number;
 	strategy_id?: number;
 	user_id?: number;
 	pair?: string;
-	chart?: null;
+	chart?: string;
 	chart_timestamp?: number|null;
 	start_date?: string;
 	end_date?: string;
 }
 
+type IndicatorsType = {
+  value?: IndicatorCreate,
+  isStack?: boolean,
+  paneOptions?: PaneOptions
+}
 
-export type DatafeedSubscribeCallback = (data: KLineData) => void
+type OverlaysType = {
+  value?: OverlayCreate,
+  paneId: string
+}
+
+type FiguresType = {
+  value?: string|FigureCreate,
+  ctx: CanvasRenderingContext2D
+}
+
+type OrderStyleType = {
+  lineStyle?: {
+		style?: string,
+		size?: number,
+		color?: string,
+		dashedValue?: number[]
+	},
+	labelStyle?: {
+		style?: string,
+		size?: number,
+		family?: string,
+		weight?: string,
+		paddingLeft?: number,
+		paddingRight?: number,
+		paddingBottom?: number,
+		paddingTop?: number,
+		borderStyle?: string,
+		borderSize?: number,
+		color?: string,
+		borderColor?: string,
+		backgroundColor?: string
+	}
+}
+
+export type OrderStylesType = {
+  buyStyle?: OrderStyleType,
+  buyLimitStyle?: OrderStyleType,
+  buyStopStyle?: OrderStyleType,
+  sellStyle?: OrderStyleType,
+  sellLimitStyle?: OrderStyleType,
+  sellStopStyle?: OrderStyleType,
+  stopLossStyle?: OrderStyleType,
+  takeProfitStyle?: OrderStyleType
+}
+
+export interface ChartObjType {
+  styleObj?: DeepPartial<Styles>
+  overlays?: OverlaysType[]
+  figures?: FiguresType[]
+  indicators?: IndicatorsType[]
+  orderStyles?: OrderStylesType
+}
+
+export type DatafeedSubscribeCallback = (data: KLineData, timestamp?: number) => void
 export type OrderPlacedCallback = (data: OrderInfo|null) => void     //this should be called when a user has successfully placed an order from consumer project side
 
 export interface Datafeed {
   searchSymbols (search?: string): Promise<SymbolInfo[]>
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
-  unsubscribe (symbol?: SymbolInfo, period?: Period): void
+  unsubscribe (symbol?: SymbolInfo, period?: Period, currtimestamp?: number): void
 }
 
 export interface OrderResource {
   retrieveOrder (order_id: number): Promise<OrderInfo|null>
-  retrieveOrders (action?: OrderType, session_id?: number): Promise<OrderInfo[]|null>
+  retrieveOrders (action?: OrderType, session_id?: number|string): Promise<OrderInfo[]|null>
   openOrder (action: OrderType, lot_size: number, entry_price: number, stop_loss?: number, take_profit?: number): Promise<OrderInfo|null>
   closeOrder (order_id: number, lotsize?: number): Promise<OrderInfo|null>
   modifyOrder (order: OrderModifyInfo): Promise<OrderInfo|null>
@@ -119,8 +177,11 @@ export interface OrderResource {
 }
 
 export interface ChartSessionResource {
-  retrieveSession (id: number): Promise<sessionType|null>
+  retrieveSession (id: number|string): Promise<sessionType|null>
   updateSession (session: sessionModifyType): Promise<sessionType|null>
+  isNotGuest (): boolean
+  // retrieveChartState (id: number): Promise<ChartObjType|null>
+  // syncState (chart_state: ChartObjType): Promise<boolean>
 }
 
 export interface ChartProOptions {
@@ -142,7 +203,6 @@ export interface ChartProOptions {
   dataTimestamp: number
   orderController: OrderResource
   chartSessionController: ChartSessionResource
-  navigateBack: () => void
   rootElementId: string
 }
 

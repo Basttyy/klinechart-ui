@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate,utils} from 'klinecharts'
-import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
-import { OrderInfo } from '../../../types'
-import { symbol } from '../../../ChartProComponent'
+import { OverlayTemplate,utils} from '@basttyy/klinecharts'
+import { useOrder } from '../../../store/positionStore'
+import { buyStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
 
 const buyLine: OverlayTemplate = {
   name: 'buyLine',
@@ -30,22 +30,13 @@ const buyLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#00698b'
-        },
+        styles: buyStyle().lineStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `buy | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        },
-        ignoreEvent: true
+        styles: buyStyle().labelStyle
       }
     ]
   },
@@ -60,7 +51,7 @@ const buyLine: OverlayTemplate = {
       textAlign = 'right'
       x = bounding.width
     }
-    let text
+    let text: string|null|undefined
     if (utils.isValid(overlay.extendData)) {
       if (!utils.isFunction(overlay.extendData)) {
         text = overlay.extendData ?? ''
@@ -71,12 +62,14 @@ const buyLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#00698b' } }
+    // let width = utils.calcTextWidth((text as string))
+    // const height = width/(text as string).length * 3
+    // width = width + height * 2
+    return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: buyStyle().labelStyle }
   },
   onRightClick: (event): boolean => {
-    useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    //the overlay represented an order that does not exist on our pool, it should be handled here
-    return false
+    useOverlaySettings().singlePopup(event, 'buy')
+    return true
   }
 }
 

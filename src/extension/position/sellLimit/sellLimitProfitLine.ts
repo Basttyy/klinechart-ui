@@ -12,14 +12,19 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
+import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
 
 import { currenttick } from '../../../store/tickStore'
 import { useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
+import { sellLimitStyle, takeProfitStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 /**
  * 获取平行线
@@ -60,7 +65,7 @@ const sellLimitProfitLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! <= currenttick()?.close!) {
+    if (overlay.points[0].value! <= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! <= currenttick()?.high!)) {
       useOrder().triggerPending(overlay, 'sell')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
@@ -68,39 +73,24 @@ const sellLimitProfitLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines[0],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#fb7b50'
-        },
+        styles: sellLimitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#00698b'
-        }
+        styles: takeProfitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts[0],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        },
-        // ignoreEvent: true
+        styles: sellLimitStyle().labelStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: parallel.recttexts[1],
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        }
+        styles: takeProfitStyle().labelStyle
       }
     ]
   },
@@ -125,19 +115,19 @@ const sellLimitProfitLine: OverlayTemplate = {
     }
     return [
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
-        // ignoreEvent: true
+        styles: sellLimitStyle().labelStyle
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' },
+        styles: takeProfitStyle().labelStyle
       }
     ]
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
@@ -145,30 +135,31 @@ const sellLimitProfitLine: OverlayTemplate = {
       paneId: event.overlay.paneId
     })
 
-    // for tp
-    if ((points as Partial<Point>[])[0].value! < currenttick()?.close!) {
-      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
-      if (res) event.overlay.points[1].value = res
-    }
-
-    // for sell limit
-    if ((points as Partial<Point>[])[0].value! > currenttick()?.close! && event.figureIndex == 0) {
+    if (
+      (points as Partial<Point>[])[0].value! > currenttick()?.close! &&
+      (points as Partial<Point>[])[0].value! > event.overlay.points[1].value! &&
+      event.figureIndex == 0
+    ) {
       const res = useOrder().updateEntryPointAndReturnValue(event, points)
       if(res) event.overlay.points[0].value = res
+    }
+    else if (
+      (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
+      event.figureIndex == 1
+    ) {
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if (res) event.overlay.points[1].value = res
     }
     return true
   },
   onPressedMoveEnd: (event): boolean => {
     useOrder().updatePositionOrder(event)
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {
-    if (event.figureIndex == 0)
-      useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    else
-      useOrder().removeStopOrTP(event.overlay, 'tp')
-    return false
+    useOverlaySettings().profitPopup(event, 'sell')
+    return true
   }
 }
 

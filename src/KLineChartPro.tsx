@@ -14,7 +14,7 @@
 
 import { render } from 'solid-js/web'
 
-import { utils, Nullable, DeepPartial, Styles } from 'klinecharts'
+import { utils, Nullable, DeepPartial, Styles } from '@basttyy/klinecharts'
 
 import ChartProComponent from './ChartProComponent'
 
@@ -76,7 +76,6 @@ export default class KLineChartPro implements ChartPro {
           dataTimestamp={options.dataTimestamp}
           orderController={options.orderController}
           chartSessionController={options.chartSessionController}
-          navigateBack={options.navigateBack}
           rootElementId={options.rootElementId}
         />
       ),

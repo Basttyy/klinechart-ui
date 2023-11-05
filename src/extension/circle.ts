@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate } from 'klinecharts'
+import { OverlayTemplate } from '@basttyy/klinecharts'
 
 import { getDistance } from './utils'
 
@@ -27,7 +27,7 @@ const circle: OverlayTemplate = {
       color: 'rgba(22, 119, 255, 0.15)'
     }
   },
-  createPointFigures: ({ coordinates }) => {
+  createPointFigures: ({ overlay, coordinates, bounding }) => {
     if (coordinates.length > 1) {
       const radius = getDistance(coordinates[0], coordinates[1])
       return {

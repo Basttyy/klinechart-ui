@@ -1,4 +1,4 @@
-import { ChartSessionResource, sessionModifyType, sessionType } from "./types";
+import { ChartObjType, ChartSessionResource, sessionModifyType, sessionType } from "./types";
 
 type MethodType = 'POST'|'GET'|'DELETE'|'PUT'
 
@@ -28,6 +28,10 @@ export default class DefaultSessionController implements ChartSessionResource {
       end_date: resp.data.end_date
     }
   }
+
+  isNotGuest (): boolean {
+    return false
+  }
   
   async updateSession(session: sessionModifyType): Promise<sessionType | null> {
     const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/test-sessions/${session.id}`, session)
@@ -46,6 +50,16 @@ export default class DefaultSessionController implements ChartSessionResource {
       end_date: data.end_date
     }
   }
+
+  // async retrieveChartState(id: number): Promise<ChartObjType | null> {
+  //   const response = await this.makeFetchWithAuthAndBody('GET', `${this.apiurl}/test-sessions/${id}`)
+  //   const resp = await response?.json()
+  //   return resp.data
+  // }
+
+  // async syncState(id: number, chart_state: ChartObjType): Promise<boolean> {
+  //   const response = await this.makeFetchWithAuthAndBody('PUT', `${this.apiurl}/test-sessions/${id}`, chart_state)
+  // }
   
   private async makeFetchWithAuthAndBody (method: MethodType, endpoint: string, params?: object): Promise<Response|null> {
     const options: RequestInit = {

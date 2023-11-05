@@ -13,12 +13,14 @@
  */
 
 import { Component, createResource, createMemo, createSignal, createEffect, Show, For, onMount } from 'solid-js'
-import { OverlayCreate, OverlayMode } from 'klinecharts'
+import { OverlayCreate, OverlayMode } from '@basttyy/klinecharts'
 import i18n from '../../i18n'
 import { List, Checkbox, Input, Button, Loading } from '../../component'
 import { Datafeed, OrderInfo, OrderResource, OrderType } from '../../types'
 import { drawOrder, orderList, useOrder } from '../../store/positionStore'
 import { instanceapi } from '../../ChartProComponent'
+import { setOrderModalVisible } from '../../store/chartStateStore'
+import { syntheticPausePlay } from '../../store/keyEventStore'
 
 export interface OrderPanelProps {
   context: string
@@ -32,8 +34,12 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
 
   const [loadingVisible, setLoadingVisible] = createSignal(true)
   const [ordersList, setOrdersList] = createSignal<OrderInfo[]>([])
+  const [isRunning, setIsRunning] = createSignal(true)
+  
 
   const onOrderEdited = (order: OrderInfo|null) => {
+    setOrderModalVisible(false)
+    syntheticPausePlay(false)
     if (order) {
       drawOrder(order)
       let orderlist = orderList()
@@ -48,16 +54,28 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
       return
     }
     if (action == 'edit') {
+      setOrderModalVisible(true)
+      syntheticPausePlay(true)
       props.orderController.launchOrderModal('modifyorder', onOrderEdited, {
         id: order.orderId,
         stoploss: order.stopLoss,
         takeprofit: order.takeProfit,
         entrypoint: order.action == 'buy' || order.action == 'sell' ? undefined : order.entryPoint,
-        lotsize: order.action == 'buy' || order.action == 'sell' ? undefined : order.lotSize
+        lotsize: order.action == 'buy' || order.action == 'sell' ? undefined : order.lotSize,
+        action: order.action
       })
       return
     }
     useOrder().closeOrder(overlay, action == 'close' ? 'manualclose' : 'cancel')
+  }
+
+  const formatNumber = (num:number) => {
+    if(!num) return null
+    if (Number.isInteger(num)) {
+      return num.toString();
+    } else {
+      return num.toFixed(2);
+    }
   }
 
   onMount(() => {
@@ -78,59 +96,75 @@ const OrdersPanel: Component<OrderPanelProps> = props => {
         <span>No Opened Orders</span>
       </Show>
       <Show when={orderList().length > 0 || loadingVisible()}>
-        <List
-          class="klinecharts-pro-order-pane-list"
-          loading={loadingVisible()}>
-          {
-            !loadingVisible() ? <li>
-            <div class="order-header">
-              <span style={'width: 70px'}>Order Id</span>
-              <span style={'width: 70px'}>Session Id</span>
-              <span style={'width: 110px'}>Action Type</span>
-              <span style={'width: 110px'}>Entry Point</span>
-              <span style={'width: 110px'}>Take Profit</span>
-              <span style={'width: 110px'}>Stop Loss</span>
-              <span style={'width: 140px'}>Profit/Loss</span>
-              <span style={'width: 110px'}>Exit Point</span>
-              <span style={'width: 160px'}>Entry Time</span>
-              <span style={'width: 160px'}>Exit Time</span>
-              <span style={'width: 110px'}>Edit Order</span>
-              <span style={'width: 110px'}>Close Order</span>
+        <div class="tab_wrapper">
+            <div class="tab_button_holder">
+                <button class={`${isRunning() ? 'selected' : ''}`}
+                  onClick={() => { setIsRunning(true)}}
+                >Running</button>
+                <button class={`${!isRunning() ? 'selected' : ''}`}
+                  onClick={() => { setIsRunning(false) }}
+                >Closed</button>
             </div>
-          </li> :
-          <li></li>
-          }
-          {
-            orderList().map(order => (
-              <li>
-                <div class='order-item'>
-                  <span style={'width: 70px'}>{ order.orderId }</span>
-                  <span style={'width: 70px'}>{ order.sessionId }</span>
-                  <span style={'width: 110px'}>{ order.action }</span>
-                  <span style={'width: 110px'}>{ order.entryPoint }</span>
-                  <span style={'width: 110px'}>{ order.takeProfit }</span>
-                  <span style={'width: 110px'}>{ order.stopLoss }</span>
-                  <span style={'width: 140px'}>{ order.pl }</span>
-                  <span style={'width: 110px'}>{ order.exitPoint }</span>
-                  <span style={'width: 160px'}>{ order.entryTime }</span>
-                  <span style={'width: 160px'}>{ order.exitTime }</span>
-                  <span style={'width: 110px'}>
-                    <Button
-                      type='confirm'
-                      class='edit-button'
-                      onClick={() => {performOrderAction(order, 'edit')}}>Edit</Button>
-                  </span>
-                  <span style={'width: 110px'}>
-                    <Button
-                      type='cancel'
-                      class='close-button'
-                      onClick={() => {performOrderAction(order, order.action == 'buy' || order.action == 'sell' ? 'close' : 'cancel')}}>{ order.action == 'buy' || order.action == 'sell' ? 'Close' : 'Cancel'}</Button>
-                  </span>
-                </div>
-              </li>
-            ))
-          }
-        </List>
+            
+            <div class="tab_content_wrapper">
+              <List class="klinecharts-pro-order-pane-list" loading={loadingVisible()}>
+                {
+                  !loadingVisible() ? <li style={"min-width: 1400px"}>
+                  <div class="order-header" >
+                    <span style={'width: 8%'}>Order Id</span>
+                    <span style={'width: 8%'}>Session Id</span>
+                    <span style={'width: 8%'}>Action Type</span>
+                    <span style={'width: 8%'}>Entry Point</span>
+                    <span style={'width: 8%'}>Take Profit</span>
+                    <span style={'width: 8%'}>Stop Loss</span>
+                    <span style={'width: 8%'}>Profit/Loss</span>
+                    <span style={'width: 8%'}>Exit Point</span>
+                    <span style={'width: 10%'}>Entry Time</span>
+                    <span style={'width: 10%'}>Exit Time</span>
+                    <span style={'width: 8%'}>Edit Order</span>
+                    <span style={'width: 8%'}>Close Order</span>
+                  </div>
+                </li> :
+                <li></li>
+                }
+                {
+                  orderList()
+                  .filter(orda => isRunning() ? orda.exitType == null : orda.exitType != null)
+                  .map(order => (
+                    <li style={"min-width: 1400px"}>
+                      <div class='order-item' >
+                        <span style={'width: 8%'}>{ order.orderId }</span>
+                        <span style={'width: 8%'}>{ order.sessionId }</span>
+                        <span style={'width: 8%'}>{ order.action }</span>
+                        <span style={'width: 8%'}>{ order.entryPoint || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ order.takeProfit || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ order.stopLoss || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ formatNumber(order.pl!) || 'N/A' }</span>
+                        <span style={'width: 8%'}>{ order.exitPoint || 'N/A' }</span>
+                        <span style={'width: 10%'}>{ order.entryTime }</span>
+                        <span style={'width: 10%'}>{ order.exitTime }</span>
+                        <span style={'width: 8%'}>
+                          <Button isDisabled={!isRunning()}
+                            type='confirm'
+                            class='edit-button'
+                            onClick={() => {performOrderAction(order, 'edit')}}>
+                              Edit
+                          </Button>
+                        </span>
+                        <span style={'width: 8%'}>
+                          <Button isDisabled={!isRunning()}
+                            type='cancel'
+                            class='close-button'
+                            onClick={() => {performOrderAction(order, order.action == 'buy' || order.action == 'sell' ? 'close' : 'cancel')}}>{ order.action == 'buy' || order.action == 'sell' ? 'Close' : 'Cancel'}
+                          </Button>
+                        </span>
+                      </div>
+                    </li>
+                  ))
+                }
+              </List>
+            </div>
+        </div>
       </Show>
     </div>
   )

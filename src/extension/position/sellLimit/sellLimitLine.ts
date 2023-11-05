@@ -12,11 +12,16 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay, Point } from 'klinecharts'
+import { OverlayTemplate, CircleAttrs, TextAttrs, LineAttrs, Figure, Coordinate, Bounding, utils, Overlay, Point } from '@basttyy/klinecharts'
 import { useOrder, setOrderList, orderList } from '../../../store/positionStore'
 import { currenttick } from '../../../store/tickStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
+import { sellStyle } from '../../../store/overlaystyle/positionStyleStore'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 const sellLimitLine: OverlayTemplate = {
   name: 'sellLimitLine',
@@ -26,29 +31,20 @@ const sellLimitLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-    if (overlay.points[0].value! <= currenttick()?.close! ) {
+    if (overlay.points[0].value! <= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! <= currenttick()?.high!)) {
       useOrder().triggerPending(overlay, 'sell')
     }
     return [
       {
         type: 'line',
         attrs: { coordinates: [{ x: 0, y: coordinates[0].y }, { x: bounding.width, y: coordinates[0].y }] },
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#fb7b50'
-        },
+        styles: sellStyle().lineStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `sellLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        },
-        ignoreEvent: true
+        styles: sellStyle().labelStyle
       }
     ]
   },
@@ -74,9 +70,10 @@ const sellLimitLine: OverlayTemplate = {
     if (!utils.isValid(text) && overlay.points[0].value !== undefined) {
       text = utils.formatPrecision(overlay.points[0].value, precision.price)
     }
-    return { type: 'rectText', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: { color: 'white', backgroundColor: '#fb7b50' } }
+    return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
@@ -91,14 +88,13 @@ const sellLimitLine: OverlayTemplate = {
     return true
   },
   onPressedMoveEnd: (event): boolean => {
+    setIsDrawing(false)
     useOrder().updatePositionOrder(event)
-    //the overlay represented an order that does not exist on our pool, it should be handled here
     return false
   },
   onRightClick: (event): boolean => {
-    useOrder().closeOrder(event.overlay, 'cancel')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    //the overlay represented an order that does not exist on our pool, it should be handled here
-    return false
+    useOverlaySettings().singlePopup(event, 'sell')
+    return true
   }
 }
 

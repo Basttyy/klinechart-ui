@@ -13,7 +13,7 @@
  */
 
 import { createSignal, createMemo, createEffect } from 'solid-js';
-import { OverlayTemplate } from 'klinecharts'
+import { OverlayTemplate } from '@basttyy/klinecharts'
 import { currenttick } from '../../store/tickStore'
 import { useOrder } from '../../store/positionStore';
 

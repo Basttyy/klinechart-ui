@@ -20,12 +20,14 @@ export interface ButtonProps extends ParentProps {
   class?: string
   style?: JSX.CSSProperties | string
   type?: ButtonType
+  isDisabled?: boolean
   onClick?: () => void
 }
 
 const Button: ParentComponent<ButtonProps> = props => {
   return (
     <button
+      disabled={props.isDisabled}
       style={props.style}
       class={`klinecharts-pro-button ${props.type ?? 'confirm'} ${props.class?? ''}`}
       onClick={props.onClick}>

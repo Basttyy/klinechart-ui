@@ -12,15 +12,19 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from 'klinecharts'
-
+import { OverlayTemplate, TextAttrs, LineAttrs, Coordinate, Bounding, utils, Point, Overlay, Precision } from '@basttyy/klinecharts'
+import { buyStyle, takeProfitStyle,stopLossStyle } from '../../../store/overlaystyle/positionStyleStore'
 import { currenttick } from '../../../store/tickStore'
 import { orderList, setOrderList, useOrder } from '../../../store/positionStore'
 import { instanceapi, symbol } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
+import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 /**
  * 获取平行线
@@ -67,9 +71,9 @@ const buyProfitLossLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[1].value! <= currenttick()?.close! || overlay.points[1].value! <= currenttick()?.high!) { //TP was hit
+    if (overlay.points[1].value! <= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! <= currenttick()?.high!)) { //TP was hit
       useOrder().closeOrder(overlay, 'takeprofit')
-    } else if (overlay.points[2].value! >= currenttick()?.close! || overlay.points[2].value! >= currenttick()?.high!) {
+    } else if (overlay.points[2].value! >= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! >= currenttick()?.low!)) {
       useOrder().closeOrder(overlay, 'stoploss')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
@@ -77,58 +81,35 @@ const buyProfitLossLine: OverlayTemplate = {
       {
         type: 'line',
         attrs: parallel.lines[0],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#00698b'
-        },
+        styles: buyStyle().lineStyle,
         ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#00698b'
-        }
+        styles: takeProfitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[2],
-        styles: {
-          style: 'dashed',
-          dashedValue: [4, 4],
-          size: 1,
-          color: '#fb7b50'
-        }
-      },
-      {
-        type: 'rectText',
-        attrs: parallel.recttexts[0],
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        },
+        styles: stopLossStyle().lineStyle,
         ignoreEvent: true
       },
       {
-        type: 'rectText',
-        attrs: parallel.recttexts[1],
-        styles: {
-          color: 'white',
-          backgroundColor: '#00698b'
-        }
+        type: 'text',
+        attrs: parallel.recttexts[0],
+        styles: buyStyle().labelStyle,
       },
       {
-        type: 'rectText',
+        type: 'text',
+        attrs: parallel.recttexts[1],
+        styles: takeProfitStyle().labelStyle
+      },
+      {
+        type: 'text',
         attrs: parallel.recttexts[2],
-        styles: {
-          color: 'white',
-          backgroundColor: '#fb7b50'
-        }
+        styles: stopLossStyle().labelStyle
       }
     ]
   },
@@ -156,81 +137,53 @@ const buyProfitLossLine: OverlayTemplate = {
     }
     return [
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' },
-        ignoreEvent: true
+        styles: buyStyle().labelStyle,
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[1].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#00698b' },
+        styles: takeProfitStyle().labelStyle,
       },
       {
-        type: 'rectText',
+        type: 'text',
         attrs: { x, y: coordinates[2].y, text: text2 ?? '', align: textAlign, baseline: 'middle' },
-        styles: { color: 'white', backgroundColor: '#fb7b50' },
+        styles: stopLossStyle().labelStyle,
       }
     ]
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    
-    let id = event.overlay.id
-    let order: OrderInfo|null
 
     if ((points as Partial<Point>[])[0].value! > currenttick()?.close! &&
       (points as Partial<Point>[])[0].value! > event.overlay.points[0].value! &&
       event.figureIndex == 1
     ) {
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order!.takeProfit = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-        event.overlay.points[1].value = order?.takeProfit
-      }
-      //the overlay represented an order that does not exist on our pool, it should be handled here
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if (res) event.overlay.points[1].value = res
     } else if ((points as Partial<Point>[])[0].value! < currenttick()?.close! &&
-      (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! &&
       event.figureIndex == 2
     ) {
-      if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-        order!.stopLoss = parseFloat( (points as Partial<Point>[])[0].value?.toFixed(instanceapi()?.getPriceVolumePrecision().price)!)
-        const orderlist = orderList().map(orda => (orda.orderId === order?.orderId ? order : orda))
-        setOrderList(orderlist)
-        event.overlay.points[1].value = order?.stopLoss
-      }
-      //the overlay represented an order that does not exist on our pool, it should be handled here
+      const res = useOrder().updateStopLossAndReturnValue(event, points)
+      if (res) event.overlay.points[2].value = res
     }
     return true
   },
   onPressedMoveEnd: (event): boolean => {
-    let id = event.overlay.id
-    let order: OrderInfo|null
-    if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
-      useOrder().updateOrder({
-        id: order.orderId,
-        stoploss: order.stopLoss,
-        takeprofit: order.takeProfit
-      })
-      return false
-    }
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    useOrder().updatePositionOrder(event)
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {
-    if (event.figureIndex == 0)
-      useOrder().closeOrder(event.overlay, 'manualclose')    //TODO: if the user doesn't enable one-click trading then we should alert the user before closing
-    else if (event.figureIndex == 1)
-      useOrder().removeStopOrTP(event.overlay, 'tp')
-    else
-      useOrder().removeStopOrTP(event.overlay, 'sl')
-    return false
+    useOverlaySettings().profitLossPopup(event, 'buy')
+    return true
   }
 }
 

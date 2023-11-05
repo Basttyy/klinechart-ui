@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { Coordinate, Bounding, LineAttrs, utils, Nullable } from 'klinecharts'
+import { Coordinate, Bounding, LineAttrs, utils, Nullable } from '@basttyy/klinecharts'
 
 export function getRotateCoordinate (coordinate: Coordinate, targetCoordinate: Coordinate, angle: number): Coordinate {
   const x = (coordinate.x - targetCoordinate.x) * Math.cos(angle) - (coordinate.y - targetCoordinate.y) * Math.sin(angle) + targetCoordinate.x
