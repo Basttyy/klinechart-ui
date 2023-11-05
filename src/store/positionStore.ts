@@ -145,6 +145,7 @@ export const useOrder = () => {
     const doJob = async () => {
       let id = overlay.id
       let order: OrderInfo|null
+      console.log(`got to close order: ${id}, exittype: ${type}`)
       if (order = orderList().find(order => order.orderId === parseInt(id.replace('orderline_', ''))) ?? null) { // order found
         instanceapi()?.removeOverlay({    //remove the overlay first to prevent flooding this backend with api calls
           id: overlay.id,
@@ -158,6 +159,7 @@ export const useOrder = () => {
           pips: type == 'cancel' ? undefined : order.pips,   //in a real application this should be calculated on backend
           pl: type == 'cancel' ? undefined : order.pl    //in a real application this should be calculated on backend
         })!
+        console.log(updatedorder)
         
         if (updatedorder) {
           const session = chartsession()

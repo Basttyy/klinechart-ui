@@ -29,8 +29,8 @@ export const useGetOverlayStyle: { [key: string]: Accessor<object> } = {
 
 // Define an object that maps function names to functions
 export const useSetOverlayStyle: { [key: string]: Setter<object>} = {
-  setPointStyle: (value: any) => setPointStyle(value),
-  setHorizontalStraightLineStyle: (value: any) => setHorizontalStraightLineStyle(value),
+  setpointStyle: (value: any) => setPointStyle(value),
+  sethorizontalStraightLineStyle: (value: any) => setHorizontalStraightLineStyle(value),
   sethorizontalRayLineStyle: (value: any) => setHorizontalRayLineStyle(value),
   sethorizontalSegmentStyle: (value: any) => setHorizontalSegmentStyle(value),
   setverticalStraightLineStyle: (value: any) => setVerticalStraightLineStyle(value),

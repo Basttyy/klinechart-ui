@@ -19,10 +19,13 @@ import { useOrder } from '../../../store/positionStore'
 import { instanceapi } from '../../../ChartProComponent'
 import { buyLimitStyle, takeProfitStyle,stopLossStyle } from '../../../store/overlaystyle/positionStyleStore'
 import {useOverlaySettings} from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
 
 
 type lineobj = { 'lines': LineAttrs[], 'recttexts': rectText[] }
 type rectText = { x: number, y: number, text: string, align: CanvasTextAlign, baseline: CanvasTextBaseline }
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 /**
  * 获取平行线
@@ -44,7 +47,7 @@ function getParallelLines (coordinates: Coordinate[], bounding: Bounding, overla
       data.lines.push({ coordinates: [{ x: startX, y: coordinates[0].y }, { x: endX, y: coordinates[0].y }] })
       text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
       useOrder().updatePipsAndPL(overlay, text)
-      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buyLimit | ${text}` ?? '', align: 'right', baseline: 'middle' })
+      data.recttexts.push({ x: endX, y: coordinates[0].y, text: `buylimit | ${text}` ?? '', align: 'right', baseline: 'middle' })
   }
   if (coordinates.length > 1) {
     data.lines.push({ coordinates: [{ x: startX, y: coordinates[1].y }, { x: endX, y: coordinates[1].y }] })
@@ -68,7 +71,7 @@ const buyLimitProfitLossLine: OverlayTemplate = {
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
-    if (overlay.points[0].value! >= currenttick()?.close! ) { //TP was hit
+    if (overlay.points[0].value! >= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! >= currenttick()?.low!)) {
       useOrder().triggerPending(overlay, 'buy')
     }
     const parallel = getParallelLines(coordinates, bounding, overlay, precision)
@@ -77,16 +80,19 @@ const buyLimitProfitLossLine: OverlayTemplate = {
         type: 'line',
         attrs: parallel.lines[0],
         styles: buyLimitStyle().lineStyle,
+        ignoreEvent: true,
       },
       {
         type: 'line',
         attrs: parallel.lines[1],
-        styles: takeProfitStyle().lineStyle
+        styles: takeProfitStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'line',
         attrs: parallel.lines[2],
-        styles: stopLossStyle().lineStyle
+        styles: stopLossStyle().lineStyle,
+        ignoreEvent: true
       },
       {
         type: 'text',
@@ -146,35 +152,36 @@ const buyLimitProfitLossLine: OverlayTemplate = {
     ]
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
     const points = instanceapi()?.convertFromPixel(coordinate, {
       paneId: event.overlay.paneId
     })
-    // for tp
-    if ((points as Partial<Point>[])[0].value! > currenttick()?.close!) {
-      // event.overlay.points[1].value = (points as Partial<Point>[])[0].value
-      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
-      if(res) event.overlay.points[1].value = res
-    }
     // for buylimit
     if (
       (points as Partial<Point>[])[0].value! < currenttick()?.close! && 
+      (points as Partial<Point>[])[0].value! < event.overlay.points[1].value! && 
       (points as Partial<Point>[])[0].value! > event.overlay.points[2].value! && 
       event.figureIndex == 0
     ) {
-      // event.overlay.points[0].value = (points as Partial<Point>[])[0].value
       const res = useOrder().updateEntryPointAndReturnValue(event, points)
       if (res) event.overlay.points[0].value = res
     }
+    // for tp
+    else if (
+      (points as Partial<Point>[])[0].value! > event.overlay.points[0].value! &&
+      event.figureIndex == 1
+      ) {
+      const res = useOrder().updateTakeProfitAndReturnValue(event, points)
+      if(res) event.overlay.points[1].value = res
+    }
     // for stoploss
-    if (
-      (points as Partial<Point>[])[0].value! < currenttick()?.close! && 
+    else if (
       (points as Partial<Point>[])[0].value! < event.overlay.points[0].value! && 
       event.figureIndex == 2
     ) {
-      // event.overlay.points[2].value = (points as Partial<Point>[])[0].value
       const res = useOrder().updateStopLossAndReturnValue(event, points)
       if(res) event.overlay.points[2].value = res
     }
@@ -182,7 +189,7 @@ const buyLimitProfitLossLine: OverlayTemplate = {
   },
   onPressedMoveEnd: (event): boolean => {
     useOrder().updatePositionOrder(event)
-    //the overlay represented an order that does not exist on our pool, it should be handled here
+    setIsDrawing(false)
     return false
   },
   onRightClick: (event): boolean => {

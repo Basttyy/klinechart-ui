@@ -20,12 +20,13 @@ import i18n from '../../i18n'
 
 import { SymbolInfo, Datafeed, Period } from '../../types'
 import { setInputClass } from '../../component/input'
+import { syntheticPausePlay } from '../../store/keyEventStore'
+import { setPeriodModalVisible } from '../../ChartProComponent'
 
 export interface TimeframeModalProps {
   locale: string
   periods: Period[]
   onTimeframeSelected: (period: Period) => void
-  onClose: () => void
 }
 
 export const [periodInputValue, setPeriodInputValue] = createSignal('')
@@ -39,11 +40,8 @@ const TimeframeModal: Component<TimeframeModalProps> = props => {
     if (event.key === "Enter") {
       if (period()) {
         props.onTimeframeSelected(period()!)
-        setPeriodInputValue('')
-        props.onClose()
-      } else {
-        setPeriodInputValue('')
       }
+      closeModal()
       // Add your desired action here
     } else {
       // Get the key code of the pressed key
@@ -61,22 +59,44 @@ const TimeframeModal: Component<TimeframeModalProps> = props => {
         else
           setPeriodInputValue(periodInputValue()+event.key)
 
-        const perio = props.periods.find(per => periodInputValue().slice(0, -1) === `${per.multiplier}` && periodInputValue().charAt(periodInputValue().length - 1) === per.timespan.charAt(0))
-        if (perio) {
-          setPeriod(perio)
-          setInputClass(defClass)
-        } else {
-          setInputClass(defClass + ' input-error')
-          setPeriod(null)
-        }
+        performCheck()
       }
+    }
+  }
+
+  function performCheck() {
+    const perio = props.periods.find((per) => {
+      if (periodInputValue() === `${per.multiplier}` && per.text.split(' ')[1].charAt(0) === 'm') {
+        console.log('1 passed')
+        return true
+      }
+      // if (periodInputValue().slice(0, -1) === `${per.multiplier}` && /\d/.test(periodInputValue().charAt(periodInputValue().length-1))) {
+      //   console.log('2 passed')
+      //   return true
+      // }
+      if (periodInputValue().slice(0, -1) === `${per.multiplier}` && ((periodInputValue().charAt(periodInputValue().length - 1) === per.text.split(' ')[1].charAt(0)))) {
+        console.log('3 passed')
+        return true
+      }
+      return false
+    })
+    console.log(perio)
+    if (perio) {
+      setPeriod(perio)
+      setInputClass(defClass)
+    } else {
+      setInputClass(defClass + ' input-error')
+      setPeriod(null)
     }
   }
 
   function closeModal() {
     setPeriodInputValue('')
-    props.onClose()
+    syntheticPausePlay(false)
+    setPeriodModalVisible(false)
   }
+
+  performCheck()
 
   return (
     <Modal

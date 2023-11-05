@@ -3,7 +3,7 @@ import { OrderInfo, OrderModalType, OrderModifyInfo, OrderPlacedCallback, OrderR
 type MethodType = 'POST'|'GET'|'DELETE'|'PUT'
 
 export default class DefaultOrderController implements OrderResource {
-  constructor (_testsession_id: number, _apiurl: string, _apikey: string) {
+  constructor (_apiurl: string, _apikey: string, _testsession_id: number|string) {
     this.apiurl = _apiurl
     this.apikey = _apikey
     this.testsesson_id = _testsession_id
@@ -11,7 +11,7 @@ export default class DefaultOrderController implements OrderResource {
 
   private apikey: string
   private apiurl: string
-  private testsesson_id: number
+  private testsesson_id: number|string
 
   async retrieveOrder(order_id: number): Promise<OrderInfo> {
     const response = await this.makeFetchWithAuthAndBody('GET', `${this.apiurl}/positions/${order_id}`)

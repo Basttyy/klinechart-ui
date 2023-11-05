@@ -19,6 +19,9 @@ import { instanceapi } from '../../../ChartProComponent'
 import { OrderInfo } from '../../../types'
 import { sellStyle } from '../../../store/overlaystyle/positionStyleStore'
 import { useOverlaySettings } from '../../../store/overlaySettingStore'
+import { createSignal } from 'solid-js'
+
+const [ isDrawing, setIsDrawing ] = createSignal(false)
 
 const sellLimitLine: OverlayTemplate = {
   name: 'sellLimitLine',
@@ -28,7 +31,7 @@ const sellLimitLine: OverlayTemplate = {
   needDefaultYAxisFigure: true,
   createPointFigures: ({ overlay, coordinates, bounding, precision }) => {
     let text = useOrder().calcPL(overlay.points[0].value!, precision.price, true)
-    if (overlay.points[0].value! <= currenttick()?.close! ) {
+    if (overlay.points[0].value! <= currenttick()?.close! || (!isDrawing() && overlay.points[1].value! <= currenttick()?.high!)) {
       useOrder().triggerPending(overlay, 'sell')
     }
     return [
@@ -41,8 +44,7 @@ const sellLimitLine: OverlayTemplate = {
       {
         type: 'text',
         attrs: { x: bounding.width, y: coordinates[0].y, text: `sellLimit | ${text}` ?? '', align: 'right', baseline: 'middle' },
-        styles: sellStyle().labelStyle,
-        ignoreEvent: true
+        styles: sellStyle().labelStyle
       }
     ]
   },
@@ -71,6 +73,7 @@ const sellLimitLine: OverlayTemplate = {
     return { type: 'text', attrs: { x, y: coordinates[0].y, text: text ?? '', align: textAlign, baseline: 'middle' }, styles: sellStyle().labelStyle }
   },
   onPressedMoving: (event): boolean => {
+    setIsDrawing(true)
     let coordinate: Partial<Coordinate>[] = [
       {x: event.x, y: event.y}
     ]
@@ -85,8 +88,8 @@ const sellLimitLine: OverlayTemplate = {
     return true
   },
   onPressedMoveEnd: (event): boolean => {
+    setIsDrawing(false)
     useOrder().updatePositionOrder(event)
-    //the overlay represented an order that does not exist on our pool, it should be handled here
     return false
   },
   onRightClick: (event): boolean => {
