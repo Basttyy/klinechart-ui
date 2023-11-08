@@ -35,7 +35,7 @@ import { translateTimezone } from './widget/timezone-modal/data'
 import { SymbolInfo, Period, ChartProOptions, ChartPro, sessionType, OrderInfo, OrderResource, ChartSessionResource } from './types'
 import { currenttick, setCurrentTick, setTickTimestamp, tickTimestamp } from './store/tickStore'
 import { orderList, ordercontr, setOrderContr, setCurrentequity } from './store/positionStore'
-import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified, documentResize, setTheme, theme, setDatafeed } from './store/chartStateStore'
+import { useChartState, mainIndicators, setMainIndicators, subIndicators, setSubIndicators, chartModified, setChartModified, documentResize, setTheme, theme, setDatafeed, cleanup } from './store/chartStateStore'
 import { setTimerid, setWidgetref, syntheticPausePlay, useKeyEvents } from './store/keyEventStore'
 import SpeedPopup from './component/popup/timeframe'
 
@@ -198,7 +198,6 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
     document.addEventListener("keydown", useKeyEvents().handleKeyDown)
     document.addEventListener("keyup", useKeyEvents().handleKeyUp)
-    // document.addEventListener('keypress', useKeyEvents().handleKeyPress)
     setOrderContr(props.orderController)
     window.addEventListener('resize', documentResize)
     widget = init(widgetRef!, {
@@ -322,16 +321,26 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
   })
 
-  onCleanup(() => {
-    document.removeEventListener('contextmenu', function(event) {
-      event.preventDefault();
-    });
-    document.removeEventListener("keydown", useKeyEvents().handleKeyDown)
-    document.removeEventListener("keyup", useKeyEvents().handleKeyUp)
-    // document.removeEventListener('keypress', useKeyEvents().handleKeyPress)
-    window.removeEventListener('resize', documentResize)
-    clearInterval(timerId)
-    dispose(widgetRef!)
+  createEffect(() => {
+    const clearChartObj = async () => {
+      document.removeEventListener('contextmenu', function(event) {
+        event.preventDefault();
+      });
+      document.removeEventListener("keydown", useKeyEvents().handleKeyDown)
+      document.removeEventListener("keyup", useKeyEvents().handleKeyUp)
+      window.removeEventListener('resize', documentResize)
+      clearInterval(timerId)
+      dispose(widgetRef!)
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    window.onbeforeunload = (e) => {
+      cleanup()
+      clearChartObj()
+    }
+    window.onpopstate = (e) => {
+      cleanup()
+      clearChartObj()
+    }
   })
 
   createEffect(() => {

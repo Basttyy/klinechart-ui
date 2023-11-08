@@ -19,7 +19,7 @@ import { SymbolInfo, Period, OrderResource, Datafeed } from '../../types'
 import i18n from '../../i18n'
 import { useOrder } from '../../store/positionStore'
 import { chartsessionCtr, pausedStatus, rootlelID, setPausedStatus, setShowSpeed } from '../../ChartProComponent'
-import { cleanup, fullScreen, range, setFullScreen, setOrderModalVisible } from '../../store/chartStateStore'
+import { fullScreen, range, setFullScreen, setOrderModalVisible } from '../../store/chartStateStore'
 import { setSpeedPopupLeft, speedPopupLeft } from '../../component/popup/timeframe'
 import { getScreenSize } from '../../helpers'
 import { syntheticPausePlay } from '../../store/keyEventStore'
@@ -64,10 +64,8 @@ const PeriodBar: Component<PeriodBarProps> = props => {
   }
 
   const onExitClicked = () => {
-    setPausedStatus(!pausedStatus());
-    (props.datafeed as any).setIsPaused = pausedStatus()
-    cleanup()
-    //TODO: Other tasks to be carried out here before exiting chart
+    syntheticPausePlay(true)
+    window.location.href = chartsessionCtr()?.isNotGuest() ? '/dashboard' : '/'
   }
 
   const showSpeedPopup = (event: MouseEvent) => {

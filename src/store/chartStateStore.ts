@@ -66,8 +66,6 @@ export const cleanup = () => {   //Cleanup objects when leaving chart page
     await updateChartSession (chartsession()!, pl, chartsessionCtr()!)
     setInstanceapi(null)
     dispose(widgetref()!)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    window.location.href = chartsessionCtr()?.isNotGuest() ? '/dashboard' : '/'
   }
   doJob()
 }
