@@ -201,16 +201,36 @@ const DrawingBar: Component<DrawingBarProps> = props => {
           }
         </span>
       </div>
-      {/* <div
+      <div
         class="item">
         <span
           style="width:32px;height:32px"
           onClick={() => {
-            props.onDrawingItemClick({ name: 'positionBox', lock: lock(), mode: mode() as OverlayMode })
+            props.onDrawingItemClick({ name: 'shortPositionTool', lock: lock(), mode: mode() as OverlayMode })
           }}>
-          box
+          short
         </span>
-      </div> */}
+      </div>
+      <div
+        class="item">
+        <span
+          style="width:32px;height:32px"
+          onClick={() => {
+            props.onDrawingItemClick({ name: 'longPositionTool', lock: lock(), mode: mode() as OverlayMode })
+          }}>
+          long
+        </span>
+      </div>
+      <div
+        class="item">
+        <span
+          style="width:32px;height:32px"
+          onClick={() => {
+            props.onDrawingItemClick({ name: 'measure', lock: lock(), mode: mode() as OverlayMode })
+          }}>
+          ruler
+        </span>
+      </div>
       <span class="split-line"/>
       <div
         class="item">

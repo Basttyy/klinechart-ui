@@ -120,5 +120,10 @@
   "follow_cross": "Follow Cross",
   "period_change": "Change Period",
   "period_code": "Enter Period Key",
-  "dashed_value": "Dashed Value"
+  "dashed_value": "Dashed Value",
+
+
+
+  "shortPositionTool": "Short Tool",
+  "longPositionTool": "Long Tool"
 }

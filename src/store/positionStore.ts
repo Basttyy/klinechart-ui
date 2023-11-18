@@ -36,7 +36,7 @@ export const useOrder = () => {
    * @returns string
    */
   const calcTarget = (top:number, middle:number, dp:number, usereal: boolean = false, buysell: 'buy'|'sell' = 'buy'): string => {
-    let multiplier = 10**(dp-1), value: string
+    let multiplier = Math.pow(10, dp - 1), value: string
     if (buysell === 'buy')
       value = usereal ? ((top - middle)*multiplier).toFixed(2) : (top - middle).toFixed(dp)
     else
@@ -55,7 +55,7 @@ export const useOrder = () => {
    * @returns return a string of the difference in pips or points
    */
   const calcStopOrTarget = (middle:number, bottom:number, dp:number, usereal: boolean = false, buysell: 'buy'|'sell' = 'buy'): string => {
-    let multiplier = 10**(dp-1), value: string
+    let multiplier = Math.pow(10, dp -1), value: string
     if (buysell === 'sell')
       value = usereal ? ((middle - bottom)*multiplier).toFixed(2) : (middle - bottom).toFixed(dp)
     else
@@ -74,7 +74,7 @@ export const useOrder = () => {
    * @returns return a string of profit or loss in pips or points
    */
   const calcPL = (middle:number, dp:number, usereal: boolean = false, buysell: 'buy'|'sell' = 'buy'): string => {
-    let multiplier = 10**(dp-1), value: string
+    let multiplier = dp = 3 ? 10 : Math.pow(10, dp -1), value: string
     if (currenttick()) {
       if (buysell === 'buy')
         value = usereal ? ((currenttick()!.close-middle) * multiplier).toFixed(2) : (currenttick()!.close-middle).toFixed(dp)

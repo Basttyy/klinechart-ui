@@ -65,7 +65,7 @@ const PeriodBar: Component<PeriodBarProps> = props => {
 
   const onExitClicked = () => {
     syntheticPausePlay(true)
-    window.location.href = chartsessionCtr()?.isNotGuest() ? '/dashboard' : '/'
+    window.location.href = chartsessionCtr()?.isNotGuest() ? '/dashboard' : '/guest/dashboard'
   }
 
   const showSpeedPopup = (event: MouseEvent) => {

@@ -36,7 +36,7 @@ const circle = {
 	style: 'fill',
 	color: 'rgba(22, 119, 255, 0.25)',
 	borderColor: '#1677FF',
-	borderSize: 1,
+	borderSize: 0,
 	// 'solid' | 'dashed'
 	borderStyle: 'solid',
 	borderDashedValue: [2, 2]

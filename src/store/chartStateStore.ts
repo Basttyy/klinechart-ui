@@ -25,7 +25,7 @@ export const documentResize = () => {
   instanceapi()?.resize()
 }
 
-export const cleanup = () => {   //Cleanup objects when leaving chart page
+export const cleanup = async () => {   //Cleanup objects when leaving chart page
   const doJob = async () => {
     clearInterval(timerid())
     datafeed()!.unsubscribe()
@@ -41,7 +41,7 @@ export const cleanup = () => {   //Cleanup objects when leaving chart page
               pips: orders[i].pips, //in a real application this should be calculated on backend
               pl: orders[i].pips! * orders[i].lotSize * symbol!.dollarPerPip!
             })
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 100));
           }
           i++
         }
@@ -263,12 +263,16 @@ export const useChartState = () => {
         id: ovrly.id,
         styles: overlay.styles ?? style,
         onDrawEnd: (event) => {
-          return syncObject(event.overlay)
+          if (!['measure'].includes(ovrly.name))
+            return syncObject(event.overlay)
+          return false
         },
         onPressedMoveEnd: (event) => {
-          return syncObject(event.overlay)
+          if (!['measure'].includes(ovrly.name))
+            return syncObject(event.overlay)
+          return false
         },
-        onRightClick: (event) => {
+        onRightClick: ovrly.onRightClick ? ovrly.onRightClick : (event) => {
           if(ctrlKeyedDown()) {
             popOverlay(event.overlay.id)
             return true

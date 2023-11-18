@@ -334,12 +334,14 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
       await new Promise(resolve => setTimeout(resolve, 500))
     }
     window.onbeforeunload = (e) => {
-      cleanup()
-      clearChartObj()
+      cleanup().then(() => {
+        clearChartObj()
+      })
     }
     window.onpopstate = (e) => {
-      cleanup()
-      clearChartObj()
+      cleanup().then(() => {
+        clearChartObj()
+      })
     }
   })
 

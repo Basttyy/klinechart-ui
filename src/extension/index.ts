@@ -19,7 +19,6 @@ import xabcd from './xabcd'
 
 //Added by TradingIo Team
 import fibonaccDiagonal from './custom/fibonacciDiagonal'
-import positionBox from './custom/positionBox'
 import buyLine from './position/buy/buyLine'
 import buyLossLine from './position/buy/buyLossLine'
 import buyProfitLine from './position/buy/buyProfitLine'
@@ -44,15 +43,20 @@ import sellLimitLossLine from './position/sellLimit/sellLimitLossLine'
 import sellLimitProfitLine from './position/sellLimit/sellLimitProfitLine'
 import sellLimitProfitLossLine from './position/sellLimit/sellLimitProfitLossLine'
 
+import longPositionTool from './position/longPositionTool'
+import shortPositionTool from './position/shortPositionTool'
+import measure from './custom/measure'
+
 const overlays = [
   arrow, circle, rect, triangle, parallelogram, fibonaccDiagonal, fibonacciCircle,
   fibonacciSegment, fibonacciSpiral, fibonacciSpeedResistanceFan, fibonacciExtension,
-  gannBox, threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd, positionBox,
-  buyLine, buyLossLine, buyProfitLine, buyProfitLossLine, buystopLine, buystopProfitLine,
+  gannBox, threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd, buyLine,
+  buyLossLine, buyProfitLine, buyProfitLossLine, buystopLine, buystopProfitLine,
   buystopLossLine, buystopProfitLossLine, buyLimitLine, buyLimitLossLine, buyLimitProfitLine,
   buyLimitProfitLossLine,sellLine, sellLossLine, sellProfitLine, sellProfitLossLine,
   sellstopLine, sellstopProfitLine, sellLossLine, sellstopProfitLossLine, sellLimitLine,
-  sellLimitLossLine, sellLimitProfitLine, sellLimitProfitLossLine
+  sellLimitLossLine, sellLimitProfitLine, sellLimitProfitLossLine, longPositionTool,
+  shortPositionTool, measure
 ]
 
 export default overlays
