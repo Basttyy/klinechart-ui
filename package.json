@@ -39,7 +39,7 @@
     "docs:deploy": "yarn run docs:build && gh-pages -d website"
   },
   "devDependencies": {
-    "@basttyy/klinecharts": "^1.0.7",
+    "@basttyy/klinecharts": "^1.2.0",
     "@solidjs/testing-library": "^0.6.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@types/lodash": "^4.14.191",
@@ -68,6 +68,6 @@
     "solid-js": "^1.6.11"
   },
   "peerDependencies": {
-    "@basttyy/klinecharts": "^1.0.7"
+    "@basttyy/klinecharts": "^1.2.0"
   }
 }

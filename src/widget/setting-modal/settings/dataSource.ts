@@ -23,6 +23,11 @@ const useDataSource = (locale:string) => {
     { key: 8, text: 8 },
     { key: 9, text: 9 },
     { key: 10, text: 10 },
+    { key: 11, text: 11 },
+    { key: 12, text: 12 },
+    { key: 13, text: 13 },
+    { key: 14, text: 14 },
+    { key: 15, text: 15 }
   ]
   const fill_stroke = [
     { key: 'fill', text: i18n('fill', locale) },

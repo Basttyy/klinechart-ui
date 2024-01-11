@@ -1,4 +1,4 @@
-import { Chart, DeepPartial, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, OverlayStyle, PaneOptions, SmoothLineStyle, dispose } from "@basttyy/klinecharts"
+import { Chart, DeepPartial, Indicator, IndicatorCreate, Nullable, Overlay, OverlayCreate, OverlayEvent, OverlayStyle, PaneOptions, SmoothLineStyle, dispose } from '@basttyy/klinecharts'
 import { chartsession, chartsessionCtr, instanceapi, setInstanceapi, symbol } from "../ChartProComponent"
 import { ChartObjType, ChartSessionResource, OrderInfo, OrderResource, OrderStylesType, SymbolInfo, sessionType } from "../types"
 import { createSignal } from "solid-js"
@@ -27,7 +27,7 @@ export const documentResize = () => {
 
 export const cleanup = async () => {   //Cleanup objects when leaving chart page
   const doJob = async () => {
-    clearInterval(timerid())
+    // clearInterval(timerid())
     datafeed()!.unsubscribe()
 
     const updateRunningOrders = async (orders: OrderInfo[], symbol: SymbolInfo, orderctr: OrderResource) => {
@@ -64,8 +64,7 @@ export const cleanup = async () => {   //Cleanup objects when leaving chart page
 
     let pl = await updateRunningOrders (orders, symbol()!, ordercontr()!)
     await updateChartSession (chartsession()!, pl, chartsessionCtr()!)
-    setInstanceapi(null)
-    dispose(widgetref()!)
+    // dispose(widgetref()!)
   }
   doJob()
 }

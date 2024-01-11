@@ -16,7 +16,7 @@ import { createSignal, createEffect, onMount, Show, onCleanup, startTransition, 
 
 import {
   init, dispose, utils, Nullable, Chart, OverlayMode, Styles,
-  TooltipIconPosition, ActionType, Indicator, DomPosition, FormatDateType
+  TooltipIconPosition, ActionType, Indicator, DomPosition, FormatDateType, version
 } from '@basttyy/klinecharts'
 
 import lodashSet from 'lodash/set'
@@ -238,6 +238,7 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
     })
 
     if (widget) {
+      console.log(`${version()}`)
       setInstanceapi(widget)
       setWidgetref(widgetRef!)
       const watermarkContainer = widget.getDom('candle_pane', DomPosition.Main)
@@ -323,25 +324,25 @@ const ChartProComponent: Component<ChartProComponentProps> = props => {
 
   createEffect(() => {
     const clearChartObj = async () => {
+      clearInterval(timerId)
+      await cleanup()
       document.removeEventListener('contextmenu', function(event) {
         event.preventDefault();
       });
       document.removeEventListener("keydown", useKeyEvents().handleKeyDown)
       document.removeEventListener("keyup", useKeyEvents().handleKeyUp)
       window.removeEventListener('resize', documentResize)
-      clearInterval(timerId)
-      dispose(widgetRef!)
+      // if (widget)
+      //   dispose(widget)
+      // setInstanceapi(null)
+      // setWidgetref(undefined)
       await new Promise(resolve => setTimeout(resolve, 500))
     }
     window.onbeforeunload = (e) => {
-      cleanup().then(() => {
-        clearChartObj()
-      })
+      clearChartObj()
     }
     window.onpopstate = (e) => {
-      cleanup().then(() => {
-        clearChartObj()
-      })
+      clearChartObj()
     }
   })
 

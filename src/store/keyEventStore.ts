@@ -2,7 +2,7 @@ import { createSignal, startTransition } from "solid-js";
 import { chartsessionCtr, indicatorModalVisible, instanceapi, orderPanelVisible, pausedStatus, periodModalVisible, rootlelID, screenshotUrl, setIndicatorModalVisible, setOrderPanelVisible, setPausedStatus, setPeriodModalVisible, setScreenshotUrl, setSettingModalVisible, setSyntheticPauseStatus, settingModalVisible, syntheticPauseStatus } from "../ChartProComponent";
 import { datafeed, documentResize, fullScreen, orderModalVisible, range, setOrderModalVisible, setRange, theme } from "./chartStateStore";
 import { ordercontr, useOrder } from "./positionStore";
-import { Chart } from "@basttyy/klinecharts";
+import { Chart } from '@basttyy/klinecharts';
 import { periodInputValue, setPeriodInputValue } from "../widget/timeframe-modal";
 import { setInputClass } from "../component/input";
 import { showOverlaySetting, showPositionSetting } from "./overlaySettingStore";

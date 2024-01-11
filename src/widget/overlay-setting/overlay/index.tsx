@@ -13,24 +13,17 @@
  */
 
 
-import { Component, For, Show, createSignal } from 'solid-js'
-import { Modal, Select, Switch, Color, Input } from '../../../component'
+import { Component, For, Show } from 'solid-js'
+import { Modal, Select, Color, Input } from '../../../component'
 import type { SelectDataSourceItem } from '../../../component'
 
 import i18n from '../../../i18n'
 import { setShowOverlaySetting, popupOtherInfo, getOverlayType, popupOverlay, setPopupOverlay } from '../../../store/overlaySettingStore'
-import {
-  setPointStyle, setRectStyle, setPolygonStyle, setCircleStyle, setArcStyle, setTextStyle, pointStyle, rectStyle, polygonStyle,
-  circleStyle, arcStyle, textStyle, horizontalStraightLineStyle, horizontalRayLineStyle, horizontalSegmentStyle, verticalStraightLineStyle,
-  verticalRayLineStyle, setRayLineStyle, rayLineStyle, segmentStyle, setArrowStyle, straightLineStyle, priceLineStyle, setHorizontalStraightLineStyle,
-  setHorizontalRayLineStyle, setHorizontalSegmentStyle, setVerticalStraightLineStyle, setVerticalRayLineStyle, setVerticalSegmentStyle,
-  setStraightLineStyle, setSegmentStyle, setPriceLineStyle, arrowStyle, verticalSegmentStyle } from '../../../store/overlaystyle/inbuiltOverlayStyleStore'
 import { chartsession, instanceapi } from '../../../ChartProComponent'
 import { ChartObjType } from '../../../types'
 
-import { cloneDeep, isArray, isString, set as lodashSet } from 'lodash'
-import { setChartModified, useChartState } from '../../../store/chartStateStore'
-import verticalSegment from '../../drawing-bar/icons/verticalSegment'
+import { cloneDeep, isArray, set as lodashSet } from 'lodash'
+import { useChartState } from '../../../store/chartStateStore'
 import { useGetOverlayStyle, useSetOverlayStyle } from '../../../store/overlaystyle/useOverlayStyles'
 import { getOptions } from './options/options'
 

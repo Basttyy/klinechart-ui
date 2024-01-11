@@ -186,7 +186,7 @@ export const getOptions = (locale: string): {[key: string]: optionType[]} => {
       key: 'borderSize',
       text: i18n('Active border size', locale),
       component: 'select',
-      dataSource: font_size
+      dataSource: size
     },
     {
       key: 'borderStyle',
